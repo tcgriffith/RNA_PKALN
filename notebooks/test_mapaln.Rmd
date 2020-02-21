@@ -27,10 +27,110 @@ seq=ct$nt
 
 ```{r}
 
+init_score()
+
+```
+
+```{r}
+
+
+
+
+
+```
+
+### funcs
+
+```{r}
+mat2aln = function(mat, gap_open=-1) {
+  
+  score_mat=0
+  mataln = mat
+  mataln[, ] = 0
+  lab=mat
+  lab[,]= 0
+  
+  imat=-1
+  jmat=-1
+  
+  for (i in 1:nrow(mat)) {
+    for (j in 1:ncol(mat)) {
+      if (i == 1 || j == 1) {
+        A = mat[i,j]
+        D = gap_open
+        R = gap_open
+      }
+      else{
+        A = mataln[i - 1, j - 1] + mat[i, j]
+        D = mataln[i - 1, j]+gap_open
+        R = mataln[i, j - 1]+gap_open
+      }
+      
+      if (A > max(D, R)){
+        mataln[i, j] = A
+        lab[i,j]=1
+      }
+        
+      else if (D > max(A, R)){
+        mataln[i, j] = D
+        lab[i,j]=2
+      }
+        
+      else{
+        mataln[i, j] = R
+        lab[i,j]=3
+      }
+      
+      if (mataln[i,j] > score_mat) {
+        score_mat=mataln[i,j]
+        imat=i
+        jmat=j
+      }
+    }
+  }
+  
+  i=imat
+  j=jmat
+  
+  a2b=integer(length=nrow(mat))
+  
+  while (mataln[i,j] >0){
+    print(sprintf("%d:%d",i,j))
+    if (lab[i,j]==1) {
+      a2b[i]=j
+      i=i-1
+      j=j-1
+    }
+    if(lab[i,j] ==2) i=i-1
+    if (lab[i,j]==3) j=j-1
+  }
+  
+  # print(lab)
+  print(mataln)
+  return(a2b)
+}
 ```
 
 
 ```{r}
-map_a=matrix()
+mat=matrix(0,6,6)
+
+# set.seed(42)
+
+# mat[sample(1:length(mat),3)]=1
+
+mat[2,4]=1
+mat[3,5]=1
+mat[4,6]=1
+
+mat=pmax(mat+t(mat))
+mat[lower.tri(mat)]=0
+mat
+
+
+mataln= mat2aln(mat)
+
+mataln
 ```
+
 
