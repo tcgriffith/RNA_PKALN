@@ -1,0 +1,36 @@
+---
+title: "Untitled"
+author: "TC"
+date: "2/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## test map align
+
+```{r}
+ct=RNASSP::read_ct(here::here("data/sandbox/ref.ct"))
+
+dca=RNASSP::read_dca(here::here("data/sandbox/inf.a2m.ungapped.gremlincpp"))
+```
+
+
+```{r}
+ct=RNASSP::example.ct
+
+seq=ct$nt
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+map_a=matrix()
+```
+
