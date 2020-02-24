@@ -190,6 +190,11 @@ extract_aln=function(R){
 
 
 ```{r}
+colSums(A)
+```
+
+
+```{r}
 gg_mat(A)
 ```
 
