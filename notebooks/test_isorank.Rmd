@@ -112,12 +112,15 @@ A=matrix(0,nrow=l1*l2,ncol=l1*l2)
 
 ```{r}
 id1_to_id2=function(id,dim){
-  i = id %/% dim +1
-  j = id %% dim
-  return(c(i=i,j=j))
+  # j = id %/% (dim +1)+1
+  i = id %% (dim)
+  j=ceiling(id/dim)
+  i[i==0]=dim
+  return(data.frame(i=i,j=j))
 }
+
 id2_to_id1=function(i,j,dim){
-  return((i-1)*dim+j)
+  return((j-1)*dim+i)
 }
 ```
 
@@ -133,8 +136,8 @@ for(i in 1:l1){
         v_contacts=sum(mat2[v,])
         if (mat1[i,u]>0 && mat2[j,v] >0){
           
-          id_row=id2_to_id1(i,j,l2)
-          id_col=id2_to_id1(u,v,l2)
+          id_row=id2_to_id1(i,j,l1)
+          id_col=id2_to_id1(u,v,l1)
           
           A[id_row,id_col]=1/(u_contacts*v_contacts)
           
@@ -152,7 +155,16 @@ A.eig=eigen(A)
 ```
 
 ```{r}
+A.eig$vectors[,1]
+```
+
+
+```{r}
 R = matrix(Re(A.eig$vectors[,1]),nrow=nrow(mat1))
+```
+
+```{r}
+R
 ```
 
 
@@ -167,11 +179,11 @@ extract_aln=function(R){
   
   for(i in 1:nrow(Rtmp)){
     idmax=which.max(Rtmp)
-    ids=id1_to_id2(idmax,ncol(Rtmp))
-    message(sprintf("%d %d %d %f",i, ids["i"],ids["j"], Rtmp[idmax]))
+    ids=id1_to_id2(idmax,nrow(Rtmp))
+    message(sprintf("%d %d %d %f",i, ids$i[[1]],ids$j[[1]], Rtmp[idmax]))
     # Rtmp=Rtmp[-ids["i"],-ids["j"]]
-    Rtmp[ids["i"],]=0
-    Rtmp[,ids["j"]]=0
+    Rtmp[ids$i[[1]],]=0
+    Rtmp[,ids$j[[1]]]=0
   }
 }
 ```
@@ -179,6 +191,23 @@ extract_aln=function(R){
 
 ```{r}
 gg_mat(A)
+```
+
+
+```{r}
+gg_mat(mat1)
+
+gg_mat(mat2)
+```
+
+
+```{r}
+
+R.filt=R
+
+R.filt[R<0.18]=0
+
+gg_mat(R.filt)
 ```
 
 
