@@ -1,0 +1,37 @@
+---
+title: "Untitled"
+author: "TC"
+date: "2/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r}
+a=matrix(0,5,5)
+
+random_diag=runif(5)
+
+random_diag=random_diag/sum(random_diag)
+
+diag(a)=1
+```
+
+```{r}
+a
+```
+
+```{r}
+a.eigen=eigen(a)
+```
+
+```{r}
+a.eigen
+```
+
+
