@@ -1,0 +1,120 @@
+---
+title: "Untitled"
+author: "TC"
+date: "2/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Matrix)
+library(dplyr)
+library(ggplot2)
+source("../R/isorank.R")
+
+library(threejs)
+
+library(igraph)
+
+```
+
+
+```{r}
+ct.ref=RNASSP::read_ct(here::here("data/toy1/ref.ct"))
+
+ct.ss=RNASSP::read_ct(here::here("data/toy1/seq.ss.ct"))
+```
+
+```{r}
+energy2=RNASSP::energy2
+RNASSP::plot_ct(ct.ss,ct.ref)
+```
+
+
+R(i,j)=1/2*(R(i-1,j-1)+R(i+1,j+1))
+
+A(i,j,u,v)={
+   1/2, if (u==i-1 and v == j-1), or (u==i+1,v==j+1)
+
+}
+
+
+
+
+```{r}
+
+
+
+```
+
+
+
+```{r}
+
+ct2mat = function(ct) {
+  l1 = nrow(ct)
+  mat1 = matrix(0, l1, l1)
+  
+  rownames(mat1) = ct$i
+  
+  colnames(mat1) = ct$nt
+  
+  linkpair = ct[ct$j > 0, c("i", "j")]
+  names(linkpair) = c("from", "to")
+  
+  # linknb = ct[ct$`i+1` > 0, c("i", "i+1")]
+  # names(linknb) = c("from", "to")
+  # links = rbind(linkpair, linknb)
+  links=linkpair
+  
+  mat1[as.matrix(links[, c(1, 2)])] = 1
+  mat1[as.matrix(links[, c(2, 1)])] = 1
+  return(mat1)
+}
+
+mat1=ct2mat(ct.ss)
+# mat1
+
+g1=mat2graph(mat1)
+ig1=graph_from_data_frame(d=g1$edges,vertices=g1$nodes)
+
+
+```
+
+
+```{r}
+mat2=ct2mat(ct.ref)
+
+g2=mat2graph(mat2)
+ig2=graph_from_data_frame(d=g2$edges,vertices=g2$nodes)
+```
+
+```{r}
+graphjs(ig2)
+```
+
+```{r}
+graphjs(ig1)
+```
+
+```{r}
+RNASSP::plot_ct(ct.ss,ct.ref)
+
+
+```
+
+```{r}
+Rmat=run_isorank(mat1,mat2,iteration=10000,debug=TRUE)
+```
+
+```{r}
+gg_mat(Rmat)
+```
+
+
+```{r}
+# gg_mat(Rmat)
+
+extract_aln(Rmat)
+```
+

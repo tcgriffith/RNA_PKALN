@@ -7,17 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
 ```
 
 
 ## funcs
 
 ```{r}
-library(ggplot2)
-gg_mat=function(mat){
-  df=as.data.frame(as.table(mat))
-  ggplot(df,aes(Var1,Var2,fill=Freq))+geom_tile()+coord_fixed()
-}
+
+
 ```
 
 
@@ -100,72 +98,16 @@ mat1
 mat2
 ```
 
-```{r}
-l1=nrow(mat1)
-l2=nrow(mat2)
 
-A=matrix(0,nrow=l1*l2,ncol=l1*l2)
-
-
-```
-
-
-```{r}
-id1_to_id2=function(id,dim){
-  # j = id %/% (dim +1)+1
-  i = id %% (dim)
-  j=ceiling(id/dim)
-  i[i==0]=dim
-  return(data.frame(i=i,j=j))
-}
-
-id2_to_id1=function(i,j,dim){
-  return((j-1)*dim+i)
-}
-```
-
-
-
-
-```{r}
-for(i in 1:l1){
-  for (j in 1:l2){
-    for(u in 1:l1){
-      u_contacts= sum(mat1[u,])
-      for(v in 1:l2){
-        v_contacts=sum(mat2[v,])
-        if (mat1[i,u]>0 && mat2[j,v] >0){
-          
-          id_row=id2_to_id1(i,j,l1)
-          id_col=id2_to_id1(u,v,l1)
-          
-          A[id_row,id_col]=1/(u_contacts*v_contacts)
-          
-          # A[(i-1)*l2+j, (u-1)*l2+v]=1/(u_contacts*v_contacts)
-
-        }
-      }
-    }
-  }
-}
-```
-
-```{r}
-A.eig=eigen(A)
-```
 
 ```{r}
 A.eig$vectors[,1]
 ```
 
-
 ```{r}
-R = matrix(Re(A.eig$vectors[,1]),nrow=nrow(mat1))
+matA2matR(A,nrow(mat1))
 ```
 
-```{r}
-R
-```
 
 
 ```{r}
@@ -174,18 +116,7 @@ gg_mat(R)
 
 
 ```{r}
-extract_aln=function(R){
-  Rtmp=R
-  
-  for(i in 1:nrow(Rtmp)){
-    idmax=which.max(Rtmp)
-    ids=id1_to_id2(idmax,nrow(Rtmp))
-    message(sprintf("%d %d %d %f",i, ids$i[[1]],ids$j[[1]], Rtmp[idmax]))
-    # Rtmp=Rtmp[-ids["i"],-ids["j"]]
-    Rtmp[ids$i[[1]],]=0
-    Rtmp[,ids$j[[1]]]=0
-  }
-}
+
 ```
 
 
@@ -210,7 +141,7 @@ gg_mat(mat2)
 
 R.filt=R
 
-R.filt[R<0.18]=0
+# R.filt[R<0.18]=0
 
 gg_mat(R.filt)
 ```
@@ -218,8 +149,6 @@ gg_mat(R.filt)
 
 ```{r}
 extract_aln(R)
-# mat1
-# mat2
 
 ```
 
