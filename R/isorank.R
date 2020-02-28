@@ -106,10 +106,7 @@ get_Rmatv = function(A, l1, l2,iteration=1000,debug=FALSE) {
     
     lastdist=dist(rbind(Rv[, i], Rv[, i - 1]))
     
-    if (lastdist < 2e-16){
-      
-      break
-    }
+
 
     if(debug){
       if (i %% 100 ==0) message(i, " ", lastdist)
@@ -214,4 +211,102 @@ get_A_nb = function(mat1, mat2) {
   
   return(A_nb)
 }
+
+get_Aseq = function(mat1, mat2) {
+  seq1=colnames(mat1)
+  seq2=colnames(mat2)
+  
+  
+  matB = matrix(0, nrow = length(seq1), ncol = length(seq1))
+  
+  for (i in 1:nrow(matB)) {
+    for (j in 1:ncol(matB)) {
+      if (seq1[i] == seq2[j]) {
+        matB[i, j] = 1
+      }
+    }
+  }
+  
+  matB = matB / sqrt(sum(matB ^ 2))
+  
+  vB = as.vector(matB)
+  
+  # vB=vB/sum(vB)
+  
+  A_seq = vB %*% t(vB)
+  
+  A_seq.sparse=Matrix::Matrix(A_seq,sparse=TRUE)
+  
+  return(A_seq.sparse)
+}
+
+
+
+ct2mat = function(ct) {
+  l1 = nrow(ct)
+  mat1 = matrix(0, l1, l1)
+  
+  rownames(mat1) = ct$i
+  
+  colnames(mat1) = ct$nt
+  
+  linkpair = ct[ct$j > 0, c("i", "j")]
+  names(linkpair) = c("from", "to")
+  
+  linknb = ct[ct$`i+1` > 0, c("i", "i+1")]
+  names(linknb) = c("from", "to")
+  
+  mat1[as.matrix(linkpair[, c(1, 2)])] = 1
+  mat1[as.matrix(linkpair[, c(2, 1)])] = 1
+  
+  # mat1[as.matrix(linknb[, c(1, 2)])] = 1
+  # mat1[as.matrix(links[, c(2, 1)])] = 1
+  return(mat1)
+}
+
+
+run_isorank_bpnbseq = function(mat1,
+                               mat2,
+                               alpha = 0.3,
+                               beta = 0.3,
+                               iteration = 1000,
+                               debug = FALSE) {
+  # alpha = alphh
+  # beta = .4
+  l1 = nrow(mat1)
+  l2 = nrow(mat2)
+  
+  A_bp = get_matA(mat1, mat2)
+  A_nb = get_A_nb(mat1, mat2)
+  A_seq = get_Aseq(mat1, mat2)
+  
+  
+  A_all = alpha * A_bp + beta * A_nb + (1 - alpha - beta) * A_seq
+  # A_all = alpha * A_bp + (1 - alpha) * A_nb
+  # rmat = do_it(A_all, l1, l2, iteration = 10000, debug = FALSE)
+  
+  Rmatv=get_Rmatv(A_all,l1,l2,iteration,debug)
+  Rmat=matrix(Rmatv[, iteration], nrow=l1,ncol=l2)
+  # gg_mat(rmat)
+  return(Rmat)
+}
+
+
+run_isorank_bpnb = function(mat1,
+                            mat2,
+                            alpha = 0.5,
+                            iteration = 1000,
+                            debug = FALSE) {
+  A_bp = get_matA(mat1, mat2)
+  A_nb = get_A_nb(mat1, mat2)
+  
+  A_all = alpha * A_bp + (1 - alpha) * A_nb
+  
+  Rmatv=get_Rmatv(A_all,l1,l2,iteration,debug)
+  Rmat=matrix(Rmatv[, iteration], nrow=l1,ncol=l2)
+  # gg_mat(rmat)
+  return(Rmat)
+  
+}
+
 
