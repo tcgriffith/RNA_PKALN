@@ -13,6 +13,7 @@ library(dplyr)
 library(ggplot2)
 
 source("../R/isorank.R")
+source("../R/benchmark.R")
 library(threejs)
 
 library(igraph)
@@ -21,11 +22,15 @@ library(igraph)
 
 
 ```{r}
-ct.ref=RNASSP::read_ct(here::here("data/toy1/ref.ct"))
+ct.ref=RNASSP::read_ct(here::here("data/toy2/ref.ct"))
 
-ct.ss=RNASSP::read_ct(here::here("data/toy1/seq.ss.ct"))
+ct.ss=RNASSP::read_ct(here::here("data/toy2/inf.a2m.ungapped.gremlincpp.ct"))
 ```
 
+```{r}
+energy2=RNASSP::energy2
+RNASSP::plot_ct(ct.ss,ct.ref)
+```
 
 
 ```{r}
@@ -45,6 +50,13 @@ ig2=graph_from_data_frame(d=g2$edges,vertices=g2$nodes)
 
 
 ## vis
+
+```{r}
+gg_mat(mat1)
+
+gg_mat(mat2)
+```
+
 ```{r}
 graphjs(ig1)
 
@@ -57,76 +69,9 @@ graphjs(ig2)
 ## isorank_directed
 
 ```{r}
-l1=nrow(mat1)
-l2=nrow(mat2)
-
-
-```
-
-
-```{r}
-get_Aseq = function(mat1, mat2) {
-  seq1=colnames(mat1)
-  seq2=colnames(mat2)
-  
-  
-  matB = matrix(0, nrow = length(seq1), ncol = length(seq1))
-  
-  for (i in 1:nrow(matB)) {
-    for (j in 1:ncol(matB)) {
-      if (seq1[i] == seq2[j]) {
-        matB[i, j] = 1
-      }
-    }
-  }
-  
-  matB = matB / sqrt(sum(matB ^ 2))
-  
-  vB = as.vector(matB)
-  
-  # vB=vB/sum(vB)
-  
-  A_seq = vB %*% t(vB)
-  
-  A_seq.sparse=Matrix::Matrix(A_seq,sparse=TRUE)
-  
-  return(A_seq.sparse)
-}
-
-```
-
-```{r}
-A_seq=get_Aseq(mat1,mat2)
-```
-
-```{r}
-rmatv=get_Rmatv(A_seq,l1,l2,debug=TRUE)
-
-rmat=Rv2Rmat(rmatv[,1000],l1,l2)
-
-gg_mat(rmat)
-```
-
-
-```{r}
-
-
-
-
-```
-
-
-
-```{r}
-A_seq=
-```
-
-
-
-```{r}
 # do_it_wrapper(0.5, A_bp,A_nb)
 
-rmat=run_isorank_bpnb(mat1,mat2,alpha=.6,iteration=5000)
+rmat=run_isorank_bpnb(mat1,mat2,alpha=.01,iteration=5000)
 
 gg_mat(rmat)
 ```
@@ -134,13 +79,45 @@ gg_mat(rmat)
 
 ```{r}
 
-rmat=run_isorank_bpnbseq(mat1,mat2,alpha=.49,beta=.49,iteration=50000)
+rmat=run_isorank_bpnbseq(mat1,mat2,alpha=0.1,beta=.80,iteration=10000,debug=TRUE)
 
 gg_mat(rmat)
 ```
 
+```{r}
+pred_pairs=extract_aln(rmat)
+```
+
 
 ```{r}
-extract_aln(rmat)
+gg_mat(mat1)
+
+gg_mat(mat2)
+```
+
+
+```{r}
+ref.pairs= id2_to_id1(1:nrow(mat1),1:nrow(mat2),dim=nrow(mat1))
+```
+
+```{r}
+pred_pairs=extract_aln(rmat)
+pred.pairs=id2_to_id1(pred_pairs$i,pred_pairs$j,dim=nrow(mat1))
+```
+
+
+
+```{r}
+
+```
+
+```{r}
+bench_pairs(pred.pairs,ref.pairs)
+```
+
+### test insertion & deletion
+
+```{r}
+
 ```
 

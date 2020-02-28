@@ -1,0 +1,286 @@
+---
+title: "Untitled"
+author: "TC"
+date: "2/28/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(Matrix)
+library(dplyr)
+library(ggplot2)
+
+source("../R/isorank.R")
+source("../R/benchmark.R")
+library(threejs)
+
+library(igraph)
+
+```
+
+
+## R Markdown
+
+```{r}
+ct.ref=RNASSP::read_ct(here::here("data/toy2/ref.ct"))
+```
+
+```{r}
+
+mat2=ct2mat(ct.ref,add_backbone=TRUE)
+```
+
+```{r}
+gg_mat(mat2)
+```
+
+```{r}
+g2=mat2graph(mat2)
+ig2=graph_from_data_frame(d=g2$edges,vertices=g2$nodes)
+```
+
+```{r}
+graph2mat=function(graph){
+  mat=matrix(0,nrow=nrow(graph$nodes),ncol=nrow(graph$nodes))
+  
+  mat[as.matrix(graph$edges[,c("from","to")])]=1
+  mat[as.matrix(graph$edges[,c("to","from")])]=1
+  return(mat)
+}
+```
+
+```{r}
+mat_test= graph2mat(g2)
+```
+
+
+```{r}
+gg_mat(mat_test)
+```
+
+```{r}
+mat1=mat2[c(-5,-7,-8),c(-5,-7,-8)]
+
+idx=as.matrix(
+  data.frame(
+    i=c(4,5,5,6),
+    j=c(5,6,4,5)
+  )
+)
+
+mat1[idx]=1
+```
+
+```{r}
+gg_mat(mat1)
+
+gg_mat(mat2)
+```
+
+
+```{r}
+g1=mat2graph(mat1)
+```
+
+```{r}
+visNetwork::visNetwork(nodes=g1$nodes,edges=g1$edges) 
+```
+
+
+
+```{r}
+visNetwork::visNetwork(nodes=g2$nodes,edges=g2$edges) 
+```
+
+## testit
+
+```{r}
+ref.pairs=id2_to_id1(1:nrow(mat1),
+                     c(1:4,6,9:47)
+                     ,dim=nrow(mat1))
+
+pred_pairs=extract_aln(rmat)
+pred.pairs=id2_to_id1(pred_pairs$i,pred_pairs$j,dim=nrow(mat1))
+
+bench_pairs(pred.pairs,ref.pairs)
+```
+
+
+```{r}
+rmat=run_isorank_bpnb(mat1,mat2,alpha=0.05,iteration=5000)
+
+gg_mat(rmat)
+```
+
+```{r}
+bench_alpha = function(mat1, mat2, alphalist, ref.pairs) {
+  rslt = pbapply::pblapply(alphalist, function(alpha) {
+    rmat = run_isorank_bpnb(mat1, mat2, alpha = alpha, iteration = 5000)
+    
+    pred_pairs = extract_aln(rmat)
+    pred.pairs = id2_to_id1(pred_pairs$i, pred_pairs$j, dim = nrow(mat1))
+    
+    df=bench_pairs(pred.pairs, ref.pairs)
+    df$alpha=alpha
+    return(df)
+  })
+  
+  return(do.call(rbind,rslt))
+  
+}
+```
+
+```{r}
+rslt=bench_alpha(mat1,mat2,alphalist=seq(0,1,0.1),ref.pairs=ref.pairs)
+
+```
+
+```{r}
+    rmat = run_isorank_bpnb(mat1, mat2, alpha = 0.7, iteration = 5000)
+
+df=extract_aln(rmat)
+
+
+```
+
+```{r}
+gg_mat(rmat)+
+  geom_point(data=df,aes(x=j,y=i,fill=v,size=v^5),color="red")
+```
+
+
+```{r}
+extract_aln(rmat)
+```
+
+
+```{r}
+
+    pred_pairs = extract_aln(rmat)
+    pred.pairs = id2_to_id1(pred_pairs$i, pred_pairs$j, dim = nrow(mat1))
+    
+    bench_pairs(pred.pairs, ref.pairs)
+
+
+
+```
+
+
+```{r}
+A_bp=get_matA(mat1,mat2)
+```
+
+```{r}
+A_nb=get_A_nb(mat1,mat2)
+```
+
+```{r}
+A_seq=get_Aseq(mat1,mat2)
+```
+
+
+
+
+
+```{r}
+rmat=run_isorank_bpnbseq(mat1,mat2,alpha=0.1,beta=.5,iteration=3000,debug=TRUE)
+
+gg_mat(rmat)
+```
+
+
+
+```{r}
+bench_alpha_beta = function(mat1, mat2, alphalist, betalist, ref.pairs) {
+  params = expand.grid(alphalist, betalist)
+  colnames(params) = c("alpha", "beta")
+  
+  A_bp = get_matA(mat1, mat2)
+  A_nb = get_A_nb(mat1, mat2)
+  A_seq = get_Aseq(mat1, mat2)
+  
+  
+  rslt = pbapply::pblapply(1:nrow(params), function(i) {
+    alpha = params$alpha[i]
+    beta = params$beta[i]
+    
+    # rmat = run_isorank_bpnb(mat1, mat2, alpha = 0, iteration = 1000)
+    
+    rmat = run_isorank_A3(A_bp,
+                          A_nb,
+                          A_seq,
+                          alpha,
+                          beta,
+                          iteration = 3000,
+                          debug = FALSE)
+    
+    pred_pairs = extract_aln(rmat)
+    pred.pairs = id2_to_id1(pred_pairs$i, pred_pairs$j, dim = nrow(mat1))
+    
+    df = bench_pairs(pred.pairs, ref.pairs)
+    df$alpha = alpha
+    df$beta = beta
+    return(df)
+  })
+  
+  return(do.call(rbind, rslt))
+  
+}
+```
+
+
+```{r}
+rslt_ab = bench_alpha_beta(mat1,
+                       mat2,
+                       alphalist = seq(0, 1, 0.1),
+                       betalist = seq(0, 1, 0.1),
+                       ref.pairs=ref.pairs
+                       )
+```
+
+
+```{r}
+
+
+rslt_ab %>% 
+  filter(alpha+beta <=1) %>% 
+  ggplot(aes(x=alpha,y=beta,fill=f1))+
+  geom_tile()
+
+
+```
+
+
+
+```{r}
+rslt_ab %>%
+  # filter(beta==0) %>% 
+  arrange(desc(f1))
+```
+
+```{r}
+rmat=run_isorank_bpnbseq(mat1,mat2,alpha=0.2,beta=.6,iteration=3000,debug=TRUE)
+
+    # rmat = run_isorank_A3(A_bp,
+    #                       A_nb,
+    #                       A_seq,
+    #                       alpha,
+    #                       beta,
+    #                       iteration = 3000,
+    #                       debug = FALSE)
+    
+
+
+
+```
+```{r}
+gg_mat(rmat)
+    pred_pairs = extract_aln(rmat)
+    pred.pairs = id2_to_id1(pred_pairs$i, pred_pairs$j, dim = nrow(mat1))
+    
+    bench_pairs(pred.pairs, ref.pairs)
+```
+

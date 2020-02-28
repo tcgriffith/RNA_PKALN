@@ -8,7 +8,7 @@ gg_mat = function(mat) {
   ggplot(df, aes(x=col, y=row, fill = val)) + geom_tile() + coord_fixed()
 }
 
-extract_aln = function(R) {
+extract_aln = function(R, debug=FALSE) {
   Rtmp = R
   maplist=list()
   
@@ -28,7 +28,9 @@ extract_aln = function(R) {
                          v=Rtmp[idmax]
                        )
                      ))
-      message(sprintf("%d %d %d %f", i, ids$i[[1]], ids$j[[1]], Rtmp[idmax]))
+      if(debug){
+        message(sprintf("%d %d %d %f", i, ids$i[[1]], ids$j[[1]], Rtmp[idmax]))
+      }
       # Rtmp=Rtmp[-ids["i"],-ids["j"]]
       Rtmp[ids$i[[1]], ] = -1
       Rtmp[, ids$j[[1]]] = -1
@@ -66,6 +68,8 @@ id2_to_id1=function(i,j,dim){
 Rv2Rmat=function(Rv,nrow,ncol){
   Rmat=matrix(Rv, nrow,ncol)
 }
+
+
 
 mat2graph=function(mat,id_renum=0){
   
@@ -113,8 +117,10 @@ get_Rmatv = function(A, l1, l2,iteration=1000,debug=FALSE) {
     }
 
   }
+  if(debug){
+    message("##  ", i, " ", lastdist)
+  }
   
-  message("##  ", i, " ", lastdist)
   
   # Rmat = Rv2Rmat(, nrow = l1, ncol = l2)
   
@@ -217,7 +223,7 @@ get_Aseq = function(mat1, mat2) {
   seq2=colnames(mat2)
   
   
-  matB = matrix(0, nrow = length(seq1), ncol = length(seq1))
+  matB = matrix(0, nrow = length(seq1), ncol = length(seq2))
   
   for (i in 1:nrow(matB)) {
     for (j in 1:ncol(matB)) {
@@ -242,7 +248,7 @@ get_Aseq = function(mat1, mat2) {
 
 
 
-ct2mat = function(ct) {
+ct2mat = function(ct, add_backbone=FALSE) {
   l1 = nrow(ct)
   mat1 = matrix(0, l1, l1)
   
@@ -258,6 +264,11 @@ ct2mat = function(ct) {
   
   mat1[as.matrix(linkpair[, c(1, 2)])] = 1
   mat1[as.matrix(linkpair[, c(2, 1)])] = 1
+  
+  if(add_backbone){
+    mat1[as.matrix(linknb[, c(1, 2)])] = 1
+    mat1[as.matrix(linknb[, c(2, 1)])] = 1
+  }
   
   # mat1[as.matrix(linknb[, c(1, 2)])] = 1
   # mat1[as.matrix(links[, c(2, 1)])] = 1
@@ -291,12 +302,42 @@ run_isorank_bpnbseq = function(mat1,
   return(Rmat)
 }
 
+run_isorank_A3 = function(A_bp,
+                          A_nb,
+                          A_seq,
+                          alpha = 0.3,
+                          beta = 0.3,
+                          iteration = 1000,
+                          debug = FALSE) {
+  # alpha = alphh
+  # beta = .4
+  l1 = nrow(mat1)
+  l2 = nrow(mat2)
+  
+  # A_bp = get_matA(mat1, mat2)
+  # A_nb = get_A_nb(mat1, mat2)
+  # A_seq = get_Aseq(mat1, mat2)
+  
+  
+  A_all = alpha * A_bp + beta * A_nb + (1 - alpha - beta) * A_seq
+  # A_all = alpha * A_bp + (1 - alpha) * A_nb
+  # rmat = do_it(A_all, l1, l2, iteration = 10000, debug = FALSE)
+  
+  Rmatv = get_Rmatv(A_all, l1, l2, iteration, debug)
+  Rmat = matrix(Rmatv[, iteration], nrow = l1, ncol = l2)
+  # gg_mat(rmat)
+  return(Rmat)
+}
+
+
 
 run_isorank_bpnb = function(mat1,
                             mat2,
                             alpha = 0.5,
                             iteration = 1000,
                             debug = FALSE) {
+  l1=nrow(mat1)
+  l2=nrow(mat2)
   A_bp = get_matA(mat1, mat2)
   A_nb = get_A_nb(mat1, mat2)
   
