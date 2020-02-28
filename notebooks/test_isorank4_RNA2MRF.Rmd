@@ -7,10 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+source("../R/isorank.R")
 library(Matrix)
 library(dplyr)
 library(ggplot2)
-source("../R/isorank.R")
+
 
 library(threejs)
 
@@ -43,14 +44,6 @@ A(i,j,u,v)={
 
 ```{r}
 
-
-
-```
-
-
-
-```{r}
-
 ct2mat = function(ct) {
   l1 = nrow(ct)
   mat1 = matrix(0, l1, l1)
@@ -59,16 +52,17 @@ ct2mat = function(ct) {
   
   colnames(mat1) = ct$nt
   
-  linkpair = ct[ct$j > 0, c("i", "j")]
-  names(linkpair) = c("from", "to")
+  # linkpair = ct[ct$j > 0, c("i", "j")]
+  # names(linkpair) = c("from", "to")
   
-  # linknb = ct[ct$`i+1` > 0, c("i", "i+1")]
-  # names(linknb) = c("from", "to")
+  linknb = ct[ct$`i+1` > 0, c("i", "i+1")]
+  names(linknb) = c("from", "to")
   # links = rbind(linkpair, linknb)
-  links=linkpair
+  links=linknb
+  # links=linkpair
   
   mat1[as.matrix(links[, c(1, 2)])] = 1
-  mat1[as.matrix(links[, c(2, 1)])] = 1
+  # mat1[as.matrix(links[, c(2, 1)])] = 1
   return(mat1)
 }
 
@@ -90,31 +84,254 @@ ig2=graph_from_data_frame(d=g2$edges,vertices=g2$nodes)
 ```
 
 ```{r}
+gg_mat(mat1)
+```
+
+
+```{r}
 graphjs(ig2)
 ```
+
+```{r}
+which(A_bp[1,] >0)
+```
+
+
 
 ```{r}
 graphjs(ig1)
 ```
 
 ```{r}
-RNASSP::plot_ct(ct.ss,ct.ref)
 
-
-```
-
-```{r}
-Rmat=run_isorank(mat1,mat2,iteration=10000,debug=TRUE)
-```
-
-```{r}
-gg_mat(Rmat)
+save(ig1,ig2, file="../rdata/igs.rda")
 ```
 
 
 ```{r}
-# gg_mat(Rmat)
+A_bp= get_matA(mat1,mat2)
+```
 
-extract_aln(Rmat)
+
+
+## a_seq
+
+```{r}
+seq1=ct.ss$nt
+
+seq2=ct.ref$nt
+```
+
+
+```{r}
+
+
+matB=matrix(0,nrow=length(seq1),ncol=length(seq1))
+
+for(i in 1:nrow(matB)){
+  for (j in 1:ncol(matB)){
+    if(seq1[i]==seq2[j]){
+      matB[i,j]=1
+    }
+  }
+}
+
+matB=matB/sqrt(sum(matB^2))
+
+vB=as.vector(matB)
+
+# vB=vB/sum(vB)
+
+A_seq= vB %*% t(vB)
+
+```
+
+
+
+## A_nb
+
+
+```{r}
+
+get_A_nb = function(mat1, mat2) {
+  l1 = nrow(mat1)
+  l2 = nrow(mat2)
+  
+  # A_nb = Matrix::sparseMatrix(i=NULL,j=NULL,dims=c(l1*l2,l1*l2))
+  
+  id_col=integer()
+  id_row=integer()
+  
+  for (i in 1:l1) {
+    for (j in 1:l2) {
+      idx_ij = id2_to_id1(i, j, l1)
+      idx_imjm = id2_to_id1(i - 1, j - 1, l1)
+      idx_ipjp = id2_to_id1(i + 1, j + 1, l1)
+      
+      if (idx_imjm > 0) {
+        # A_nb[idx_ij, idx_imjm] = 1 / 2
+        id_row=append(id_row, idx_ij)
+        id_col=append(id_col,idx_imjm)
+      }
+      if (idx_ipjp < l1 * l2) {
+        id_row=append(id_row,idx_ij)
+        id_col=append(id_col,idx_ipjp)
+        # A_nb[idx_ij, idx_ipjp] = 1 / 2
+      }
+    }
+  }
+  
+  A_nb = Matrix::sparseMatrix(i=id_row,j=id_col,x=1/2,dims=c(l1*l2,l1*l2))
+  
+  return(A_nb)
+}
+
+```
+
+```{r}
+A_nb=get_A_nb(mat1,mat2)
+```
+
+
+
+```{r}
+# gg_mat(A_nb)
+```
+
+```{r}
+
+# run_isorank = function(mat1, mat2,iteration=1000,debug=FALSE) {
+#   
+#   l1=nrow(mat1)
+#   l2=nrow(mat2)
+#   
+#   A_sparse=get_matA(mat1,mat2)
+#   
+#   message("## A_sparse constructed, calculating R")
+#   
+#   Rmatv=get_Rmatv(A_sparse,l1,l2,iteration,debug)
+#   message("## Rmat extracted, finished")  
+#   
+#   Rmat=matrix(Rmatv[, iteration], nrow=l1,ncol=l2)
+#   # return(Rmat)
+#   return(Rmat)
+# }
+
+
+
+do_it=function(A_sparse,l1,l2,iteration,debug=FALSE){
+  Rmatv=get_Rmatv(A_sparse,l1,l2,iteration,debug)
+  Rmat=matrix(Rmatv[, iteration], nrow=l1,ncol=l2)
+  # df=extract_aln(Rmat)
+  # df
+  return(Rmat)
+}
+```
+
+## test1
+
+```{r}
+# A_bp1=do_it(A_bp, 34,34, 5000)
+get_Rmatv(A_bp,34,34,5000,TRUE)
+```
+
+
+
+```{r}
+
+do_it_wrapper = function(alpha, beta, A_bp, A_nb, A_seq) {
+  # alpha = alphh
+  # beta = .4
+  l1 = nrow(mat1)
+  l2 = nrow(mat2)
+
+  A_all = alpha * A_bp + beta * A_nb + (1 - alpha - beta) * A_seq
+  rmat = do_it(A_all, l1, l2, iteration = 10000, debug = FALSE)
+  gg_mat(rmat)
+}
+
+```
+
+
+
+```{r}
+gglist=list()
+```
+
+
+```{r}
+gglist$onlypair=do_it_wrapper(1,0,A_bp,A_nb,A_seq)
+```
+
+```{r}
+gglist$onlynb=do_it_wrapper(0,1,A_bp,A_nb,A_seq)
+```
+
+```{r}
+gglist$onlyseq=do_it_wrapper(0,0,A_bp,A_nb,A_seq)
+```
+
+```{r}
+gglist$bpnb=do_it_wrapper(0.5,0.5,A_bp,A_nb,A_seq)
+```
+
+```{r}
+gglist$nbseq=do_it_wrapper(0,0.5,A_bp,A_nb,A_seq)
+```
+
+```{r}
+gglist$bpseq=do_it_wrapper(0.5,0,A_bp,A_nb,A_seq)
+```
+
+```{r}
+gglist$bpnbseq=do_it_wrapper(0.3,0.3,A_bp,A_nb,A_seq)
+```
+
+
+```{r}
+gglist
+```
+
+```{r}
+save(gglist,file="../rdata/gglist.rda")
+```
+
+
+
+```{r}
+
+
+df=extract_aln(rmat)
+```
+
+
+```{r}
+ref_aln=id2_to_id1(
+  i=1:34,
+  j=1:34,
+  dim=34
+)
+```
+
+```{r}
+pred_aln=id2_to_id1(
+  i=df$i,
+  j=df$j,
+  dim=34
+)
+```
+
+
+```{r}
+df$seq1=seq1[df$i]
+
+df$seq2=seq2[df$j]
+
+# seq1[df$i]
+
+# seq1[df$j]
+df %>% 
+  filter(i<=j) %>% 
+  arrange(i)
 ```
 

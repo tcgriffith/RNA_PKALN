@@ -34,4 +34,35 @@ a.eigen=eigen(a)
 a.eigen
 ```
 
+```{r}
+mat=random_diag %*% t(c(1,1,1,1,1))
+```
+
+```{r}
+mat
+```
+
+```{r}
+
+```
+
+
+```{r}
+mat.eig=eigen(mat)
+
+mat.eig
+```
+
+```{r}
+mat1=matrix(0,5,5)
+
+diag(mat1)=mat.eig$values
+
+mat2=mat.eig$vectors
+```
+
+```{r}
+mat1 %*% mat.eig$vectors[,1]
+```
+
 

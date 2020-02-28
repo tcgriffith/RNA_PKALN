@@ -79,7 +79,13 @@ edges=rbind(mat1.graph$edges,mat2.graph$edges)
 
 # visNetwork::visNetwork(mat2.graph$nodes, mat2.graph$edges, width="100%", height="400px")
 
+
+
 visNetwork::visNetwork(nodes, edges, width="100%", height="450px")
+```
+
+```{r}
+save(mat1.graph,mat2.graph, file="../rdata/mat1mat2.graph.rda")
 ```
 
 

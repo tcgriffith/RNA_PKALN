@@ -54,102 +54,59 @@ gg_mat(mat2)
 ```
 
 
-```{r}
-
-```
-
 
 
 ```{r}
-
-
-get_Rmat = function(A, l1, l2) {
-  Rv = matrix(0, nrow = l1 * l2, ncol = 1000)
-  
-  R=runif(l1*l2)
-  
-  Rv[, 1] = R
-  
-  for (i in 2:1000) {
-    Rvnew = A_sparse %*% Rv[, i - 1]
-    Rvnew = as.matrix(Rvnew)
-    Rv[, i] = Rvnew / norm(Rvnew, "F")
-
-    if (i %% 100 == 0) {
-      message(i, " ", dist(rbind(Rv[, i], Rv[, i - 1])))
-    }
-  }
-  
-  Rmat = Rv2Rmat(Rv[, 1000], nrow = l1, ncol = l2)
-}
-
-
-
-
+A_bp=get_matA(mat1,mat2)
 ```
 
 ```{r}
-# Rv[,1000]
-
-
+A_nb=get_A_nb(mat1,mat2)
 ```
 
 ```{r}
-gg_mat(Rmat)
-```
 
-```{r}
-extract_aln = function(R) {
-  Rtmp = R
-  maplist=list()
-  
-  for (i in 1:nrow(Rtmp)) {
-    max_R = max(Rtmp)
-    if (max_R > 0.01) {
-      
-
-
-      idmax = which.max(Rtmp)
-      ids = id1_to_id2(idmax, nrow(Rtmp))
-      maplist=append(maplist,
-                     values=list(
-                       data.frame(
-                       i=ids$i[[1]],
-                       j=ids$j[[1]],
-                       v=Rtmp[idmax]
-                     )
-                     ))
-      message(sprintf("%d %d %d %f", i, ids$i[[1]], ids$j[[1]], Rtmp[idmax]))
-      # Rtmp=Rtmp[-ids["i"],-ids["j"]]
-      Rtmp[ids$i[[1]], ] = -1
-      Rtmp[, ids$j[[1]]] = -1
-      # gg=gg_mat(Rtmp)
-      # plot(gg)
-    }
-    
-  }
-  
-  return(do.call(rbind,maplist))
-  # return(maplist)
+do_it=function(A_sparse,l1,l2,iteration,debug=FALSE){
+  Rmatv=get_Rmatv(A_sparse,l1,l2,iteration,debug)
+  Rmat=matrix(Rmatv[, iteration], nrow=l1,ncol=l2)
+  # df=extract_aln(Rmat)
+  # df
+  return(Rmat)
 }
 ```
 
 
+
 ```{r}
-tmp=extract_aln(Rmat)
+alpha=1
+beta=.4
+
+
+# A_all=alpha *
+
+# A_all= alpha*A_bp+beta*A_nb
+
+A_all= alpha *A_bp + (1-alpha) *A_nb
+
+# A_all = beta *
+
+# do_it()
+
+#Rmat
+rmat=do_it(A_all, l1,l2, iteration=1000,debug=FALSE)
+```
+
+```{r}
+extract_aln(rmat)
+```
+
+```{r}
+# gg_mat(A_nb)
+A_sparse
 ```
 
 
 ```{r}
-u_contacts[tmp$i]
-
-v_contacts[tmp$j]
-```
-
-
-```{r}
-gg_mat(mat1)
-
-gg_mat(mat2)
+gg_mat(rmat)
 ```
 

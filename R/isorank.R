@@ -57,11 +57,11 @@ id2_to_id1=function(i,j,dim){
 
 
 # not suitable for large matrices
-matA2matR=function(A,nrow){
-  A.eig=eigen(A)
-  R = matrix(Re(A.eig$vectors[,1]),nrow=nrow)
-  return(R)
-}
+# matA2matR=function(A,nrow){
+#   A.eig=eigen(A)
+#   R = matrix(Re(A.eig$vectors[,1]),nrow=nrow)
+#   return(R)
+# }
 
 Rv2Rmat=function(Rv,nrow,ncol){
   Rmat=matrix(Rv, nrow,ncol)
@@ -103,14 +103,21 @@ get_Rmatv = function(A, l1, l2,iteration=1000,debug=FALSE) {
     Rvnew = A %*% Rv[, i - 1]
     Rvnew = as.matrix(Rvnew)
     Rv[, i] = Rvnew / norm(Rvnew, "F")
+    
+    lastdist=dist(rbind(Rv[, i], Rv[, i - 1]))
+    
+    if (lastdist < 2e-16){
+      
+      break
+    }
 
     if(debug){
-      if (i %%100 ==0){
-        message(i, " ", dist(rbind(Rv[, i], Rv[, i - 1])))
-      }
+      if (i %% 100 ==0) message(i, " ", lastdist)
     }
 
   }
+  
+  message("##  ", i, " ", lastdist)
   
   # Rmat = Rv2Rmat(, nrow = l1, ncol = l2)
   
@@ -174,4 +181,37 @@ run_isorank = function(mat1, mat2,iteration=1000,debug=FALSE) {
   return(Rmat)
 }
 
+
+get_A_nb = function(mat1, mat2) {
+  l1 = nrow(mat1)
+  l2 = nrow(mat2)
+  
+  # A_nb = Matrix::sparseMatrix(i=NULL,j=NULL,dims=c(l1*l2,l1*l2))
+  
+  id_col=integer()
+  id_row=integer()
+  
+  for (i in 1:l1) {
+    for (j in 1:l2) {
+      idx_ij = id2_to_id1(i, j, l1)
+      idx_imjm = id2_to_id1(i - 1, j - 1, l1)
+      idx_ipjp = id2_to_id1(i + 1, j + 1, l1)
+      
+      if (idx_imjm > 0) {
+        # A_nb[idx_ij, idx_imjm] = 1 / 2
+        id_row=append(id_row, idx_ij)
+        id_col=append(id_col,idx_imjm)
+      }
+      if (idx_ipjp < l1 * l2) {
+        id_row=append(id_row,idx_ij)
+        id_col=append(id_col,idx_ipjp)
+        # A_nb[idx_ij, idx_ipjp] = 1 / 2
+      }
+    }
+  }
+  
+  A_nb = Matrix::sparseMatrix(i=id_row,j=id_col,x=1/2,dims=c(l1*l2,l1*l2))
+  
+  return(A_nb)
+}
 
