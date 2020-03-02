@@ -1,0 +1,207 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source(here::here("R/isorank.R"))
+source(here::here("R/benchmark.R"))
+```
+
+## R Markdown
+
+
+
+```{r}
+rf_3vrs_rf01734=seqinr::read.fasta(file="/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa",as.string=FALSE)
+```
+
+```{r}
+seqid=sapply(rf_3vrs_rf01734,function(seq){
+  seqid=sum(seq==rf_3vrs_rf01734$`0000|reference`)/length(seq)
+  return(seqid)
+})
+```
+
+```{r}
+seqiddf=data.frame(
+  id=names(seqid),
+  seqid=seqid
+)
+
+rownames(seqiddf)=NULL
+```
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+ggplot(seqiddf)+
+  geom_boxplot(aes(y=seqid))
+```
+
+```{r}
+seq1=rf_3vrs_rf01734$`0000|reference`
+```
+
+```{r}
+seq1
+```
+
+
+```{r}
+seq2mat=function(seq){
+  cano_pairs=c("AU", "GC", "CG", "UA", "GU", "UG")
+  
+  seqc=toupper(seq)
+  
+  if (length(seq) ==1){
+    seqc=seqinr::s2c(toupper(seq))
+  }
+  
+  
+  mat=matrix(0,length(seqc),length(seqc))
+  
+  
+  
+  # mat[matrix(c(1:9,2:10),ncol=2)] =1
+  # mat[matrix(c(2:10,1:9),ncol=2)] =1
+  
+  for(i in 1:length(seqc)){
+    for(j in 1:length(seqc)){
+      pair=paste0(seqc[i],seqc[j])
+      
+      if(any(cano_pairs == pair)){
+        mat[i,j]=1
+      }
+    }
+  }
+  
+  
+  return(mat)
+}
+```
+
+
+
+```{r}
+
+
+
+label_stemlen = function(mat1) {
+  mat_stem = mat1
+  mat_stem[,] = 0
+  
+  for (i in 1:nrow(mat1)) {
+    for (j in 1:nrow(mat1)) {
+      if (i < j) {
+        if (mat1[i, j] >0) {
+          if (mat_stem[i, j] == 0) {
+            tmp_stem = id2_to_id1(i, j, nrow(mat1))
+            max_stemlen=0
+            for (stemlen in 1:nrow(mat1)) {
+              if (i + stemlen < j - stemlen && mat1[i + stemlen, j - stemlen] > 0) {
+                tmp_stem = append(tmp_stem,
+                                  id2_to_id1(i + stemlen, j - stemlen, nrow(mat1)))
+                max_stemlen=stemlen+1
+              }
+              else{
+                break
+              }
+            }
+            mat_stem[tmp_stem]=max_stemlen
+          }
+        }
+      }
+    }
+  }
+  return(mat_stem)
+}
+
+
+```
+
+
+```{r}
+mat_stem=label_stemlen(mat1)
+```
+
+```{r}
+
+mat_stem_gt2=mat_stem
+
+mat_stem_gt2[mat_stem<4]=0
+
+gg1=gg_mat(mat_stem_gt2)
+
+gg_mat(mat_stem)
+
+gg1
+```
+
+
+```{r}
+library(dplyr)
+gg1 +geom_point(data=ct_ref%>% filter(i<j),mapping=aes(x=i,y=j, color=j),color="red")+
+  geom_abline(color="red")
+```
+
+
+```{r}
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+energy2=RNASSP::energy2
+RNASSP::plot_ct(ct_ref)
+```
+
+```{r}
+mat1=mat_stem
+
+mat1[mat_stem <4]=0
+
+mat1[mat1>0] =1
+
+colnames(mat1)=ct_ref$nt
+
+mat1=mat1+t(mat1)
+
+mat2=ct2mat(ct_ref)
+
+colnames(mat2)=ct_ref$nt
+
+```
+
+```{r}
+gg_mat(mat1)
+
+gg_mat(mat2)
+```
+
+
+```{r}
+rmat=run_isorank_bpnb(mat1,mat2, alpha=0.1)
+```
+
+```{r}
+rownames(mat1)=1:nrow(mat1)
+
+g1=mat2graph(mat1)
+```
+
+
+```{r}
+visNetwork::visNetwork(g1$nodes,g1$edges)
+```
+
+
+
+```{r}
+gg_mat(rmat)+geom_abline()
+
+extract_aln(rmat)
+```
+

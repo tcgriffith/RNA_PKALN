@@ -1,0 +1,100 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## data
+
+```{r}
+dput(RNASSP::energy2)
+```
+
+
+```{r}
+seq2mat=function(seq){
+  cano_pairs=c("AU", "GC", "CG", "UA", "GU", "UG")
+  
+  seqc=seqinr::s2c(seq)
+  
+  mat=matrix(0,length(seqc),length(seqc))
+  
+  
+  
+  mat[matrix(c(1:9,2:10),ncol=2)] =1
+  # mat[matrix(c(2:10,1:9),ncol=2)] =1
+  
+  for(i in 1:length(seqc)){
+    for(j in 1:length(seqc)){
+      pair=paste0(seqc[i],seqc[j])
+      
+      if(any(cano_pairs == pair)){
+        mat[i,j]=1
+      }
+    }
+  }
+  
+  
+  return(mat)
+}
+```
+
+```{r}
+seq="CACCCCCCUG"
+
+mat1=seq2mat(seq)
+
+
+```
+
+```{r}
+nodes=data.frame(
+  id=1:8,
+  label=1:8
+)
+edges=data.frame(
+  from=c(1,2, 1:7),
+  to=c(8,7,2:8)
+)
+```
+
+```{r}
+visNetwork::visNetwork(nodes=nodes,edges=edges)
+```
+
+
+
+## align
+
+```{r}
+source(here::here("R/isorank.R"))
+source(here::here("R/benchmark.R"))
+
+```
+
+
+
+```{r}
+mat2=graph2mat(graph=list(nodes=nodes,edges=edges))
+```
+
+```{r}
+
+rmat=run_isorank_bpnb(mat1,mat2,alpha=1)
+
+gg_mat(rmat)
+
+extract_aln(rmat)
+
+```
+
+```{r}
+
+```
+

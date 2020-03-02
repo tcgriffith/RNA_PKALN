@@ -5,7 +5,7 @@ gg_mat = function(mat) {
   
   df$val = mat[which(!is.na(mat) > 0)]
   # df=as.data.frame(as.table(mat))
-  ggplot(df, aes(x=col, y=row, fill = val)) + geom_tile() + coord_fixed()
+  ggplot(df) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
 }
 
 extract_aln = function(R, debug=FALSE) {
@@ -69,7 +69,13 @@ Rv2Rmat=function(Rv,nrow,ncol){
   Rmat=matrix(Rv, nrow,ncol)
 }
 
-
+graph2mat=function(graph){
+  mat=matrix(0,nrow=nrow(graph$nodes),ncol=nrow(graph$nodes))
+  
+  mat[as.matrix(graph$edges[,c("from","to")])]=1
+  mat[as.matrix(graph$edges[,c("to","from")])]=1
+  return(mat)
+}
 
 mat2graph=function(mat,id_renum=0){
   
