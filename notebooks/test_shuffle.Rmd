@@ -1,0 +1,51 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source(here::here("R/isorank.R"))
+library(tidyverse)
+```
+
+## R Markdown
+
+```{r}
+ct1=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa.gremlincpp.ct")
+
+ct_sscon=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.sto.ss_con.dbn.ct")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+```
+
+```{r}
+energy2=RNASSP::energy2
+
+RNASSP::plot_ct(ct1,ct_ref)
+```
+
+```{r}
+seq=ct_ref$nt
+```
+
+```{r}
+
+
+```
+
+```{r}
+rbind(seq_shuffle,seq)
+```
+
+```{r}
+mat=matrix(0,52,52)
+
+diag(mat)=ifelse(seq_shuffle==seq,1,0)
+
+gg_mat(mat)
+
+```
+

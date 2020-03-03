@@ -1,0 +1,491 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+source(here::here("R/isorank.R"))
+```
+
+## R Markdown
+
+
+```{r}
+
+
+v1= data.table::fread(cmd="grep  '^V' /home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+
+w1=data.table::fread(cmd="grep  '^W' /home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+```
+
+```{r}
+sqrt(sum(w1[1326,2:26]^2))
+```
+
+```{r}
+v=w1[1,2:26]
+v=as.numeric(v)
+
+tmp= matrix(v,5,5)
+```
+
+```{r}
+w1_mat=as.matrix(w1[,2:26])
+```
+
+
+```{r}
+ids=expand.grid(1:52,1:52) %>% filter(Var2 > Var1) %>% arrange(Var1)
+```
+
+```{r}
+mat_score= sapply(1:nrow(w1_mat),function(i){
+  tmpmat=matrix(w1_mat[i,],5,5)
+  score=sqrt(sum(tmpmat[-5,-5]^2))
+  return(score)
+})
+```
+
+```{r}
+ids$score=mat_score
+```
+
+```{r}
+mat=matrix(0,52,52)
+
+mat[as.matrix(ids[,c(1,2)])]=ids$score
+```
+
+```{r}
+gg_mat(mat)
+```
+
+```{r}
+dca08=RNASSP::read_dca("~/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp_gap08.gremlincpp")
+```
+
+```{r}
+mat2=matrix(0,52,52)
+
+mat2[as.matrix(dca08[,c(1,2)])]=dca08[,3]
+```
+
+```{r}
+gg_mat(mat2) |gg_mat(mat)
+```
+
+
+
+
+
+
+```{r}
+v1_mat=as.matrix(v1[,2:6])
+```
+
+```{r}
+gg_mat(t(v1_mat))
+```
+
+## msa
+
+```{r}
+seqmsa=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+```
+
+```{r}
+seqmsa.mat=do.call(rbind,seqmsa)
+```
+
+```{r}
+seqmsa.h = apply(seqmsa.mat, 2, function(col) {
+  tmpA = sum(col == 'a')
+  tmpU = sum(col == 'u')
+  tmpC = sum(col == 'c')
+  tmpG = sum(col == 'g')
+  tmpS = length(col) - tmpA - tmpU - tmpC - tmpG
+  
+  return(as.numeric(c(
+    A = tmpA,
+    U = tmpU,
+    C = tmpC,
+    G = tmpG,
+    S = tmpS
+  )))
+})
+```
+
+```{r}
+library(patchwork)
+
+gg_mat(seqmsa.h) /gg_mat(t(v1_mat))
+```
+
+```{r}
+seq2idx=function(seq){
+  
+  
+  idx=match(seq,table=c("a","u","c","g","-"))
+  idy=1:length(seq)
+  ## convert unrecognized to gap
+  idx[is.na(idx)]=5
+  matrix(
+    c(idx,idy),ncol=2
+  )
+}
+
+score_h1=function(seq, h1){
+  idx=seq2idx(seq)
+  
+  return(sum(h1[idx]))
+}
+```
+
+```{r}
+seq = seqmsa[[1]]
+
+ij = expand.grid(1:length(seq), 1:length(seq))
+
+ij = ij[ij$Var2 > ij$Var1, ]
+
+id_a = match(seq[ij$Var1], table = c("a", "u", "c", "g", "-"))
+id_b = match(seq[ij$Var2], table = c("a", "u", "c", "g", "-"))
+```
+
+```{r}
+mat12=matrix(w1_mat[984,],5,5,byrow=TRUE)
+
+gg_mat(mat12)+scale_y_reverse()
+```
+
+
+
+```{r}
+
+seq2idx2 = function(seq) {
+  
+  myalphabet= c("a", "u", "c", "g", "-")
+  
+  # seq = seqmsa[[1]]
+  
+  ij = expand.grid(1:length(seq), 1:length(seq)) %>% 
+    filter(Var2 > Var1) %>%
+    arrange(Var1)
+  
+  # ij = ij[ij$Var2 > ij$Var1,]
+  
+  id_a = match(seq[ij$Var1], table = c("a", "u", "c", "g", "-"))
+  id_b = match(seq[ij$Var2], table = c("a", "u", "c", "g", "-"))
+  
+  id_a[is.na(id_a)]=5
+  id_b[is.na(id_b)]=5
+  ## L*L
+  # id_row= id2_to_id1(ij$Var1,ij$Var2,length(seq))
+  id_row=1:nrow(ij)
+  
+  
+  id_col= id2_to_id1(id_b,id_a,length(myalphabet))
+  
+  # return(data.frame(
+  #   i=ij$Var1,
+  #   j=ij$Var2,
+  #   a=id_a,
+  #   b=id_b
+  # ))
+  return(matrix(c(id_row,id_col), ncol=2))
+  
+  ## a*a
+  
+}
+
+score_h2 = function(seq, h2) {
+  idx = seq2idx2(seq)
+  return(sum(h2[idx]))
+  # return(as.data.frame(cbind(idx,h2[idx])))
+}
+
+
+score_h2_full = function(seq, h2) {
+  idx = seq2idx2(seq)
+  return(sum(h2[idx]))
+  # return(as.data.frame(cbind(idx,h2[idx])))
+}
+
+```
+
+```{r}
+tmp=seq2idx2(seq)
+
+tmp_score=score_h2(seq, w1_mat)
+```
+
+```{r}
+h2_scores=pbapply::pbsapply(1:length(seqmsa),function(i){
+  seq=seqmsa[[i]]
+  score=score_h2(seq,w1_mat)
+  return(score)
+})
+```
+
+
+```{r}
+seq=seqmsa[[1]]
+
+seq_shuffle=sample(seq)
+
+score_h1(seq, t(v1_mat))
+
+score_h1(seq_shuffle,t(v1_mat))
+```
+
+
+```{r}
+h1_scores=pbapply::pbsapply(1:length(seqmsa),function(i){
+  seq=seqmsa[[i]]
+  score=score_h1(seq,t(v1_mat))
+  return(score)
+})
+```
+
+```{r}
+
+df_h1h2=data.frame(x=1:length(h1_scores),
+           h1=h1_scores,
+           h2=h2_scores) 
+
+df_h1h2 %>% 
+  ggplot(aes(h1,h2))+
+  geom_point()
+```
+
+
+```{r}
+df_poorh2=
+df_h1h2 %>% filter(
+  h2<20
+)
+
+df_good=
+  df_h1h2 %>% filter(
+    h2 > 50
+  )
+```
+
+
+
+```{r}
+# df_poorh2
+
+seq_poorh2= seqmsa.mat[df_poorh2$x,]
+seq_good= seqmsa.mat[df_good$x,]
+seq_rand = seqmsa.mat[sample(1:nrow(seqmsa.mat), nrow(seq_poorh2)),]
+```
+
+```{r}
+ids_pairs=ids %>% filter(score>1)
+```
+
+
+```{r}
+fcanos_poorh2= sapply(1:nrow(seq_poorh2), function(i){
+  seq=seq_poorh2[i,]
+  
+  pairs=toupper(paste0(seq[ids_pairs$Var1],seq[ids_pairs$Var2]))
+  
+  fcano=sum(pairs %in% RNASSP::energy2)/length(pairs)
+  
+  return(fcano)
+  
+})
+
+fcanos_good= sapply(1:nrow(seq_good), function(i){
+  seq=seq_good[i,]
+  
+  pairs=toupper(paste0(seq[ids_pairs$Var1],seq[ids_pairs$Var2]))
+  
+  fcano=sum(pairs %in% RNASSP::energy2)/length(pairs)
+  
+  return(fcano)
+  
+})
+
+
+
+fcanos_all= sapply(1:nrow(seqmsa.mat), function(i){
+  seq=seqmsa.mat[i,]
+  
+  pairs=toupper(paste0(seq[ids_pairs$Var1],seq[ids_pairs$Var2]))
+  
+  fcano=sum(pairs %in% RNASSP::energy2)/length(pairs)
+  
+  return(fcano)
+  
+})
+```
+
+
+```{r}
+df_h1h2$fcano=fcanos_all
+```
+
+```{r}
+df_h1h2 %>% 
+  ggplot(aes(x=h1,y=fcano))+
+  geom_point()
+```
+
+```{r}
+df_h1h2 %>% filter(fcano < 0.3)
+```
+
+
+```{r}
+seqmsa.mat[c(1,153),]
+```
+
+
+
+```{r}
+fcanos=sapply(1:nrow(seq_rand), function(i){
+  seq=seq_rand[i,]
+  
+  pairs=toupper(paste0(seq[ids_pairs$Var1],seq[ids_pairs$Var2]))
+  
+  fcano=sum(pairs %in% RNASSP::energy2)/length(pairs)
+  
+  return(fcano)
+  
+})
+```
+
+```{r}
+data.frame(fcano=c(fcanos_good,fcanos_poorh2,fcanos_rand38),grp=c(rep("good",15),rep("poor",38),rep("rand",38))) %>% 
+  ggplot()+geom_boxplot(aes(x=grp,y=fcano))
+```
+
+```{r}
+seq_poorh2
+```
+
+
+
+```{r}
+summary(fcanos_rand38)
+
+summary(fcanos_poorh2)
+
+summary(fcanos_good)
+
+t.test(fcanos_rand38,fcanos_poorh2)
+```
+
+
+```{r}
+seqmsa.poor = apply(seq_poorh2, 2, function(col) {
+  tmpA = sum(col == 'a')
+  tmpU = sum(col == 'u')
+  tmpC = sum(col == 'c')
+  tmpG = sum(col == 'g')
+  tmpS = length(col) - tmpA - tmpU - tmpC - tmpG
+  
+  return(as.numeric(c(
+    A = tmpA,
+    U = tmpU,
+    C = tmpC,
+    G = tmpG,
+    S = tmpS
+  )))
+})
+
+seqmsa.good = apply(seq_good, 2, function(col) {
+  tmpA = sum(col == 'a')
+  tmpU = sum(col == 'u')
+  tmpC = sum(col == 'c')
+  tmpG = sum(col == 'g')
+  tmpS = length(col) - tmpA - tmpU - tmpC - tmpG
+  
+  return(as.numeric(c(
+    A = tmpA,
+    U = tmpU,
+    C = tmpC,
+    G = tmpG,
+    S = tmpS
+  )))
+})
+```
+
+```{r}
+gg_mat(seqmsa.good)/gg_mat(seqmsa.poor)/gg_mat(seqmsa.h)
+```
+
+
+```{r}
+table(seq_good[,27],seq_good[,34])
+```
+
+
+```{r}
+# gg_mat(seqmsa.h) /gg_mat(t(v1_mat)) /gg_mat(seqmsa.poor)+geom_vline(xintercept=c(26,35,27,34,4,15,10,45,9,46, 24,37,12,43),color="red")
+```
+
+```{r}
+tmp1=rbind(seqmsa.mat[1,],seq_poorh2)
+```
+
+## test shuffleseq
+
+
+```{r}
+seq_shuffle=seqmsa[[1]]
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+for(k in 1:nrow(ct_ref)){
+  if(ct_ref$j[k] >ct_ref$i[k]){
+    j=ct_ref$j[k]
+    i=ct_ref$i[k]
+    
+    tmp=seq_shuffle[i]
+    seq_shuffle[i]=seq_shuffle[j]
+    seq_shuffle[j]=tmp
+  }
+}
+```
+
+```{r}
+score_h1(seq_shuffle,t(v1_mat))
+
+score_h2(seq_shuffle,w1_mat)
+```
+
+```{r}
+seqmsa.shuffle = apply(seq_shuffle, 2, function(col) {
+  tmpA = sum(col == 'a')
+  tmpU = sum(col == 'u')
+  tmpC = sum(col == 'c')
+  tmpG = sum(col == 'g')
+  tmpS = length(col) - tmpA - tmpU - tmpC - tmpG
+  
+  return(as.numeric(c(
+    A = tmpA,
+    U = tmpU,
+    C = tmpC,
+    G = tmpG,
+    S = tmpS
+  )))
+})
+```
+
+```{r}
+sum(seq_shuffle==seqmsa[[1]])
+```
+
+```{r}
+min(h1_scores)
+```
+
