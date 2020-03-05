@@ -90,3 +90,59 @@ align=function(score_mtx, gap_open=-1,gap_e=0.2,debug=FALSE){
   return(a2b)
   
 }
+
+
+read_mrf = function(filemrf) {
+  myalphabet = c("a", "u", "c", "g", "-")
+  len=nrow(v1)
+  len_a=length(myalphabet)
+  
+  v1 = data.table::fread(cmd = paste("grep '^V'", filemrf))
+  names(v1)[-1] = myalphabet
+  
+  w1 = data.table::fread(cmd = paste("grep  '^W'", filemrf))
+  
+  w1$i=as.integer(gsub(".*\\[(.*?)\\]\\[(.*?)\\].*","\\1",w1$V1))+1
+  
+  w1$j=as.integer(gsub(".*\\[(.*?)\\]\\[(.*?)\\].*","\\2",w1$V1))+1
+  
+  array_j = array(0, dim = c(len, len, len_a, len_a))
+  
+  for (m in 1:nrow(w1)) {
+    id_i = w1$i[m]
+    id_j = w1$j[m]
+    
+    mat = matrix(as.matrix(w1[m, 2:26]), 5, 5, byrow = TRUE)
+    array_j[id_i, id_j, , ] = mat
+    
+  }
+  
+  
+  
+  ids = expand.grid(1:nrow(v1), 1:nrow(v1)) %>% filter(Var2 > Var1) %>% arrange(Var1)
+  w1_mat = as.matrix(w1[, 2:(1 + length(myalphabet) * length(myalphabet))])
+  
+  mat_score = sapply(1:nrow(w1_mat), function(i) {
+    tmpmat = matrix(w1_mat[i,], 5, 5)
+    score = sqrt(sum(tmpmat[-5,-5] ^ 2))
+    return(score)
+  })
+  ids$score = mat_score
+  
+  mat_mrf = matrix(0, nrow(v1), nrow(v1))
+  
+  mat_mrf[as.matrix(ids[, c(1, 2)])] = ids[, 3]
+  mat_mrf[as.matrix(ids[, c(2, 1)])] = ids[, 3]
+  
+  mat_apc = APC_correction(mat_mrf)
+  mrf = list(
+    len = len,
+    h = v1,
+    j = w1,
+    mat_mrf = mat_mrf,
+    mat_apc = mat_apc,
+    array_j=array_j
+  )
+  
+  return(mrf)
+}

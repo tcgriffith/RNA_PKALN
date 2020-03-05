@@ -183,6 +183,20 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
+
+vec_int encode_seq(string seq){
+    vec_int seq_int;
+
+    
+
+
+
+
+
+    return(seq_int);
+}
+
+
 vec_int align(vec_double &gap_a, vec_double &gap_b, double &gap_e, mtx_double &sco_mtx, mtx_double &p_sco_mtx){
     // LOCAL_ALIGN
     // Start    0

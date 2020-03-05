@@ -1,0 +1,22 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(Rcpp)
+```
+
+```{r}
+
+```
+
+
