@@ -44,16 +44,19 @@ ids=expand.grid(1:52,1:52) %>% filter(Var2 > Var1) %>% arrange(Var1)
 ```
 
 ```{r}
+ids=expand.grid(1:52,1:52) %>% filter(Var2 > Var1) %>% arrange(Var1)
+w1_mat=as.matrix(w1[,2:26])
+
 mat_score= sapply(1:nrow(w1_mat),function(i){
   tmpmat=matrix(w1_mat[i,],5,5)
   score=sqrt(sum(tmpmat[-5,-5]^2))
   return(score)
 })
+ids$score=mat_score
+
 ```
 
-```{r}
-ids$score=mat_score
-```
+
 
 ```{r}
 mat=matrix(0,52,52)

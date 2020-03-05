@@ -32,7 +32,18 @@ seq=ct_ref$nt
 ```
 
 ```{r}
+seq_shuffle=seq
 
+for(k in 1:nrow(ct_ref)){
+  if(ct_ref$j[k] >ct_ref$i[k]){
+    j=ct_ref$j[k]
+    i=ct_ref$i[k]
+    
+    tmp=seq_shuffle[i]
+    seq_shuffle[i]=seq_shuffle[j]
+    seq_shuffle[j]=tmp
+  }
+}
 
 ```
 

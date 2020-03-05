@@ -1,9 +1,17 @@
 gg_mat = function(mat) {
   # df=as.data.frame(which(mat>0,arr.ind=TRUE))
   
-  df = as.data.frame(which(!is.na(mat) > 0, arr.ind = TRUE))
   
-  df$val = mat[which(!is.na(mat) > 0)]
+
+  
+  if(!is.null(dimnames(mat))){
+    df = as.data.frame(as.table(mrf_12))
+    colnames(df)=c("row","col","val")
+  } else {
+    df = as.data.frame(which(!is.na(mat) > 0, arr.ind = TRUE))
+    df$val = mat[which(!is.na(mat) > 0)]    
+  }
+
   # df=as.data.frame(as.table(mat))
   ggplot(df) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
 }
