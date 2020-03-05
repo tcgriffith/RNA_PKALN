@@ -7,16 +7,59 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(Rcpp)
 ```
 
 ## R Markdown
 
+
 ```{r}
-library(Rcpp)
+sourceCpp(here::here("src/mapalignR.cpp"))
 ```
 
 ```{r}
-
+cumsum(1:10)
 ```
 
+
+```{r}
+test(1:10)
+```
+
+```{r}
+library(microbenchmark)
+```
+
+```{r}
+mat=matrix(runif(25),5,5)
+```
+
+
+```{r}
+Falign(mat)
+```
+
+
+```{r}
+x=runif(1e3)
+```
+
+```{r}
+cumsumR=function(x){
+  out=x
+  for (i in 2:length(x) ){
+    out[i]=out[i-1]+x[i]
+  }
+  return(out)
+}
+```
+
+
+```{r}
+microbenchmark::microbenchmark(
+  falign_R(mat,5,5),
+  Falign(mat)
+)
+```
 

@@ -1,4 +1,4 @@
-falign=function(score_mtx, rows,cols){
+falign_R=function(score_mtx, rows,cols){
   max_sco = 0;
   # sco[rows+1,cols+1];
   gap_o=-1
@@ -31,7 +31,7 @@ falign=function(score_mtx, rows,cols){
   # return(sco)
 }
 
-align=function(score_mtx, gap_open=-1,gap_e=0.2,debug=FALSE){
+align_R=function(score_mtx, gap_open=-1,gap_e=0.2,debug=FALSE){
   rows=nrow(score_mtx)
   cols=ncol(score_mtx)
   

@@ -83,7 +83,7 @@ ini_SCO = function(seq, mrf, sep_x, sep_y) {
           }
       }
       message(ai,bi)
-      SCO[ai,bi]= falign(M,length(seq),mrf_len)
+      SCO[ai,bi]= Falign(M)
     }
   }
   return(SCO)
