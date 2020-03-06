@@ -5,7 +5,7 @@ gg_mat = function(mat) {
 
   
   if(!is.null(dimnames(mat))){
-    df = as.data.frame(as.table(mrf_12))
+    df = as.data.frame(as.table(mat))
     colnames(df)=c("row","col","val")
   } else {
     df = as.data.frame(which(!is.na(mat) > 0, arr.ind = TRUE))

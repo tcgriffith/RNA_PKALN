@@ -93,14 +93,17 @@ align_R=function(score_mtx, gap_open=-1,gap_e=0.2,debug=FALSE){
 
 
 read_mrf = function(filemrf) {
+  
   myalphabet = c("a", "u", "c", "g", "-")
-  len=nrow(v1)
-  len_a=length(myalphabet)
   
   v1 = data.table::fread(cmd = paste("grep '^V'", filemrf))
   names(v1)[-1] = myalphabet
   
   w1 = data.table::fread(cmd = paste("grep  '^W'", filemrf))
+  
+  
+  len=nrow(v1)
+  len_a=length(myalphabet)
   
   w1$i=as.integer(gsub(".*\\[(.*?)\\]\\[(.*?)\\].*","\\1",w1$V1))+1
   
@@ -146,3 +149,5 @@ read_mrf = function(filemrf) {
   
   return(mrf)
 }
+
+

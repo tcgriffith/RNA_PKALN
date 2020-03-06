@@ -7,8 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
+library(dplyr)
 library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
 ```
 
 ## R Markdown
@@ -18,48 +20,463 @@ library(Rcpp)
 sourceCpp(here::here("src/mapalignR.cpp"))
 ```
 
+
 ```{r}
-cumsum(1:10)
+source(here::here("R/mapalign.R"))
+
+mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
 ```
 
 
-```{r}
-test(1:10)
-```
-
-```{r}
-library(microbenchmark)
-```
-
-```{r}
-mat=matrix(runif(25),5,5)
-```
 
 
 ```{r}
-Falign(mat)
-```
-
-
-```{r}
-x=runif(1e3)
-```
-
-```{r}
-cumsumR=function(x){
-  out=x
-  for (i in 2:length(x) ){
-    out[i]=out[i-1]+x[i]
+mrf2mrf_mat = function(mrf) {
+  myalphabet = c("a", "u", "c", "g", "-")
+  
+  len = mrf$len
+  len_a = length(myalphabet)
+  
+  
+  mat_j = matrix(0, len * len_a, len * len_a)
+  
+  w1 = mrf$j
+  for (m in 1:nrow(w1)) {
+    id_i = w1$i[m]
+    id_j = w1$j[m]
+    
+    id_ia = id2_to_id1(1, id_i, len_a)
+    id_ja = id2_to_id1(1, id_j, len_a)
+    
+    mat = matrix(as.matrix(w1[m, 2:26]), 5, 5, byrow = TRUE)
+    # array_j[id_i, id_j, ,] = mat
+    
+    mat_j[id_ia:(id_ia + len_a - 1), id_ja:(id_ja + len_a - 1)] = mat
   }
-  return(out)
+  return(mat_j)
 }
 ```
 
 
 ```{r}
-microbenchmark::microbenchmark(
-  falign_R(mat,5,5),
-  Falign(mat)
-)
+mrf_mat_filt=matrix(0,5,5)
+
+mrf_mat_filt[1,2]=1
+mrf_mat_filt[2,1]=1
+mrf_mat_filt[3,4]=1
+mrf_mat_filt[4,3]=1
+mrf_mat_filt[4,2]=1
+mrf_mat_filt[2,4]=1
+
+rownames(mrf_mat_filt)=c("a", "u", "c", "g", "-")
+colnames(mrf_mat_filt)=c("a", "u", "c", "g", "-")
+
+gg_mat(mrf$array_j[1,2,,] * mrf_mat_filt)
+
+gg_mat(mrf$array_j[1,2,,])
+
+gg_mat(mrf_mat_filt)
+```
+
+
+```{r}
+mrf2mrf_mat_cano = function(mrf,mrf_mat_filt) {
+  myalphabet = c("a", "u", "c", "g", "-")
+  
+  len = mrf$len
+  len_a = length(myalphabet)
+  
+  
+  mat_j = matrix(0, len * len_a, len * len_a)
+  
+  w1 = mrf$j
+  for (m in 1:nrow(w1)) {
+    id_i = w1$i[m]
+    id_j = w1$j[m]
+    
+    id_ia = id2_to_id1(1, id_i, len_a)
+    id_ja = id2_to_id1(1, id_j, len_a)
+    
+    mat = matrix(as.matrix(w1[m, 2:26]), 5, 5, byrow = TRUE)
+    
+    mat_filt=mat * mrf_mat_filt
+    # array_j[id_i, id_j, ,] = mat
+    
+    mat_j[id_ia:(id_ia + len_a - 1), id_ja:(id_ja + len_a - 1)] = mat_filt
+  }
+  return(mat_j)
+}
+```
+
+
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+```
+
+```{r}
+
+encode_seq = function(seq) {
+  myalphabet = c("a", "u", "c", "g")
+  seq_int = match(seq, table = myalphabet, nomatch = 0) - 1 # 0 based
+  seq_int_ungapped = seq_int[seq_int > -1]
+  seq_int_ref = which(seq_int > -1)
+
+  rslt=list(
+    seq_int_ungapped=seq_int_ungapped,
+    seq_int_ref=seq_int_ref
+  )
+  return(rslt)
+}
+
+
+
+
+
+
+```
+
+```{r}
+bench_pair_mapalign=function(a2b,a2b_ref){
+  tpfp=length(a2b[a2b>0])
+  
+  tpfn=length(a2b_ref[a2b_ref>0])
+  
+  tp=sum(a2b[a2b>0]==a2b_ref[a2b>0])
+  
+  prec=tp/tpfp
+  
+  sens=tp/tpfn
+  
+  return(c(
+    prec=prec,
+    sens=sens
+  ))
+  
+}
+```
+
+
+
+
+## exp
+
+```{r}
+mrf_mat=mrf2mrf_mat(mrf)
+```
+
+```{r}
+
+mapaln_oneseq = function(seq,mrf_mat, sep_x=0,sep_y=1) {
+  exp_seq = encode_seq(seq)
+  
+  SCO = ini_SCO(
+    seq = exp_seq$seq_int_ungapped,
+    mrf_mat = mrf_mat,
+    mrf_len = mrf$len,
+    sep_x = sep_x,
+    sep_y = sep_y
+  )
+  
+  SCO_pair = align_R(SCO)
+  
+  seq_aln=character(mrf$len)
+  seq_aln[]="X"
+  
+  # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
+  
+    seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+  
+  
+  return(seq_aln)
+  
+}
+
+do_it = function(seqs) {
+  benchs = pbapply::pblapply(1:length(seqs), function(i) {
+    exp_seq = encode_seq(seqs[[i]])
+    
+    SCO = ini_SCO(
+      seq = exp_seq$seq_int_ungapped,
+      mrf_mat = mrf_mat,
+      mrf_len = mrf$len,
+      sep_x = 0,
+      sep_y = 1
+    )
+    
+    SCO_pair = align_R(SCO)
+
+    bench_pair_mapalign(SCO_pair, exp_seq$seq_int_ref)
+  })
+  do.call(rbind,benchs)
+}
+
+```
+
+
+```{r}
+mybench= do_it(seqs[1:10])
+```
+
+```{r}
+mybench
+```
+
+
+
+```{r}
+mrf_mat
+# mrf_h =
+```
+
+```{r}
+mrf_h=as.matrix(mrf$h[,2:6])
+```
+
+
+```{r}
+
+
+    seq=seqs[[2]]
+
+    exp_seq = encode_seq(seq)
+    
+    SCO = ini_SCO(
+      seq = exp_seq$seq_int_ungapped,
+      mrf_mat = mrf_mat, 
+      mrf_h=mrf_h,
+      mrf_len = mrf$len,
+      sep_x = 0,
+      sep_y = 1
+    )
+    
+    SCO_pair = align_R(SCO)
+    
+    SCO_aln=align_R(SCO,debug=TRUE)
+    
+    
+# SCO_pair=align_R(SCO_simple)
+
+  seq_aln=character(mrf$len)
+  seq_aln[]="X"
+  
+  # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
+  
+  seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+  
+bench_aln(seq_aln,seqs[[1]],ct_ref)
+    
+    gg_mat(SCO)
+    gg_mat(SCO_aln)+geom_point(data=tmpdf,aes(x,y),color="red",alpha=0.3)
+```
+
+```{r}
+simple_mat=function(seq1,seq2){
+  mat=matrix(0,length(seq1),length(seq2))
+  
+  for(i in 1:length(seq1)){
+    for (j in 1:length(seq2)){
+      if(seq1[i]==seq2[j]){
+        mat[i,j]= 1
+      }
+      
+      
+    }
+  }
+  return(mat)
+}
+```
+
+```{r}
+SCO_simple=simple_mat(seq1=seqs[[8]],seq2=seqs[[1]])
+```
+
+```{r}
+gg_mat(SCO_simple)
+
+SCO_pair=align_R(SCO_simple)
+
+  seq_aln=character(mrf$len)
+  seq_aln[]="X"
+  
+  # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
+  
+  seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+  
+bench_aln(seq_aln,seqs[[1]],ct_ref)
+```
+
+
+```{r}
+
+seq_8_realn=mapaln_oneseq(seqs[[8]],mrf)
+
+
+
+rbind(seqinr::c2s(seqs[[1]]),seqinr::c2s(seqs[[8]]),seqinr::c2s(seq_8_realn))
+```
+
+
+```{r}
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+```
+
+
+
+```{r}
+bench_seqid=function(seq,seqref){
+  return(sum(seq==seqref)/length(seqref))
+}
+
+
+bench_pair=function(seq,seqref,ctref, debug=FALSE){
+  
+  npair=sum(ctref$j>0)
+  
+  pairs=paste0(seq[ctref$i[ctref$j>0]],seq[ctref$j[ctref$j>0]])
+  
+  pairs=toupper(pairs)
+  
+  if(debug){
+    print(paste(pairs))
+  }
+  
+  return(sum(pairs %in% RNASSP::energy2)/npair)
+}
+
+bench_aln=function(seq,seqref,ctref,debug=FALSE){
+  seqid=bench_seqid(seq,seqref)
+  pairid=bench_pair(seq,seqref,ctref,debug)
+  return(c(
+    seqid=seqid,
+    pairid=pairid
+  ))
+}
+
+```
+
+
+```{r}
+mrf_mat2= mrf2mrf_mat_cano(mrf,mrf_mat_filt)
+```
+
+```{r}
+seq_8_realn2=mapaln_oneseq(seqs,mrf_mat2)
+
+
+```
+
+```{r}
+sepxy=expand.grid(0:2, c(1,2,4,8,16,32))
+```
+
+
+```{r}
+exp_seq = encode_seq(seqs[[8]])
+
+
+
+
+
+    SCO = ini_SCO(
+      seq = exp_seq$seq_int_ungapped,
+      mrf_mat = mrf_mat2,
+      mrf_len = mrf$len,
+      sep_x = 0,
+      sep_y = 1
+    )
+    
+  gg_mat(SCO)
+    
+```
+
+
+```{r}
+seq_8_realn2=mapaln_oneseq(seqs[[8]],mrf_mat2,sep_x=2,sep_y=32)
+
+bench_aln(seq_8_realn2,seqs[[1]],ct_ref,debug=TRUE)
+```
+
+
+```{r}
+# ct_ref = RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+testseq = seqs[[1]]
+
+seq_swap_pairs = function(seq, ct_ref) {
+  seq_shuffle=seq
+  for (k in 1:nrow(ct_ref)) {
+    if (ct_ref$j[k] > ct_ref$i[k]) {
+      j = ct_ref$j[k]
+      i = ct_ref$i[k]
+      
+      tmp = seq_shuffle[i]
+      seq_shuffle[i] = seq_shuffle[j]
+      seq_shuffle[j] = tmp
+    }
+  }
+  return(seq_shuffle)
+}
+
+testseq_shuffle=seq_swap_pairs(testseq,ct_ref)
+```
+
+
+```{r}
+ sep_x=0
+ sep_y=1
+
+  exp_seq = encode_seq(testseq_shuffle)
+  
+  SCO = ini_SCO(
+    seq = exp_seq$seq_int_ungapped,
+    mrf_mat = mrf_mat,
+    mrf_len = mrf$len,
+    sep_x = sep_x,
+    sep_y = sep_y
+  )
+  
+  SCO_pair = align_R(SCO)
+  
+  gg_mat(SCO)
+  
+  # gg_mat(SCO_pair)
+  
+  seq_aln=character(mrf$len)
+  seq_aln[]="X"
+  
+  # SCO_pair
+  
+  seq_aln[SCO_pair[SCO_pair>0]]=testseq_shuffle[SCO_pair>0]
+  
+  seq_aln
+```
+
+
+```{r}
+testseq_shuffle_realign = mapaln_oneseq(testseq_shuffle,mrf_mat)
+```
+
+
+
+```{r}
+
+
+
+bench_aln(seqs[[8]],seqs[[1]],ct_ref)
+
+bench_aln(seq_8_realn,seqs[[1]],ct_ref)
+
+bench_aln(seq_8_realn2,seqs[[1]],ct_ref)
+
+bench_aln(testseq_shuffle_realign,seqs[[1]],ct_ref)
+
+bench_aln(testseq_shuffle,seqs[[1]],ct_ref)
+
+```
+
+```{r}
+
+rbind(seqinr::c2s(seqs[[1]]),seqinr::c2s(testseq_shuffle),seqinr::c2s(testseq_shuffle_realign))
 ```
 

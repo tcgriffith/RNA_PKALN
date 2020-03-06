@@ -34,10 +34,6 @@ seq1=ct1$nt
 
 
 
-```{r}
-mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
-```
-
 
 
 
@@ -92,9 +88,50 @@ ini_SCO = function(seq, mrf, sep_x, sep_y) {
 ```
 
 
+```{r}
+```
 
 
 
+
+
+
+
+```{r}
+matrix(as.matrix(w1[1, 2:26]), 5, 5, byrow = TRUE)
+
+  id_i=1
+  id_j=2
+
+  id_ia=id2_to_id1(1, id_i, len_a)
+  id_ja=id2_to_id1(1, id_j, len_a)
+
+  mat_j[id_ia:(id_ia+len_a-1),id_ja:(id_ja+len_a-1)]
+```
+
+```{r}
+retrieve_matj=function(i,a,j,b,mat_j,len_a){
+  return(mat_j[(i-1)*len_a+a,(j-1)*len_a+b])
+}
+```
+
+```{r}
+get_matj(1,1:5,2,1:5,mat_j,5)
+```
+
+
+
+
+```{r}
+id_ia=id2_to_id1(1,1,5)
+
+id_ja=id2_to_id1(1,2,5)
+
+
+
+
+mat_j[id_ia:(id_ia+len_a-1),id_ja:(id_ja+len_a-1)]
+```
 
 
 ## test
@@ -126,5 +163,35 @@ tmp =align(SCO,debug=TRUE)
 gg_mat(tmp)
 ```
 
+```{r}
+id2_to_id1(4,2,5)
+```
 
+
+```{r}
+cppFunction(
+  "
+IntegerVector id1_to_id2(int id1, int dim_i){
+    IntegerVector id2(2);
+    
+    int mod=id1 % dim_i;
+    
+    if (mod == 0){
+      id2(0) = dim_i;
+      id2(1) = id1 / dim_i;
+    } else{
+      id2(0) = mod;
+      id2(1) = id1 / dim_i +1;
+    }
+
+    return(id2);
+
+}
+"
+)
+```
+
+```{r}
+
+```
 
