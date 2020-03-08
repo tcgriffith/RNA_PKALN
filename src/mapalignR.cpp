@@ -100,7 +100,7 @@ double sepw(double sep){if(sep <= 4){return 0.50;}else if(sep == 5){return 0.75;
 
 // [[Rcpp::export]]
 
-NumericMatrix ini_SCO(IntegerVector seq, NumericMatrix mrf_mat,NumericMatrix mrf_h, int mrf_len, double sep_x, double sep_y) {
+NumericMatrix ini_SCO(IntegerVector seq, NumericMatrix mrf_mat, int mrf_len, double sep_x, double sep_y) {
 
 
   // SCO = matrix(0, nrow = length(seq), ncol = mrf_len)
@@ -144,19 +144,22 @@ NumericMatrix ini_SCO(IntegerVector seq, NumericMatrix mrf_mat,NumericMatrix mrf
     }
   }
   
-  NumericMatrix SCO_h(seq.length(),mrf_len);
-  
-  for (int ai = 0; ai < seq.length(); ++ai){
-    for (int bi = 0; bi < mrf_len; ++bi){
-      int nt_ai=seq(ai);
-      SCO_h(ai,bi) = mrf_h(bi, nt_ai) +SCO(ai,bi);
-    }
-  }
+  // NumericMatrix SCO_h(seq.length(),mrf_len);
+  // 
+  // for (int ai = 0; ai < seq.length(); ++ai){
+  //   for (int bi = 0; bi < mrf_len; ++bi){
+  //     int nt_ai=seq(ai);
+  //     SCO_h(ai,bi) = mrf_h(bi, nt_ai) +SCO(ai,bi);
+  //   }
+  // }
   
 
-  return(SCO_h);
+  return(SCO);
   
 }
+
+
+
 
 // 
 // vec_int mod_SCO(double do_it, vec_double &gap_a, vec_double &gap_b, double gap_e, mtx_double &SCO, mtx_double &P_SCO,

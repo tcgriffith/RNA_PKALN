@@ -1,0 +1,148 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
+source(here::here("R/mapalign.R"))
+sourceCpp(here::here("src/mapalignR.cpp"))
+```
+
+```{r}
+
+mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+
+mrf_mat=mrf2mrf_mat(mrf)
+```
+
+
+```{r}
+mat_tmp=mrf$mat_mrf
+
+mat_tmp[mrf$mat_apc<1]=0
+
+gg_mat(mat_tmp)
+```
+
+
+```{r}
+mrf2mrf_mat_only_Tcontact = function(mrf) {
+  myalphabet = c("a", "u", "c", "g", "-")
+  
+  len = mrf$len
+  len_a = length(myalphabet)
+  
+  
+  mat_j = matrix(0, len * len_a, len * len_a)
+  
+  w1 = mrf$j
+  for (m in 1:nrow(w1)) {
+    id_i = w1$i[m]
+    id_j = w1$j[m]
+    
+    id_ia = id2_to_id1(1, id_i, len_a)
+    id_ja = id2_to_id1(1, id_j, len_a)
+    
+    mat = matrix(as.matrix(w1[m, 2:26]), 5, 5, byrow = TRUE)
+    # array_j[id_i, id_j, ,] = mat
+    
+    if (mrf$mat_apc[id_i,id_j]<1){
+      mat=matrix(0,5,5)
+    }
+    
+    mat_j[id_ia:(id_ia + len_a - 1), id_ja:(id_ja + len_a - 1)] = mat
+  }
+  return(mat_j)
+}
+```
+
+```{r}
+mrf_mat_t=mrf2mrf_mat_only_Tcontact(mrf)
+
+```
+
+```{r}
+mrf_mat_empty= mrf_mat
+
+mrf_mat_empty[]=0
+```
+
+```{r}
+mrf_mat_simple=mrf_mat_empty
+
+
+
+```
+
+
+
+```{r}
+
+      seq=seqs[[2]]
+    exp_seq = encode_seq(seq)
+    
+    SCO = ini_SCO(
+      seq = exp_seq$seq_int_ungapped,
+      mrf_mat = mrf_mat_t, 
+      mrf_len = mrf$len,
+      sep_x = 1,
+      sep_y = 32
+    )
+    
+     gg_mat(SCO)
+```
+
+```{r}
+x=-100:100
+
+y=dnorm(x,sd=1)
+
+plot(x,y)
+```
+
+
+
+```{r}
+
+
+
+
+    # SCO_pair = align_R(SCO)
+    
+    SCO_aln=align_R(SCO,debug=TRUE)
+    
+    
+# SCO_pair=align_R(SCO_simple)
+
+  seq_aln=character(mrf$len)
+  seq_aln[]="X"
+  
+  # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
+  
+  seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+df=data.frame(row=1:length(SCO_pair),col=SCO_pair) %>% 
+  filter(col>0)
+  
+    
+bench_aln(seq_aln,seqs[[1]],ct_ref)
+    rbind(seqinr::c2s(seqs[[1]]),seqinr::c2s(seq_aln))
+    
+    gg_mat(SCO)
+    gg_mat(SCO_aln)+
+      geom_point(data=df,aes(x=col,y=row),color="red",alpha=0.3)
+```
+
+

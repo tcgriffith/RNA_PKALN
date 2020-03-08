@@ -150,4 +150,80 @@ read_mrf = function(filemrf) {
   return(mrf)
 }
 
+retrieve_matj=function(i,a,j,b,mat_j,len_a){
+  return(mat_j[(i-1)*len_a+a,(j-1)*len_a+b])
+}
+
+mrf2mrf_mat = function(mrf) {
+  myalphabet = c("a", "u", "c", "g", "-")
+  
+  len = mrf$len
+  len_a = length(myalphabet)
+  
+  
+  mat_j = matrix(0, len * len_a, len * len_a)
+  
+  w1 = mrf$j
+  for (m in 1:nrow(w1)) {
+    id_i = w1$i[m]
+    id_j = w1$j[m]
+    
+    id_ia = id2_to_id1(1, id_i, len_a)
+    id_ja = id2_to_id1(1, id_j, len_a)
+    
+    mat = matrix(as.matrix(w1[m, 2:26]), 5, 5, byrow = TRUE)
+    # array_j[id_i, id_j, ,] = mat
+    
+    mat_j[id_ia:(id_ia + len_a - 1), id_ja:(id_ja + len_a - 1)] = mat
+  }
+  return(mat_j)
+}
+
+
+
+encode_seq = function(seq) {
+  myalphabet = c("a", "u", "c", "g")
+  seq_int = match(seq, table = myalphabet, nomatch = 0) - 1 # 0 based
+  seq_int_ungapped = seq_int[seq_int > -1]
+  seq_int_ref = which(seq_int > -1)
+  
+  rslt=list(
+    seq_int_ungapped=seq_int_ungapped,
+    seq_int_ref=seq_int_ref
+  )
+  return(rslt)
+}
+
+
+
+bench_seqid=function(seq,seqref){
+  return(sum(seq==seqref)/length(seqref))
+}
+
+
+bench_pair=function(seq,seqref,ctref, debug=FALSE){
+  
+  npair=sum(ctref$j>0)
+  
+  pairs=paste0(seq[ctref$i[ctref$j>0]],seq[ctref$j[ctref$j>0]])
+  
+  pairs=toupper(pairs)
+  
+  if(debug){
+    print(paste(pairs))
+  }
+  
+  return(sum(pairs %in% RNASSP::energy2)/npair)
+}
+
+bench_aln=function(seq,seqref,ctref,debug=FALSE){
+  seqid=bench_seqid(seq,seqref)
+  pairid=bench_pair(seq,seqref,ctref,debug)
+  return(c(
+    seqid=seqid,
+    pairid=pairid
+  ))
+}
+
+
 
