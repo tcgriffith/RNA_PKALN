@@ -182,8 +182,8 @@ mrf2mrf_mat = function(mrf) {
 
 
 encode_seq = function(seq) {
-  myalphabet = c("a", "u", "c", "g")
-  seq_int = match(seq, table = myalphabet, nomatch = 0) - 1 # 0 based
+  myalphabet = c("a", "u", "c", "g","-")
+  seq_int = match(seq, table = myalphabet, nomatch = 5) - 1 # 0 based
   seq_int_ungapped = seq_int[seq_int > -1]
   seq_int_ref = which(seq_int > -1)
   

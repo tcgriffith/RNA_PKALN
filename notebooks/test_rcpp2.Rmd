@@ -88,6 +88,94 @@ mrf_mat_simple=mrf_mat_empty
 ```
 
 
+```{r}
+
+
+      seq=seqs[[2]]
+
+mrf_len=mrf$len
+M=matrix(0,length(seq),mrf_len)
+
+ai=2
+# aj=17
+bi=2
+sep_y =1
+sep_x=0
+
+sepw=function(sep){
+  wt=numeric(length=length(sep))
+  
+  wt[]=1
+  wt[sep<=4]=0.5
+  wt[sep==5]=0.75
+  
+  return(wt)
+}
+
+      for (aj in 1:length(seq)) {
+        for (bj in 1:mrf_len) {
+            nt_aiaj= match(seq[c(ai,aj)],table=c("a", "u", "c", "g", "-"))
+            
+            if (aj==ai) next
+            
+            if (bj==bi) next
+            
+            if (bi>bj){
+              score_a2b = mrf$array_j[bj, bi,nt_aiaj[2], nt_aiaj[1]]
+              # score_a2b = retrieve_matj(bj, nt_aiaj[2],bi,nt_aiaj[1],mrf_mat,len_a = 5)
+            } else {
+              score_a2b = mrf$array_j[bi,bj,nt_aiaj[1],nt_aiaj[2]]
+              # score_a2b = retrieve_matj(bi, nt_aiaj[1],bj,nt_aiaj[2],mrf_mat,len_a = 5)
+            }
+
+            sep_a = abs(ai - aj)
+            sep_b = abs(bi - bj)
+            sep_D = abs(sep_a - sep_b)
+            sep_M = min(sep_a, sep_b)
+            sep_std = sep_y * (1 + (sep_M - 2)^sep_x)
+            
+            if (bj==17 && aj==17){
+              message(score_a2b)
+              # message(dnorm(sep_D, mean = 0, sd =sep_std))
+              message(sep_std)
+            }
+            
+            M[aj,bj] =  score_a2b *  sepw(sep_M) * dnorm(sep_D, mean = 0, sd =
+                                                        sep_std)
+    
+          }
+      }
+
+
+gg_mat(M)
+
+M[is.na(M)]=0
+falign_R(M,52,52)
+```
+
+
+```{r}
+x=-100:100
+y=sapply(x,function(i){
+  gaussian(0,2,i)
+})
+y2=dnorm(x, sd=2)
+
+plot(y,y2*sqrt(2*pi)*2)
+```
+
+
+```{r}
+Falign(M)
+```
+
+
+
+```{r}
+seq[c(2,3)]
+```
+
+
 
 ```{r}
 
@@ -96,53 +184,50 @@ mrf_mat_simple=mrf_mat_empty
     
     SCO = ini_SCO(
       seq = exp_seq$seq_int_ungapped,
-      mrf_mat = mrf_mat_t, 
+      mrf_mat = mrf_mat, 
       mrf_len = mrf$len,
-      sep_x = 1,
-      sep_y = 32
+      sep_x = 0,
+      sep_y = 1
     )
     
-     gg_mat(SCO)
+     gg_mat(SCO)+geom_abline()
 ```
-
-```{r}
-x=-100:100
-
-y=dnorm(x,sd=1)
-
-plot(x,y)
-```
-
 
 
 ```{r}
-
-
-
-
-    # SCO_pair = align_R(SCO)
-    
-    SCO_aln=align_R(SCO,debug=TRUE)
-    
-    
-# SCO_pair=align_R(SCO_simple)
-
-  seq_aln=character(mrf$len)
-  seq_aln[]="X"
-  
-  # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
-  
-  seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
-df=data.frame(row=1:length(SCO_pair),col=SCO_pair) %>% 
-  filter(col>0)
-  
-    
-bench_aln(seq_aln,seqs[[1]],ct_ref)
-    rbind(seqinr::c2s(seqs[[1]]),seqinr::c2s(seq_aln))
-    
-    gg_mat(SCO)
-    gg_mat(SCO_aln)+
-      geom_point(data=df,aes(x=col,y=row),color="red",alpha=0.3)
+SCO[2,]
+which.max(SCO[2,])
 ```
 
+```{r}
+gg_mat(SCO)
+```
+
+
+```{r}
+align_R(SCO,debug = TRUE) %>% gg_mat()
+```
+
+
+```{r}
+align(SCO,gap_ext = 0.1,gap_open = -1)
+```
+
+
+
+
+```{r}
+
+SCO_mod =mod_SCO(SCO,5,exp_seq$seq_int_ungapped,mrf_mat)
+```
+
+```{r}
+
+gg_mat(SCO)
+gg_mat(SCO_mod)
+```
+
+```{r}
+align_R(SCO_mod)
+```
 
