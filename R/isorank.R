@@ -4,13 +4,13 @@ gg_mat = function(mat) {
   
 
   
-  if(!is.null(dimnames(mat))){
-    df = as.data.frame(as.table(mat))
-    colnames(df)=c("row","col","val")
-  } else {
+  # if(!is.null(dimnames(mat))){
+    # df = as.data.frame(as.table(mat))
+    # colnames(df)=c("row","col","val")
+  # } else {
     df = as.data.frame(which(!is.na(mat) > 0, arr.ind = TRUE))
     df$val = mat[which(!is.na(mat) > 0)]    
-  }
+  # }
 
   # df=as.data.frame(as.table(mat))
   ggplot(df) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
@@ -365,3 +365,82 @@ run_isorank_bpnb = function(mat1,
 }
 
 
+seq2mat=function(seq){
+  cano_pairs=c("AU", "GC", "CG", "UA", "GU", "UG")
+  
+  seqc=toupper(seq)
+  
+  if (length(seq) ==1){
+    seqc=seqinr::s2c(toupper(seq))
+  }
+  
+  
+  mat=matrix(0,length(seqc),length(seqc))
+  
+  
+  
+  # mat[matrix(c(1:9,2:10),ncol=2)] =1
+  # mat[matrix(c(2:10,1:9),ncol=2)] =1
+  
+  for(i in 1:length(seqc)){
+    for(j in 1:length(seqc)){
+      pair=paste0(seqc[i],seqc[j])
+      
+      if(any(cano_pairs == pair)){
+        mat[i,j]=1
+      }
+    }
+  }
+  
+  
+  return(mat)
+}
+
+
+label_stemlen = function(mat1) {
+  mat_stem = mat1
+  mat_stem[,] = 0
+  
+  for (i in 1:nrow(mat1)) {
+    for (j in 1:nrow(mat1)) {
+      if (i < j) {
+        if (mat1[i, j] >0) {
+          if (mat_stem[i, j] == 0) {
+            tmp_stem = id2_to_id1(i, j, nrow(mat1))
+            max_stemlen=0
+            for (stemlen in 1:nrow(mat1)) {
+              if (i + stemlen < j - stemlen && mat1[i + stemlen, j - stemlen] > 0) {
+                tmp_stem = append(tmp_stem,
+                                  id2_to_id1(i + stemlen, j - stemlen, nrow(mat1)))
+                max_stemlen=stemlen+1
+              }
+              else{
+                break
+              }
+            }
+            mat_stem[tmp_stem]=max_stemlen
+          }
+        }
+      }
+    }
+  }
+  return(mat_stem)
+}
+
+seq2matstem=function(seq){
+  mat1=seq2mat(seq)
+  mat_stem=label_stemlen(mat1)
+  return(mat_stem)
+}
+
+
+
+get_alnseq = function(SCO, seq) {
+  seq_aln = character(ncol(SCO))
+  seq_aln[] = "-"
+  SCO_pair = align_R(SCO)
+  seq_aln[SCO_pair[SCO_pair > 0]] = seq[SCO_pair > 0]
+  
+  return(seq_aln)
+  
+}

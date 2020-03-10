@@ -1,0 +1,102 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## R Markdown
+
+```{r}
+
+bench_seqid=function(seq,seqref){
+  return(sum(seq==seqref)/length(seqref))
+}
+
+
+bench_pair=function(seq,seqref,ctref, debug=FALSE){
+  
+  npair=sum(ctref$j>0)
+  
+  pairs=paste0(seq[ctref$i[ctref$j>0]],seq[ctref$j[ctref$j>0]])
+  
+  pairs=toupper(pairs)
+  
+  if(debug){
+    print(paste(pairs))
+  }
+  
+  return(sum(pairs %in% RNASSP::energy2)/npair)
+}
+
+bench_aln=function(seq,seqref,ctref,debug=FALSE){
+  seqid=bench_seqid(seq,seqref)
+  pairid=bench_pair(seq,seqref,ctref,debug)
+  return(c(
+    seqid=seqid,
+    pairid=pairid
+  ))
+}
+
+bench_aln_list=function(seqlist,seqref,ctref,debug=FALSE){
+  rslt.l=lapply(seqlist, function(seq){
+    seqid = bench_seqid(seq, seqref)
+    pairid=bench_pair(seq,seqref,ctref,debug)
+    return(data.frame(seqid=seqid,pairid=pairid))
+  })
+  
+  rslt.df=do.call(rbind, rslt.l)
+  
+  rslt.df$name=names(rslt.l)
+  return(rslt.df)
+  
+}
+
+
+```
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+```
+
+```{r}
+bench_aln_cm = bench_aln_list(seqs, seqs[[1]],ctref=ct_ref)
+```
+
+
+```{r}
+bench_aln_cm %>% ggplot(aes(seqid, pairid))+
+  geom_point()
+```
+
+```{r}
+bench_aln_cm %>% 
+  filter(seqid < 0.5, pairid > 0.8) %>% 
+  arrange(seqid, pairid)
+```
+
+```{r}
+rbind(seqinr::c2s(seqs[["1303|FP929048.1/1688235-1688299"]]),seqinr::c2s(seqs[[1]]))
+```
+
+```{r}
+seqmatch=ifelse(seqs[["1303|FP929048.1/1688235-1688299"]]==seqs[[1]],"|",".")
+```
+
+```{r}
+rbind(seqinr::c2s(seqs[["1303|FP929048.1/1688235-1688299"]]),
+      seqinr::c2s(seqmatch),
+      seqinr::c2s(seqs[[1]]))
+```
+
+```{r}
+
+```
+

@@ -1,0 +1,75 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
+source(here::here("R/mapalign.R"))
+library(patchwork)
+sourceCpp(here::here("src/mapalignR.cpp"))
+
+```
+
+## R Markdown
+
+```{r}
+seqs_rrna=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/BRaliBase/bralibase3/datasets/rRNA.db")
+
+seqs_rrna_shuffle=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/BRaliBase/bralibase3/datasets/shrRNA.db")
+```
+
+
+## exp
+
+```{r}
+seq1=seqs_rrna[[1]]
+
+
+mat1=seq2matstem(seq1)
+
+
+mat_stem_gt2=mat1
+mat_stem_gt2[mat1<5]=0
+
+
+mat_stem_gt2= mat_stem_gt2+ t(mat_stem_gt2)
+
+colnames(mat_stem_gt2)=seq1
+
+
+gg_mat(mat_stem_gt2)
+```
+
+```{r}
+seq1_shuffle=seqs_rrna_shuffle[[1]]
+
+
+mat1=seq2matstem(seq1_shuffle)
+
+
+mat_stem_gt2=mat1
+mat_stem_gt2[mat1<5]=0
+
+
+mat_stem_gt2= mat_stem_gt2+ t(mat_stem_gt2)
+
+colnames(mat_stem_gt2)=seq1_shuffle
+
+
+gg_mat(mat_stem_gt2)
+```
+
+```{r}
+bench_seqid(seq1,seq1_shuffle)
+```
+

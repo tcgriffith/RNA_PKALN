@@ -29,14 +29,6 @@ mrf_mat=mrf2mrf_mat(mrf)
 ```
 
 
-```{r}
-mat_tmp=mrf$mat_mrf
-
-mat_tmp[mrf$mat_apc<1]=0
-
-gg_mat(mat_tmp)
-```
-
 
 ```{r}
 mrf2mrf_mat_only_Tcontact = function(mrf) {
@@ -154,32 +146,10 @@ falign_R(M,52,52)
 ```
 
 
-```{r}
-x=-100:100
-y=sapply(x,function(i){
-  gaussian(0,2,i)
-})
-y2=dnorm(x, sd=2)
-
-plot(y,y2*sqrt(2*pi)*2)
-```
-
-
-```{r}
-Falign(M)
-```
-
-
-
-```{r}
-seq[c(2,3)]
-```
-
-
 
 ```{r}
 
-      seq=seqs[[2]]
+      seq=seqs[[1304]]
     exp_seq = encode_seq(seq)
     
     SCO = ini_SCO(
@@ -190,17 +160,9 @@ seq[c(2,3)]
       sep_y = 1
     )
     
-     gg_mat(SCO)+geom_abline()
-```
-
-
-```{r}
-SCO[2,]
-which.max(SCO[2,])
-```
-
-```{r}
-gg_mat(SCO)
+    align_R(SCO,debug = TRUE)
+    
+     gg_mat(SCO)
 ```
 
 
@@ -211,6 +173,10 @@ align_R(SCO,debug = TRUE) %>% gg_mat()
 
 ```{r}
 align(SCO,gap_ext = 0.1,gap_open = -1)
+```
+
+```{r}
+seq
 ```
 
 
@@ -228,6 +194,74 @@ gg_mat(SCO_mod)
 ```
 
 ```{r}
-align_R(SCO_mod)
+align_R(SCO)
+```
+
+
+```{r}
+
+get_alnseq = function(SCO, seq) {
+  seq_aln = character(ncol(SCO))
+  seq_aln[] = "-"
+  SCO_pair = align_R(SCO)
+  seq_aln[SCO_pair[SCO_pair > 0]] = seq[SCO_pair > 0]
+  
+  return(seq_aln)
+  
+}
+# 
+# SCO_pair=align_R(SCO_simple)
+# seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+# 
+#   
+#   # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
+#   
+#   seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+#   
+# bench_aln(seq_aln,seqs[[1]],ct_ref)
+```
+
+
+
+```{r}
+alnseq=get_alnseq(SCO, exp_seq$seq_ungapped)
+```
+
+```{r}
+
+alnseq3=ifelse(seqs[[1304]]==seqs[[1]],"|",".")
+ss=".<<<<{.((((((>>>>......((((((..))))))}.<.))))))>...."
+
+rbind(
+  ss,
+  seqinr::c2s(seqs[[1]]),
+  seqinr::c2s(alnseq2),
+  seqinr::c2s(alnseq),
+  seqinr::c2s(alnseq3),
+
+  seqinr::c2s(seqs[["1303|FP929048.1/1688235-1688299"]]),
+  ss
+)
+
+
+
+seqlist2= list(seqs[[1]],seqs[[1304]],alnseq)
+```
+
+```{r}
+bench_aln_list(seqlist2, seqs[[1]],ct_ref)
+```
+
+```{r}
+alnseq2=ifelse(alnseq==seqs[[1]],"|",".")
+```
+
+
+```{r}
+data.frame(
+  alnseq,
+  as.character(seqs[[1]]),
+  alnseq2
+)
 ```
 

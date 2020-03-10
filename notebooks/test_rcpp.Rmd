@@ -114,13 +114,13 @@ bench_aln(seq_aln,seqs[[1]],ct_ref)
 gg_mat(SCO_simple)
 
 SCO_pair=align_R(SCO_simple)
-
+seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
   seq_aln=character(mrf$len)
   seq_aln[]="X"
   
   # seq_aln[SCO_pair]=myalphabet[exp_seq$seq_int_ungapped+1]
   
-  seq_aln[SCO_pair[SCO_pair>0]]=seq[SCO_pair>0]
+  seq_aln[SCO_pair[SCO_pair>0]]=exp_seq$[SCO_pair>0]
   
 bench_aln(seq_aln,seqs[[1]],ct_ref)
 ```

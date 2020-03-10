@@ -1,0 +1,179 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
+source(here::here("R/mapalign.R"))
+library(patchwork)
+# sourceCpp(here::here("src/mapalignR.cpp"))
+```
+
+## R Markdown
+
+```{r}
+mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+
+mrf_mat=mrf2mrf_mat(mrf)
+```
+
+##
+
+```{r}
+seq1=seqs[[1304]]
+
+seq1.ungapped=seq1[seq1!='-']
+
+mat1=seq2matstem(seq1.ungapped)
+
+
+mat_stem_gt2=mat1
+mat_stem_gt2[mat1<4]=0
+
+
+# mat_stem_gt2[,45:51]=0
+
+# mat_stem_gt2[,20:30]=0
+
+
+for(i in 1:nrow(mat_stem_gt2)){
+  tmp_colsum=sum(mat_stem_gt2[,i]>0)
+  if(tmp_colsum>0){
+      mat_stem_gt2[,i]=mat_stem_gt2[,i]*1/tmp_colsum
+  }
+}
+
+for(i in 1:nrow(mat_stem_gt2)){
+  tmp_rowsum=sum(mat_stem_gt2[i,]>0)
+  if(tmp_rowsum>0){
+      mat_stem_gt2[i,]=mat_stem_gt2[i,]*1/tmp_colsum
+  }
+}
+
+# mat_stem_gt2= mat_stem_gt2+ t(mat_stem_gt2)
+
+colnames(mat_stem_gt2)=seq1.ungapped
+
+
+gg_mat(mat_stem_gt2)
+```
+
+
+```{r}
+mat2=mrf$mat_apc
+
+mat2[is.na(mat2)]=0
+
+mat2[mat2<1]=0
+mat2[mat2>1]=1
+
+# colnames(mat2)=seqs[[1]]
+
+colnames(mat2)= as.character(seqs[[1]])
+
+rownames(mat2)=as.character(seqs[[1]])
+
+
+gg_mat(mat2)
+
+# gg_mat(mat2)+gg_mat(mat_stem_gt2)
+```
+
+
+```{r}
+Rmat= run_isorank_bpnb(mat_stem_gt2, mat2,alpha=.4)
+
+gg_mat(Rmat)
+```
+
+
+```{r}
+get_alnseq(Rmat, seq=seq1.ungapped)
+```
+
+```{r}
+
+
+tmp=extract_aln(Rmat)
+
+tmp
+seq_aln=character(ncol(Rmat))
+seq_aln[]="-"
+
+seq_aln[tmp$j]=seq1.ungapped[tmp$i]
+
+seqinr::c2s(seq_aln)
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+alnseq=get_alnseq(Rmat, seq1.ungapped)
+```
+
+```{r}
+bench_aln(alnseq,seqref=seqs[[1]],ct_ref)
+
+bench_aln(seq_aln,seqref=seqs[[1]],ct_ref)
+
+bench_aln(seqs[[1304]],seqref=seqs[[1]],ct_ref)
+```
+
+```{r}
+rbind(
+
+  seqinr::c2s(seqs[[1]]),
+  seqinr::c2s(alnseq),
+  seqinr::c2s(seq_aln),
+  seqinr::c2s(seqs[["1303|FP929048.1/1688235-1688299"]])
+
+)
+
+```
+
+
+```{r}
+mat1= mat_stem_gt2
+
+  l1=nrow(mat1)
+  l2=nrow(mat2)
+  A_bp = get_matA(mat1, mat2)
+  A_nb = get_A_nb(mat1, mat2)
+```
+
+```{r}
+which(seqs[[1304]]=="-")
+```
+
+## bpp
+
+```{r}
+
+```
+
+
+
+### bralibase
+
+
+```{r}
+
+```
+
