@@ -255,7 +255,7 @@ gg_mat(mat)+gg_mat(mat2)
 ```
 
 ```{r}
-seq_aln=run_isorank_seq2mat(seqs[[4]],mat2)
+seq_aln=run_isorank_seq2mat(seqs[[4]],mat2,alpha=0, beta=.8)
 
 bench_aln(seq_aln,seqref=seqs[[1]],ct_ref)
 ```
