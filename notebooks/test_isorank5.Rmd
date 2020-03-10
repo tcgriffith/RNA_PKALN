@@ -78,12 +78,12 @@ gg_mat(mat1)
 ```
 
 ```{r}
-run_isorank_seq2mat = function(seq, matmrf,alpha=0.3) {
+run_isorank_seq2mat = function(seq, matmrf,alpha=0.1,beta=0.7) {
   mat1 = seq2mat_exp1(seq)
   
   mat2 = matmrf
   
-  Rmat = run_isorank_bpnb(mat1, mat2, alpha = alpha)
+  Rmat = run_isorank_bpnbseq(mat1, mat2, alpha = alpha,beta=beta)
   plot(gg_mat(mat1))
   plot(gg_mat(Rmat))
   
@@ -249,9 +249,69 @@ rownames(mat2)=as.character(seqs[[1]])
 ```
 
 ```{r}
-mat=seq2mat_exp1(seqs[[10]])
+mat=seq2mat_exp1(seqs[[4]])
 
 gg_mat(mat)+gg_mat(mat2)
+```
+
+```{r}
+seq_aln=run_isorank_seq2mat(seqs[[4]],mat2)
+
+bench_aln(seq_aln,seqref=seqs[[1]],ct_ref)
+```
+
+
+```{r}
+
+seq1=seqs[[4]]
+prob.spotrna=data.table::fread("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/spotrna/SPOTRNA_OUTPUT/0003.prob",header=F)
+
+seq1.ungapped = seq1[seq1 %in% c("a", "u", "c", "g")]
+
+
+prob.mat=as.matrix(prob.spotrna)
+prob.mat[prob.mat>0.5]=1
+
+prob.mat[prob.mat<0.5]=0
+
+prob.mat=prob.mat+t(prob.mat)
+
+gg_mat(prob.mat)
+
+
+
+colnames(prob.mat)= seq1.ungapped
+
+gg_mat(mat2)
+```
+
+```{r}
+Rmat= run_isorank_bpnbseq(prob.mat,mat2, alpha=.1,beta=.8)
+
+  # Rmat = run_isorank_bpnb(mat1, mat2, alpha = alpha)
+  # plot(gg_mat(mat1))
+  plot(gg_mat(Rmat))
+  gg_mat(prob.mat)
+  
+  tmp = extract_aln(Rmat)
+  
+  # tmp %>% arrange(i)
+  seq_aln = character(ncol(Rmat))
+  seq_aln[] = "-"
+  seq_aln[tmp$j] = seq1.ungapped[tmp$i]
+bench_aln(seq_aln,seqref=seqs[[1]],ct_ref)
+```
+
+
+```{r}
+align_R(Rmat, debug=TRUE,gap_open=-.1,gap_e=0.01) %>% 
+  gg_mat()
+```
+
+
+```{r}
+seqinr::c2s(seqs[[2]])
+seqinr::c2s(seqs[[1]])
 ```
 
 
