@@ -175,16 +175,14 @@ align_R(SCO,debug = TRUE) %>% gg_mat()
 align(SCO,gap_ext = 0.1,gap_open = -1)
 ```
 
-```{r}
-seq
-```
+
 
 
 
 
 ```{r}
 
-SCO_mod =mod_SCO(SCO,5,exp_seq$seq_int_ungapped,mrf_mat)
+SCO_mod =mod_SCO(SCO,20,exp_seq$seq_int_ungapped,mrf_mat,mrf_h=mrfh)
 ```
 
 ```{r}

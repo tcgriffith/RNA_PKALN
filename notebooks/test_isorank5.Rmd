@@ -127,14 +127,15 @@ gg_mat(mat2)
 
 
 ```{r}
-Rmat= run_isorank_bpnb(mattmp, mat2,alpha=.3)
+Rmat= run_isorank_bpnb(mat1, mat2,alpha=.1)
 
 gg_mat(Rmat)
 ```
 
-
 ```{r}
-get_alnseq(Rmat, seq=seq1.ungapped)
+# max(Rmat)
+
+align_R(Rmat,gap_open=-0.15,gap_e=0.1)
 ```
 
 ```{r}
@@ -304,7 +305,7 @@ bench_aln(seq_aln,seqref=seqs[[1]],ct_ref)
 
 
 ```{r}
-align_R(Rmat, debug=TRUE,gap_open=-.1,gap_e=0.01) %>% 
+align_R(Rmat, debug=TRUE,gap_open=-max(Rmat),gap_e=0.1) %>% 
   gg_mat()
 ```
 

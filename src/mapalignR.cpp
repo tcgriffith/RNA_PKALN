@@ -102,7 +102,12 @@ double sepw(double sep){if(sep <= 4){return 0.50;}else if(sep == 5){return 0.75;
 
 // [[Rcpp::export]]
 
-NumericMatrix ini_SCO(IntegerVector seq, NumericMatrix mrf_mat, int mrf_len, double sep_x, double sep_y) {
+NumericMatrix ini_SCO(IntegerVector seq, 
+                      NumericMatrix mrf_mat, 
+                      NumericMatrix mrf_h,
+                      int mrf_len,
+                      double sep_x,
+                      double sep_y) {
 
 
   // SCO = matrix(0, nrow = length(seq), ncol = mrf_len)
@@ -151,20 +156,42 @@ NumericMatrix ini_SCO(IntegerVector seq, NumericMatrix mrf_mat, int mrf_len, dou
       // }
     }
   }
-  
-  // NumericMatrix SCO_h(seq.length(),mrf_len);
-  // 
-  // for (int ai = 0; ai < seq.length(); ++ai){
-  //   for (int bi = 0; bi < mrf_len; ++bi){
-  //     int nt_ai=seq(ai);
-  //     SCO_h(ai,bi) = mrf_h(bi, nt_ai) +SCO(ai,bi);
-  //   }
-  // }
+
+ 
+
+  NumericMatrix SCO_h(seq.length(),mrf_len);
+
+  for (int ai = 0; ai < seq.length(); ++ai){
+    for (int bi = 0; bi < mrf_len; ++bi){
+      int nt_ai=seq(ai);
+      SCO_h(ai,bi) = mrf_h(bi, nt_ai) +SCO(ai,bi);
+    }
+  }
   
 
+  return(SCO_h);
+  
+}
+
+// [[Rcpp::export]]
+NumericMatrix ini_SCO_simple(IntegerVector seq, NumericMatrix mrf_h){
+  
+  int mrf_len = mrf_h.nrow();
+  NumericMatrix SCO(seq.length(), mrf_len);
+  
+  // NumericMatrix SCO_h(seq.length(),mrf_len);
+
+  for (int ai = 0; ai < seq.length(); ++ai){
+    for (int bi = 0; bi < mrf_len; ++bi){
+      int nt_ai=seq(ai);
+      SCO(ai,bi) = mrf_h(bi, nt_ai);
+    }
+  }
+  
   return(SCO);
   
 }
+
 
 // [[Rcpp::export]]
 IntegerVector align(NumericMatrix sco_mtx, double gap_ext,double gap_open){
@@ -210,12 +237,65 @@ IntegerVector align(NumericMatrix sco_mtx, double gap_ext,double gap_open){
     else if(label(i,j) == 2){i--;}
     else if(label(i,j) == 3){j--;}
   }
+  std::cerr << "aln score: " << max_sco <<std::endl;
   return(a2b);
 }
 
 
+
+
+
+
+//[[Rcpp::export]]
+DoubleVector score_aln(IntegerVector a2b,IntegerVector seq,  NumericMatrix mrf_mat,NumericMatrix mrf_h){
+  DoubleVector score_hj(2);
+  
+  int mrf_len=mrf_h.nrow();
+  
+  double score_contact = 0;
+  double score_single = 0;
+  
+  for(int ai=0; ai <seq.length(); ai++){
+    int ai2bi= a2b[ai];
+    int nt_ai =seq(ai);
+    if (ai2bi >-1){
+      score_single += mrf_h(ai2bi, nt_ai);
+      
+      for (int aj=0;aj <seq.length();aj++){
+        
+        if (aj==ai) continue;
+        
+        int aj2bj = a2b[aj];
+        if (aj2bj > -1){
+          int nt_aj=seq(aj);
+          
+          double score_a2b;
+          if (ai2bi > aj2bj){
+            score_a2b=retrieve_matj(aj2bj,nt_aj, ai2bi,nt_ai,mrf_mat, 5);
+          }
+          else{
+            score_a2b=retrieve_matj(ai2bi,nt_ai,aj2bj,nt_aj,mrf_mat, 5);
+          }
+          score_contact +=score_a2b;
+        }
+        
+      }
+    }
+  }
+  
+  score_hj(0) = score_single;
+  score_hj(1) = score_contact;
+  
+  // std::cerr << "single: " << score_single << " contact: " << score_contact << std::endl;
+  
+  
+  return(score_hj);
+}
+
+
+
 // [[Rcpp::export]]
-NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, NumericMatrix mrf_mat){
+NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, NumericMatrix mrf_mat,NumericMatrix mrf_h){
 
       // iterate
     IntegerVector a2b_tmp;
@@ -225,17 +305,21 @@ NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, Numeri
     for(int it=0; it < iteration; it++)
     {
         // align
-        a2b_tmp = align(SCO,0.1,-1);
+        a2b_tmp = align(SCO2,0.1,-1);
+      
+        score_aln(a2b_tmp, seq, mrf_mat, mrf_h);
         
         // update similarity matrix
         double IT = (double)it + 1;
         double s1 = (IT/(IT+1)); double s2 = (1/(IT+1));
-        for(int ai=0; ai < SCO.nrow(); ai++){ // go through columns (vec_a) in map_a that has contacts
+        for(int ai=0; ai < SCO2.nrow(); ai++){ // go through columns (vec_a) in map_a that has contacts
             // int ai = vec_a[a];
-            for(int bi=0; bi < SCO.ncol(); bi++){ // go through columns (vec_b) in map_b that has contacts
+            int nt_ai=seq(ai);
+            for(int bi=0; bi < SCO2.ncol(); bi++){ // go through columns (vec_b) in map_b that has contacts
                 // int bi = vec_b[b];
                 double sco_contact = 0;
-                for(int aj=0; aj < SCO.nrow(); aj++){ // go through contacts in vec_a
+                double sco_single = 0;
+                for(int aj=0; aj < SCO2.nrow(); aj++){ // go through contacts in vec_a
                     // int aj = vec_a_i[ai,n];
                     int bj = a2b_tmp[aj]; // get mapping
                     if(bj != -1){ // if mapping exists
@@ -243,8 +327,6 @@ NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, Numeri
                             double sep_M = std::min(abs(ai-aj),abs(bi-bj));
                             // sco_contact += mtx_a[ai,aj] * mtx_b[bi,bj] * sepw(sep_M);
 
-
-                            int nt_ai=seq(ai);
                             int nt_aj=seq(aj);
                             double score_a2b;
 
@@ -252,14 +334,15 @@ NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, Numeri
                                 score_a2b=retrieve_matj(bj,nt_aj, bi,nt_ai,mrf_mat, 5);
                             }
                             else{
-                                score_a2b=retrieve_matj(bi,nt_ai,bj,nt_aj,mrf_mat,5);
+                                score_a2b=retrieve_matj(bi,nt_ai,bj,nt_aj,mrf_mat, 5);
                             }
 
                             sco_contact = score_a2b *  sepw(sep_M);
                         }
                     }
                 }
-                SCO2(ai,bi) = s1*SCO2(ai,bi) + s2*sco_contact;
+                sco_single = mrf_h(bi, nt_ai);
+                SCO2(ai,bi) = s1*SCO2(ai,bi) + s2*(sco_contact);
             }
         }
     }

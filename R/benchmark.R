@@ -29,6 +29,8 @@ bench_pairs_df=function(pred_pairs, ref_pairs,dim1){
 }
 
 
+
+
 bench_seqid=function(seq,seqref){
   return(sum(seq==seqref)/length(seqref))
 }

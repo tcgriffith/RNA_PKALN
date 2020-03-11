@@ -1,0 +1,183 @@
+---
+title: "Untitled"
+author: "TC"
+date: "3/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
+source(here::here("R/mapalign.R"))
+sourceCpp(here::here("src/mapalignR.cpp"))
+```
+
+```{r}
+
+mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+mrf_mat=mrf2mrf_mat(mrf)
+
+
+   seq=seqs[[2]]
+```
+
+
+
+```{r}
+    exp_seq = encode_seq(seq)
+mrfh=as.matrix((mrf$h[,2:6]))
+    
+    SCO = ini_SCO(
+      seq = exp_seq$seq_int_ungapped,
+      mrf_mat = mrf_mat, 
+      mrf_h = mrfh,
+      mrf_len = mrf$len,
+      sep_x = 0,
+      sep_y = 1
+    )
+    
+    # align_R(SCO,debug = TRUE)
+    
+     gg_mat(SCO)
+```
+
+
+```{r}
+SCO2= ini_SCO_simple(exp_seq$seq_int_ungapped,
+                     mrf_h=mrfh)
+
+    # align_R(SCO2)
+    
+     gg_mat(SCO2)
+```
+
+
+```{r}
+a2b_ref = exp_seq$seq_int_ref -1
+
+a2b_ref
+
+score_aln(a2b_ref, seq=exp_seq$seq_int_ungapped, mrf_mat, mrfh)
+```
+
+
+```{r}
+SCO_mod=mod_SCO(SCO2,iteration=20,exp_seq$seq_int_ungapped, mrf_mat=mrf_mat,mrf_h=mrfh)
+```
+
+```{r}
+gg_mat(SCO_mod)
+```
+
+
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+
+a2b_init = align(SCO,gap_open=-1,gap_ext=0.1)
+
+a2b_sco = align(SCO_mod, gap_open=-1,gap_ext=0.1)
+
+score_aln(a2b_init, exp_seq$seq_int_ungapped, mrf_mat,mrfh)
+
+score_aln(a2b_sco, exp_seq$seq_int_ungapped, mrf_mat,mrfh)
+score_aln(exp_seq$seq_int_ref-1, exp_seq$seq_int_ungapped, mrf_mat,mrfh)
+```
+
+```{r}
+seq_aln = a2b2seq(tmp+1, exp_seq$seq_ungapped, len=length(seqs[[1]]))
+seq_ref =a2b2seq(exp_seq$seq_int_ref, exp_seq$seq_ungapped, len=length(seqs[[1]]))
+
+seq_aln %>% seqinr::c2s()
+seq_ref %>% seqinr::c2s()
+
+seqs[[2]] %>% seqinr::c2s()
+```
+
+```{r}
+tmp+1
+```
+
+
+```{r}
+mod_SCO(SCO2,iteration=100,seq=exp_seq$seq_int_ungapped, mrf_mat,mrfh)
+```
+
+
+```{r}
+a2b =exp_seq$seq_int_ref
+
+a2b
+
+a2b2seq= function(a2b,seq,len){
+  seq_aln = character(len)
+  seq_aln[] = "-"
+  
+  seq_aln[a2b[a2b>0]] = seq[a2b > 0]
+  return(seq_aln)
+
+}
+
+
+a2b2seq(a2b, seq=exp_seq$seq_ungapped, len=length(seqs[[1]]))
+seqs[[2]]
+```
+
+
+
+```{r}
+bench_aln(alnseq,seqref=seqs[[1]],ctref=ct_ref)
+
+bench_aln(seqs[[2]],seqref=seqs[[1]],ctref=ct_ref)
+
+
+```
+
+
+```{r}
+gg_mat(SCO)
+gg_mat(SCO2)
+
+gg_mat(SCO_mod)
+```
+
+
+```{r}
+alnseq=get_alnseq(SCO2,exp_seq$seq_ungapped)
+
+alnseq2=get_alnseq(SCO,exp_seq$seq_ungapped)
+
+alnseq3=get_alnseq(SCO_mod,exp_seq$seq_ungapped)
+
+
+rbind(
+  seqinr::c2s(seqs[[1]]),
+  seqinr::c2s(seqs[[2]]),
+  seqinr::c2s(alnseq),
+  seqinr::c2s(alnseq3)
+)
+
+```
+
+```{r}
+
+```
+
