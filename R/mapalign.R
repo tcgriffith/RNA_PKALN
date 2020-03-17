@@ -138,6 +138,9 @@ read_mrf = function(filemrf) {
   mat_mrf[as.matrix(ids[, c(2, 1)])] = ids[, 3]
   
   mat_apc = APC_correction(mat_mrf)
+  
+
+  
   mrf = list(
     len = len,
     h = v1,
@@ -146,6 +149,11 @@ read_mrf = function(filemrf) {
     mat_apc = mat_apc,
     array_j=array_j
   )
+  mrf_mat=mrf2mrf_mat(mrf)
+  mrfh = as.matrix((mrf$h[, 2:6]))
+  
+  mrf$mrf_mat=mrf_mat
+  mrf$mrf_h=mrfh
   
   return(mrf)
 }
@@ -226,5 +234,89 @@ bench_aln=function(seq,seqref,ctref,debug=FALSE){
   ))
 }
 
+a2b2seq= function(a2b_1b,seq,mrf_len,type=c("c","s")){
+  
+  type=match.arg(type)
+  
+  a2b=a2b_1b
+  seq_aln = character(mrf_len)
+  seq_aln[] = "-"
+  
+  seq_aln[a2b[a2b>0]] = seq[a2b > 0]
+  
+  if (type=="s"){
+    seq_aln = paste0(seq_aln,collapse = "")
+  }
+  
+  return(seq_aln)
+  
+}
 
+align_seq2mrf = function(seq, mrf,iteration=20,wt_h=1.0,wt_j=1.0,debug=TRUE) {
+  
+  exp_seq = encode_seq(seq)
+  
+  SCO_init = ini_SCO_simple(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h)
+  SCO_mod = mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    DEBUG = debug
+  )
+  
+  a2b=align(SCO_mod,gap_ext = 0.1,gap_open = -1)
+  return(a2b)
+}
 
+align_seq2mrf_mtx = function(seq, mrf_mat, mrf_h,iteration=20,wt_h=1.0,wt_j=1.0,debug=TRUE) {
+  
+  exp_seq = encode_seq(seq)
+  
+  SCO_init = ini_SCO_simple(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h)
+  SCO_mod = mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf_mat,
+    mrf_h = mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    DEBUG = debug
+  )
+  
+  a2b=align(SCO_mod,gap_ext = 0.1,gap_open = -1)
+  return(a2b)
+}
+
+bench_a2b = function(a2b_0b, # a2b output of Rcpp, 0 based
+                     seq,
+                     mrf,
+                     seq_ref = NULL,
+                     ct_ref = NULL) {
+  exp_seq = encode_seq(seq)
+  rslt_aln = score_aln(a2b_0b, exp_seq$seq_int_ungapped, mrf$mrf_mat, mrf$mrf_h, DEBUG = FALSE)
+  
+  
+  rslt = c(mrf_total = rslt_aln[1]+rslt_aln[2],
+          mrf_single = rslt_aln[1],
+           mrf_pair = rslt_aln[2])
+  
+  a2b_1b=a2b_0b+1
+  
+  seq_final = a2b2seq(a2b_1b, exp_seq$seq_ungapped, mrf$len)
+  
+  if (!is.null(seq_ref)) {
+    benchaln = bench_aln(seq_final, seqref = seqs[[1]], ctref = ct_ref)
+    rslt=c(rslt,benchaln)
+  }
+  
+  return(rslt)
+  
+  
+}

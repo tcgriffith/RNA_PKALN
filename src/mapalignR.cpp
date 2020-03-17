@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace Rcpp;
 
-
+// bool DEBUG=true;
 
 double exp_fast(double x){
   // WARNING fails if |x| > 1024
@@ -237,7 +237,7 @@ IntegerVector align(NumericMatrix sco_mtx, double gap_ext,double gap_open){
     else if(label(i,j) == 2){i--;}
     else if(label(i,j) == 3){j--;}
   }
-  std::cerr << "aln score: " << max_sco <<std::endl;
+  // std::cerr << "aln score: " << max_sco <<std::endl;
   return(a2b);
 }
 
@@ -247,7 +247,7 @@ IntegerVector align(NumericMatrix sco_mtx, double gap_ext,double gap_open){
 
 
 //[[Rcpp::export]]
-DoubleVector score_aln(IntegerVector a2b,IntegerVector seq,  NumericMatrix mrf_mat,NumericMatrix mrf_h){
+DoubleVector score_aln(IntegerVector a2b,IntegerVector seq,  NumericMatrix mrf_mat,NumericMatrix mrf_h, bool DEBUG){
   DoubleVector score_hj(2);
   
   int mrf_len=mrf_h.nrow();
@@ -286,48 +286,57 @@ DoubleVector score_aln(IntegerVector a2b,IntegerVector seq,  NumericMatrix mrf_m
   score_hj(0) = score_single;
   score_hj(1) = score_contact;
   
-  // std::cerr << "single: " << score_single << " contact: " << score_contact << std::endl;
+  char out[100];
+  std::sprintf(out,"total: %.2f single: %.2f contact: %.2f", score_single+score_contact, score_single,score_contact);
   
+  if (DEBUG){
+    Rcpp::Rcerr << out << std::endl;
+  }
   
+
   return(score_hj);
 }
 
 
 
 // [[Rcpp::export]]
-NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, NumericMatrix mrf_mat,NumericMatrix mrf_h){
+NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, NumericMatrix mrf_mat,NumericMatrix mrf_h,double wt_h, double wt_j,bool DEBUG){
 
       // iterate
     IntegerVector a2b_tmp;
 
-    NumericMatrix SCO2 = clone(SCO);
+    NumericMatrix SCO_cln = clone(SCO);
 
     for(int it=0; it < iteration; it++)
     {
         // align
-        a2b_tmp = align(SCO2,0.1,-1);
+        a2b_tmp = align(SCO_cln,0.1,-1);
       
-        score_aln(a2b_tmp, seq, mrf_mat, mrf_h);
+        score_aln(a2b_tmp, seq, mrf_mat, mrf_h,DEBUG);
         
         // update similarity matrix
         double IT = (double)it + 1;
         double s1 = (IT/(IT+1)); double s2 = (1/(IT+1));
-        for(int ai=0; ai < SCO2.nrow(); ai++){ // go through columns (vec_a) in map_a that has contacts
+        for(int ai=0; ai < SCO_cln.nrow(); ai++){ // go through columns (vec_a) in map_a that has contacts
             // int ai = vec_a[a];
             int nt_ai=seq(ai);
-            for(int bi=0; bi < SCO2.ncol(); bi++){ // go through columns (vec_b) in map_b that has contacts
+            for(int bi=0; bi < SCO_cln.ncol(); bi++){ // go through columns (vec_b) in map_b that has contacts
                 // int bi = vec_b[b];
                 double sco_contact = 0;
                 double sco_single = 0;
-                for(int aj=0; aj < SCO2.nrow(); aj++){ // go through contacts in vec_a
+                for(int aj=0; aj < SCO_cln.nrow(); aj++){ // go through contacts in vec_a
+
+                    if (aj == ai) continue;
                     // int aj = vec_a_i[ai,n];
                     int bj = a2b_tmp[aj]; // get mapping
+                    int nt_aj=seq(aj);
+
                     if(bj != -1){ // if mapping exists
                         if((ai > aj and bi > bj) or (ai < aj and bi < bj)){ // if ai-aj in same direction as bi-bj
                             double sep_M = std::min(abs(ai-aj),abs(bi-bj));
                             // sco_contact += mtx_a[ai,aj] * mtx_b[bi,bj] * sepw(sep_M);
 
-                            int nt_aj=seq(aj);
+                            // int nt_aj=seq(aj);
                             double score_a2b;
 
                             if (bi > bj){
@@ -336,18 +345,29 @@ NumericMatrix mod_SCO(NumericMatrix SCO, int iteration,IntegerVector seq, Numeri
                             else{
                                 score_a2b=retrieve_matj(bi,nt_ai,bj,nt_aj,mrf_mat, 5);
                             }
+                            
+                            sco_contact = sco_contact + score_a2b;
 
-                            sco_contact = score_a2b *  sepw(sep_M);
+
+                            // sco_contact = score_a2b *  sepw(sep_M);
+                            // sco_contact = 0;
                         }
                     }
                 }
+                if (ai==1) {
+                  // std::cerr << bi << " " << sco_contact << std::endl;
+                }
+            
+                // double wt_single = 0.0;
+                // double wt_contact = 1.0;
                 sco_single = mrf_h(bi, nt_ai);
-                SCO2(ai,bi) = s1*SCO2(ai,bi) + s2*(sco_contact);
+                // SCO_cln(ai,bi) = s1 *SCO_cln(ai,bi) + s2 *sco_contact;
+                SCO_cln(ai,bi) = s1*SCO_cln(ai,bi) + s2*(sco_contact*wt_j+sco_single*wt_h);
             }
         }
     }
 
-  return(SCO2);
+  return(SCO_cln);
 
 }
 

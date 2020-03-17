@@ -1,9 +1,6 @@
 gg_mat = function(mat) {
   # df=as.data.frame(which(mat>0,arr.ind=TRUE))
-  
-  
 
-  
   # if(!is.null(dimnames(mat))){
     # df = as.data.frame(as.table(mat))
     # colnames(df)=c("row","col","val")
@@ -443,4 +440,20 @@ get_alnseq = function(SCO, seq) {
   
   return(seq_aln)
   
+}
+
+
+seq_swap_pairs = function(seq, ct_ref) {
+  seq_shuffle=seq
+  for (k in 1:nrow(ct_ref)) {
+    if (ct_ref$j[k] > ct_ref$i[k]) {
+      j = ct_ref$j[k]
+      i = ct_ref$i[k]
+      
+      tmp = seq_shuffle[i]
+      seq_shuffle[i] = seq_shuffle[j]
+      seq_shuffle[j] = tmp
+    }
+  }
+  return(seq_shuffle)
 }

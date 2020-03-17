@@ -1,0 +1,201 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+## cleanup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
+source(here::here("R/mapalign.R"))
+sourceCpp(here::here("src/mapalignR.cpp"))
+```
+
+```{r}
+
+mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+# mrf_mat=mrf2mrf_mat(mrf)
+# mrfh = as.matrix((mrf$h[, 2:6]))
+
+
+
+
+```
+
+```{r}
+mrfapc.df=as.data.frame(which(!is.na(mrf$mat_apc), arr.ind = TRUE))
+
+mrfapc.df$val= mrf$mat_apc[which(!is.na(mrf$mat_apc))]
+
+mrf.top10 = 
+mrfapc.df %>% filter(col >row) %>% arrange(desc(val)) %>% top_n(10)
+
+len_a=5
+
+mrf_mat.masktop10 = mrf$mrf_mat
+
+mrf_mat.masktop10[]=0
+
+for (m in 1:nrow(mrf.top10)){
+    id_i = mrf.top10$row[m]
+    id_j = mrf.top10$col[m]
+    
+    id_ia = id2_to_id1(1, id_i, len_a)
+    id_ja = id2_to_id1(1, id_j, len_a)
+    
+    mrf_mat.masktop10[id_ia:(id_ia + len_a - 1), id_ja:(id_ja + len_a - 1)]=1
+    
+    mrf_mat.masktop10[id_ja:(id_ja + len_a - 1), id_ia:(id_ia + len_a - 1)]=1
+}
+
+mrf_mat.masked= mrf$mrf_mat * mrf_mat.masktop10
+```
+
+
+
+```{r}
+
+
+bench_100= pbapply::pblapply(seqs, function(seq){
+  a2b = align_seq2mrf(seq,mrf,wt_h = 0.5,debug = FALSE)
+  bench=bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
+  return(bench)
+})
+
+
+bench_100_ref = pbapply::pblapply(seqs, function(seq){
+  exp_seq = encode_seq(seq)
+  bench=bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
+  return(bench)
+})
+```
+
+
+
+```{r}
+bench_100.mapalign.mask= data.frame(do.call(rbind,bench_100_masked))
+
+
+bench_100.mapalign.mask$type="mapalign_mask"
+  
+bench_100.mapalign= data.frame(do.call(rbind,bench_100))
+bench_100.mapalign$type = "mapalign"
+
+bench_100.ref = data.frame(do.call(rbind,bench_100_ref))
+bench_100.ref$type="ref"
+
+bench_100.all = rbind(bench_100.mapalign.mask,bench_100.mapalign,bench_100.ref)
+# bench_100.all = rbind(bench_100.mapalign,bench_100.ref)
+
+# bench_100.all=data.frame(bench_100.all)
+bench_100.all$id = gsub("\\|.*","",rownames(bench_100.all))
+
+# save(bench_100.all, file="../rdata/bench_100.all.rda")
+
+library(tidyr)
+bench_100.wider=
+bench_100.all %>%
+  mutate(mrf_all=mrf_single+mrf_pair) %>% 
+  pivot_wider(id_cols = id, names_from = type , values_from = c(1:5, mrf_all))
+```
+
+```{r}
+bench_100.wider %>% 
+  ggplot(aes(mrf_all_mapalign,mrf_all_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(mrf_pair_mapalign,mrf_pair_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(mrf_single_mapalign,mrf_single_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(pairid_mapalign,pairid_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(seqid_mapalign,seqid_ref)) +
+  geom_point()+geom_abline()
+
+```
+
+
+```{r}
+table(bench_100.wider$pairid_mapalign < bench_100.wider$pairid_ref)
+```
+
+
+```{r}
+
+bench_100.wider %>% 
+  ggplot(aes(mrf_all_mapalign_mask,mrf_all_ref)) +
+  geom_point()+geom_abline()
+
+
+bench_100.wider %>% 
+  ggplot(aes(mrf_pair_mapalign_mask,mrf_pair_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(mrf_single_mapalign_mask,mrf_single_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(pairid_mapalign_mask,pairid_ref)) +
+  geom_point()+geom_abline()
+
+bench_100.wider %>% 
+  ggplot(aes(seqid_mapalign_mask,seqid_ref)) +
+  geom_point()+geom_abline()
+
+```
+
+
+
+```{r}
+bench_100.wider %>% 
+  select(id, starts_with("pairid"), starts_with("mrf")) %>% 
+  filter(mrf_pair_mapalign_mask > mrf_pair_ref+15)
+```
+
+
+```{r}
+seq = seqs[[7]]
+
+a2b = align_seq2mrf_mtx(seq,mrf_mat = mrf$mrf_mat ,mrf_h = mrf$mrf_h,iteration = 20,debug = TRUE)
+exp_seq=encode_seq(seq)
+
+bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref)
+
+bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
+
+
+
+a2b2seq(a2b+1,seq = exp_seq$seq_ungapped, mrf_len = mrf$len,type="s")
+
+seq %>% seqinr::c2s()
+
+".<<<<{.((((((>>>>......((((((..))))))}.<.))))))>...."
+a2b
+```
+
+
+
+
+
+
+
+

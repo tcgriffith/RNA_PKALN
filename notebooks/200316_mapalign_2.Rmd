@@ -1,0 +1,117 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+## R Markdown
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(Rcpp)
+source(here::here("R/apc.R"))
+source(here::here("R/isorank.R"))
+source(here::here("R/mapalign.R"))
+sourceCpp(here::here("src/mapalignR.cpp"))
+```
+
+
+```{r}
+
+mrf=read_mrf("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.mrf")
+
+ct_ref=RNASSP::read_ct("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/3VRS_A.ct")
+
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/set1_rfa_cln/3VRS_A_RF01734/tmp.ungapped.msa")
+
+```
+
+
+```{r}
+align_seq2mrf = function(seq, mrf,iteration=20,debug=TRUE) {
+  
+  exp_seq = encode_seq(seq)
+  
+  SCO_init = ini_SCO_simple(exp_seq$seq_int_ungapped, mrf_h = mrf$mrf_h)
+  
+  # SCO_init = ini_SCO(exp_seq$seq_int_ungapped,
+  #                    mrf_mat = mrf$mrf_mat,
+  #                    mrf_h = mrf$mrf_h,
+  #                    mrf_len = mrf$len,
+  #                    sep_x = 0,
+  #                    sep_y = 1)
+  SCO_mod = mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = 0,
+    wt_j = 1,
+    DEBUG = debug
+  )
+  
+  a2b=align(SCO_mod,gap_ext = 0.1,gap_open = -1)
+  return(a2b)
+}
+```
+
+```{r}
+seq= seqs[[4]]
+  exp_seq = encode_seq(seq)
+  
+  SCO_init = ini_SCO_simple(exp_seq$seq_int_ungapped, mrf_h = mrf$mrf_h)
+  
+  SCO_init2 = ini_SCO(exp_seq$seq_int_ungapped,
+                     mrf_mat = mrf$mrf_mat,
+                     mrf_h = mrf$mrf_h,
+                     mrf_len = mrf$len,
+                     sep_x = 0,
+                     sep_y = 1)
+
+  
+  SCO_mod = mod_SCO(
+    SCO_init,
+    iteration = 20,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = .1,
+    wt_j = 1,
+    DEBUG = TRUE
+  )
+  gg_mat(SCO_init)
+  gg_mat(SCO_mod)
+```
+
+
+```{r}
+# seq=seqinr::s2c("GGCGAUGGUGUUCGCCAUAAACGCUCUUCGGAGCUAAUGACACCUAC") %>% tolower()
+
+seq= seqs[[9]]
+
+a2b = align_seq2mrf(seq,mrf = mrf,iteration = 20, debug = TRUE)
+
+
+
+exp_seq=encode_seq(seq)
+
+bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref)
+
+bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
+
+
+
+a2b2seq(a2b+1,seq = exp_seq$seq_ungapped, mrf_len = mrf$len,type="s")
+
+
+
+seq %>% seqinr::c2s()
+
+
+".<<<<{.((((((>>>>......((((((..))))))}.<.))))))>...."
+
+a2b
+```
