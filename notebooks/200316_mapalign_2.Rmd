@@ -78,35 +78,56 @@ seq= seqs[[4]]
     exp_seq$seq_int_ungapped,
     mrf_mat = mrf$mrf_mat,
     mrf_h = mrf$mrf_h,
-    wt_h = .1,
+    wt_h = .5,
     wt_j = 1,
     DEBUG = TRUE
   )
-  gg_mat(SCO_init)
-  gg_mat(SCO_mod)
+  
+  gg1=gg_mat(SCO_init)
+  gg2=gg_mat(SCO_mod)
+```
+
+```{r}
+library(patchwork)
+
+mypatch_exp=gg1/gg2
+```
+
+```{r}
+save(mypatch_exp, file="../rdata/mypatch_exp.rda")
 ```
 
 
 ```{r}
-# seq=seqinr::s2c("GGCGAUGGUGUUCGCCAUAAACGCUCUUCGGAGCUAAUGACACCUAC") %>% tolower()
+seq=seqinr::s2c("GGCGAUGGUGUUCGCCAUAAACGCUCUUCGGAGCUAAUGACACCUAC") %>% tolower()
 
-seq= seqs[[9]]
+  exp_seq = encode_seq(seq)
+  
+  SCO_init = ini_SCO_simple(exp_seq$seq_int_ungapped, mrf_h = mrf$mrf_h)
+  
+  a2b_init = align(SCO_init, 0.1, -1)
+  
+  
+
+
+# seq= seqs[[9]]
 
 a2b = align_seq2mrf(seq,mrf = mrf,iteration = 20, debug = TRUE)
 
+# a2b_seqonly=
 
-
-exp_seq=encode_seq(seq)
+# exp_seq=encode_seq(seq)
 
 bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref)
 
 bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
 
+a2b2seq(a2b_init+1,seq = exp_seq$seq_ungapped, mrf_len = mrf$len,type="s")
 
 
 a2b2seq(a2b+1,seq = exp_seq$seq_ungapped, mrf_len = mrf$len,type="s")
 
-
+("-GGCGAUGGUGUUCGCCAUAAACGCUC.UUCG.GAGCUAAUGACACCUAC--") %>% tolower() 
 
 seq %>% seqinr::c2s()
 

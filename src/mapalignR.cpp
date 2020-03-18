@@ -263,7 +263,7 @@ DoubleVector score_aln(IntegerVector a2b,IntegerVector seq,  NumericMatrix mrf_m
       
       for (int aj=0;aj <seq.length();aj++){
         
-        if (aj==ai) continue;
+        if (aj<ai) continue;
         
         int aj2bj = a2b[aj];
         if (aj2bj > -1){

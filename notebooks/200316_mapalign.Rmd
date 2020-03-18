@@ -64,18 +64,66 @@ mrf_mat.masked= mrf$mrf_mat * mrf_mat.masktop10
 
 
 ```{r}
+ct_onlypk=ct_ref
+
+ct_onlypk$j=0
+
+ct_onlypk$j[c(2:5, 14:17)]=ct_ref$j[c(2:5, 14:17)]
+```
+
+```{r}
+energy2=RNASSP::energy2
+RNASSP::plot_ct(ct_onlypk,ctref=ct_ref)
+```
+
+```{r}
+seq= seqs[[2]]
+
+a2b=align_seq2mrf(seq,mrf,wt_h=0.5, debug=FALSE)
+
+bench_a2b(a2b, seq,mrf, seq_ref=seqs[[1]], ct_ref=ct_ref)
+
+bench_a2b(a2b, seq,mrf, seq_ref=seqs[[1]], ct_ref=ct_onlypk)
+```
+
+```{r}
+bench_100_wth1= pbapply::pblapply(seqs, function(seq){
+  a2b = align_seq2mrf(seq,mrf,debug = FALSE)
+  bench_ref= bench_a2b(a2b, seq,mrf, seq_ref=seqs[[1]], ct_ref=ct_ref)
+  bench=bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_onlypk)
+  bench["pairid_all"]=bench_ref["pairid"]
+  return(bench)
+})
+```
+
+```{r}
+bench_100.mapalign.wt1= data.frame(do.call(rbind,bench_100_wth1))
+
+
+bench_100.mapalign.wt1$type="mapalign_equalwt"
+  
+```
+
+
+```{r}
 
 
 bench_100= pbapply::pblapply(seqs, function(seq){
   a2b = align_seq2mrf(seq,mrf,wt_h = 0.5,debug = FALSE)
-  bench=bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
+  bench_ref= bench_a2b(a2b, seq,mrf, seq_ref=seqs[[1]], ct_ref=ct_ref)
+  bench=bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_onlypk)
+  bench["pairid_all"]=bench_ref["pairid"]
   return(bench)
 })
 
 
 bench_100_ref = pbapply::pblapply(seqs, function(seq){
   exp_seq = encode_seq(seq)
-  bench=bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_ref)
+  # bench=bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_onlypk)
+  
+  bench_ref= bench_a2b(exp_seq$seq_int_ref-1, seq,mrf, seq_ref=seqs[[1]], ct_ref=ct_ref)
+  bench=bench_a2b(exp_seq$seq_int_ref-1,seq,mrf,seq_ref = seqs[[1]],ct_ref = ct_onlypk)
+  bench["pairid_all"]=bench_ref["pairid"]
   return(bench)
 })
 ```
@@ -83,18 +131,14 @@ bench_100_ref = pbapply::pblapply(seqs, function(seq){
 
 
 ```{r}
-bench_100.mapalign.mask= data.frame(do.call(rbind,bench_100_masked))
 
-
-bench_100.mapalign.mask$type="mapalign_mask"
-  
 bench_100.mapalign= data.frame(do.call(rbind,bench_100))
 bench_100.mapalign$type = "mapalign"
 
 bench_100.ref = data.frame(do.call(rbind,bench_100_ref))
 bench_100.ref$type="ref"
 
-bench_100.all = rbind(bench_100.mapalign.mask,bench_100.mapalign,bench_100.ref)
+bench_100.all = rbind(bench_100.mapalign.wt1,bench_100.mapalign,bench_100.ref)
 # bench_100.all = rbind(bench_100.mapalign,bench_100.ref)
 
 # bench_100.all=data.frame(bench_100.all)
@@ -106,30 +150,154 @@ library(tidyr)
 bench_100.wider=
 bench_100.all %>%
   mutate(mrf_all=mrf_single+mrf_pair) %>% 
-  pivot_wider(id_cols = id, names_from = type , values_from = c(1:5, mrf_all))
+  pivot_wider(id_cols = id, names_from = type , values_from = c(1:6, mrf_all))
 ```
 
 ```{r}
+ggs2=list()
+
+ggs2$mrf_all=
+bench_100.wider %>% 
+  ggplot(aes(mrf_all_mapalign,mrf_all_mapalign_equalwt)) +
+  geom_point()+geom_abline()
+
+ggs2$mrf_pair=
+bench_100.wider %>% 
+  ggplot(aes(mrf_pair_mapalign,mrf_pair_mapalign_equalwt)) +
+  geom_point()+geom_abline()
+
+ggs2$mrf_single=
+bench_100.wider %>% 
+  ggplot(aes(mrf_single_mapalign,mrf_single_mapalign_equalwt)) +
+  geom_point()+geom_abline()
+
+ggs2$pair=
+bench_100.wider %>% 
+  ggplot(aes(pairid_mapalign,pairid_mapalign_equalwt)) +
+  geom_point()+geom_abline()
+
+ggs2$pairfull=
+bench_100.wider %>% 
+  ggplot(aes(pairid_all_mapalign, pairid_all_mapalign_equalwt)) +
+  geom_point()+geom_abline()
+
+ggs2$single=
+bench_100.wider %>% 
+  ggplot(aes(seqid_mapalign,seqid_mapalign_equalwt)) +
+  geom_point()+geom_abline()
+
+library(patchwork)
+
+mypatch2=(ggs2$mrf_all | ggs2$mrf_single |ggs2$mrf_pair) /(ggs2$pair|ggs2$single|ggs2$pairfull)
+
+mypatch2
+```
+
+```{r}
+
+ggs=list()
+
+ggs$mrf_all=
 bench_100.wider %>% 
   ggplot(aes(mrf_all_mapalign,mrf_all_ref)) +
-  geom_point()+geom_abline()
+  geom_point()+geom_abline()+labs(x="mrf_all",y="mrf_all_CMalign")
 
+ggs$mrf_pair=
 bench_100.wider %>% 
   ggplot(aes(mrf_pair_mapalign,mrf_pair_ref)) +
-  geom_point()+geom_abline()
+  geom_point()+geom_abline()+labs(x="mrf_pair",y="mrf_pair_CMalign")
 
+ggs$mrf_single=
 bench_100.wider %>% 
   ggplot(aes(mrf_single_mapalign,mrf_single_ref)) +
-  geom_point()+geom_abline()
+  geom_point()+geom_abline()+labs(x="mrf_single",y="mrf_single_CMalign")
 
+ggs$pair=
 bench_100.wider %>% 
   ggplot(aes(pairid_mapalign,pairid_ref)) +
-  geom_point()+geom_abline()
+  geom_point()+geom_abline()+labs(x="F_pkbp",y="F_pkbp_CMalign")
 
+ggs$pairfull=
+bench_100.wider %>% 
+  ggplot(aes(pairid_all_mapalign, pairid_all_ref)) +
+  geom_point()+geom_abline()+labs(x="F_bp",y="F_bp_CMalign")
+
+ggs$single=
 bench_100.wider %>% 
   ggplot(aes(seqid_mapalign,seqid_ref)) +
-  geom_point()+geom_abline()
+  geom_point()+geom_abline()+labs(x="seqid",y="seqid_CMalign")
 
+
+library(patchwork)
+
+mypatch=(ggs$mrf_all | ggs$mrf_single |ggs$mrf_pair) /(ggs$pair|ggs$single|ggs$pairfull)
+
+mypatch
+
+```
+
+```{r}
+save(mypatch, file="../rdata/mypatch.rda")
+```
+
+
+```{r}
+t.test(bench_100.wider$pairid_all_mapalign, bench_100.wider$pairid_all_ref,
+       paired=TRUE,alternative="less")
+
+t.test(bench_100.wider$seqid_mapalign, bench_100.wider$seqid_ref,
+       paired=TRUE,alternative="less")
+```
+
+```{r}
+summary(bench_100.wider)
+```
+
+
+
+```{r}
+table(bench_100.wider$seqid_mapalign > bench_100.wider$seqid_ref)
+
+table(bench_100.wider$seqid_mapalign < bench_100.wider$seqid_ref)
+
+table(bench_100.wider$seqid_mapalign == bench_100.wider$seqid_ref)
+
+
+table(bench_100.wider$pairid_mapalign > bench_100.wider$pairid_ref)
+
+
+table(bench_100.wider$pairid_mapalign < bench_100.wider$pairid_ref)
+
+
+table(bench_100.wider$pairid_mapalign == bench_100.wider$pairid_ref)
+
+
+table(bench_100.wider$seqid_mapalign == bench_100.wider$seqid_ref)
+
+
+table(bench_100.wider$mrf_all_mapalign == bench_100.wider$mrf_all_ref)
+
+
+# table(bench_100.wider$pairid_mapalign_equalwt > bench_100.wider$pairid_ref)
+```
+
+
+```{r}
+table(bench_100.wider$seqid_mapalign_equalwt > bench_100.wider$seqid_ref)
+
+
+
+
+table(bench_100.wider$pairid_all_mapalign < bench_100.wider$pairid_all_ref)
+
+table(bench_100.wider$pairid_all_mapalign > bench_100.wider$pairid_all_ref)
+```
+
+
+```{r}
+bench_100.wider %>% 
+  select(id, seqid_mapalign,seqid_ref, pairid_mapalign,pairid_ref) %>% 
+  filter(bench_100.wider$pairid_mapalign > bench_100.wider$pairid_ref)
 ```
 
 
@@ -173,9 +341,9 @@ bench_100.wider %>%
 
 
 ```{r}
-seq = seqs[[7]]
+seq = seqs[[1347]]
 
-a2b = align_seq2mrf_mtx(seq,mrf_mat = mrf$mrf_mat ,mrf_h = mrf$mrf_h,iteration = 20,debug = TRUE)
+a2b = align_seq2mrf_mtx(seq,mrf_mat = mrf$mrf_mat ,mrf_h = mrf$mrf_h,wt_h = 0.5,iteration = 20,debug = TRUE)
 exp_seq=encode_seq(seq)
 
 bench_a2b(a2b,seq,mrf,seq_ref = seqs[[1]],ct_ref)
@@ -188,8 +356,12 @@ a2b2seq(a2b+1,seq = exp_seq$seq_ungapped, mrf_len = mrf$len,type="s")
 
 seq %>% seqinr::c2s()
 
+seqs[[1]] %>%  seqinr::c2s()
+
 ".<<<<{.((((((>>>>......((((((..))))))}.<.))))))>...."
 a2b
+
+seq
 ```
 
 
