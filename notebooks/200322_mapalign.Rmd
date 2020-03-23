@@ -1,0 +1,77 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+pk_strs=data.table::fread(
+"
+1SJ3_R PK2 2bp
+1U6B_B PK7 4bp
+1YFG_A PK2 2bp
+2A64_A PK2 2bp
+2FK6_R PK2 2bp
+2NZ4_P PK3 2bp
+2NZ4_P PK5 6bp
+2QWY_A PK4 3bp
+2YGH_A PK3 4bp
+3DIG_X PK3 6bp
+3FU2_A PK3 3bp
+3GCA_A PK3 2bp
+3HHN_C PK2 6bp
+3HHN_C PK6 5bp
+3L0U_A PK2 2bp
+3Q3Z_A PK2 2bp
+3Q3Z_A PK3 5bp
+3SD3_A PK4 4bp
+3SUH_X PK2 4bp
+3V7E_C PK3 4bp
+3WQY_C PK2 2bp
+4FRN_A PK6 6bp
+4JF2_A PK3 4bp
+4KQY_A PK3 4bp
+4MEG_B PK6 4bp
+4OJI_A PK2 4bp
+4OQU_A PK2 5bp
+4P95_A PK5 3bp
+4PR6_B PK2 2bp
+4QLM_A PK4 7bp
+4RGE_A PK2 2bp
+4RGE_A PK3 2bp
+4RZD_A PK4 3bp
+4U3M_4 PK2 2bp
+4UYK_R PK3 4bp
+4ZNP_A PK3 3bp
+5BTP_A PK2 4bp
+5E7K_1L PK2 2bp
+5J01_A PK8 7bp
+5NWQ_A PK3 2bp
+5TPY_A PK3 4bp
+5X2G_B PK4 3bp
+6CU1_A PK4 2bp
+6FZ0_A PK7 2bp
+6JXM_B PK2 2bp
+6MJ0_A PK6 4bp
+6OL3_C PK3 2bp
+
+",
+header=FALSE
+)
+
+pdb2rfam=data.table::fread("../data/PDB2rfam_cln.tsv",header=FALSE)
+
+library(dplyr)
+
+pdb_rfam_PK=
+  
+pdb2rfam %>% 
+  filter(V3 %in% pk_strs$V1)
+  
+```
+
