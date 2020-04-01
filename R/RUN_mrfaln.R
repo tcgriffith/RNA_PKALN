@@ -119,13 +119,19 @@ pair_a2b2aln = function(a2b_1, a2b_2, seqs) {
 
 ### main
 
-filemrf="/home/tc/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/tmp.sto.afa.mrf"
-fileout="/home/tc/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/"
-fileseqs="/home/tc/GIT/sandbox/mrftmp/5_8S_rRNA/"
+# filemrf="/home/tc/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/tmp.sto.afa.mrf"
+# fileout="/home/tc/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/"
+# fileseqs="/home/tc/GIT/sandbox/mrftmp/5_8S_rRNA/"
+
+filemrf=args[1]
+fileout=args[2]
+fileseqs=args[3]
+
 
 seqfiles=list.files(fileseqs,pattern = "raw")
 
 
+mymrf=read_mrf_renum(filemrf)
 
 
 pbapply::pboptions(type="txt")
