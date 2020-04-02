@@ -170,14 +170,79 @@ rslt=data.table::fread("~/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/benchmark.tbl")
 
 ```{r}
 rslt$apsi=as.numeric(gsub(".*apsi-(.*?).sci.*","\\1",rslt$V1))
-```
 
-```{r}
 ggplot(rslt)+
   geom_point(aes(apsi, V2))+
   ylim(0,1)
 ```
 
+```{r}
+rslt_mafft= data.table::fread("~/GIT/RNA_PKALN/data/bralibase_2.1/scores_ref/mafft/k2.5_8S_rRNA.mafft_ginsi.list.coal.sci.apsi")
 
+rslt_mafft$apsi=as.numeric(gsub(".*apsi-(.*?).sci.*","\\1",rslt_mafft$V1))
+
+ggplot(rslt_mafft)+
+  geom_point(aes(apsi,V5))+
+    ylim(0,1)
+```
+
+```{r}
+rslt_mafft2=
+rslt_mafft %>% mutate(id=gsub("(.*raw).*","\\1",basename(V4))) %>% 
+  select(id,mafft=V5)
+
+
+gg1=
+rslt %>% mutate(id =gsub("(.*raw).*","\\1",V1)) %>% 
+  select(id,mrfaln=V2,apsi) %>% 
+  left_join(rslt_mafft2) %>% 
+  ggplot(aes(mrfaln,mafft,color=apsi<60))+geom_point()+geom_abline()+lims(x=c(0.5,1),y=c(0.5,1))
+```
+
+
+
+```{r}
+bench=data.table::fread("/home/tc/GIT/sandbox/mrftmp/mrfonly/Cobalamin/benchmark.tbl")
+
+bench_ref=data.table::fread("~/GIT/RNA_PKALN/data/bralibase_2.1/scores_ref/mafft/k2.Cobalamin.mafft_ginsi.list.coal.sci.apsi")
+
+bench_ref$apsi=as.numeric(gsub(".*apsi-(.*?).sci.*","\\1",bench_ref$V1))
+
+ggplot(bench_ref)+
+  geom_point(aes(apsi,V5))+
+    ylim(0,1)
+
+bench_ref2=bench_ref %>% 
+  select(V4, V5,V6,V7) %>% 
+  mutate(V4=basename(V4))
+
+
+# ("~/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/benchmark.tbl")
+bench_ref2=
+bench_ref %>% mutate(id=gsub("(.*raw).*","\\1",basename(V4))) %>% 
+  select(id,mafft=V5)
+
+
+gg2=
+bench %>% mutate(id =gsub("(.*raw).*","\\1",V1)) %>% 
+  mutate(apsi=as.numeric(gsub(".*apsi-(.*?).sci.*","\\1",V1))) %>% 
+  select(id,mrfaln=V2,apsi) %>% 
+  left_join(bench_ref2) %>% 
+  ggplot(aes(mrfaln,mafft,color=apsi<50))+geom_point()+geom_abline()+lims(x=c(0.5,1),y=c(0.5,1))
+
+# 
+# bench$apsi=as.numeric(gsub(".*apsi-(.*?).sci.*","\\1",bench$V1))
+# 
+# ggplot(bench)+
+#   geom_point(aes(apsi, V2))+
+#   ylim(0,1)
+gg2
+
+
+```
+
+```{r}
+save(gg1,gg2,file = "~/tmp.rda")
+```
 
 
