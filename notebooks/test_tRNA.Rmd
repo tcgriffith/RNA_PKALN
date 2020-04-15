@@ -1,0 +1,66 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source(here::here("R/isorank.R"))
+library(ggplot2)
+library(dplyr)
+```
+
+
+## R Markdown
+
+```{r}
+mymrf=RNAmrf::read_mrf_renum("~/GIT/sandbox/mrftmp/mrfonly/tRNA/tmp.sto.afa.mrf")
+```
+
+```{r}
+gg_trna2=
+gg_mat(mymrf$mat_mrf)+
+  scale_fill_continuous(name="MRF_pairwise")+
+  labs(x="",y="")+theme_minimal()
+
+gg_trna2
+```
+
+```{r}
+save(gg_trna2, file="../rdata/gg_trna2.rda")
+```
+
+
+```{r}
+# which(mymrf$mat_mrf >6,TRUE)
+
+mymrf$mrf_mat[(10*5+1):(10*5+5),(22*5+1):(22*5+5)]
+
+sum(mymrf$h[1,2:6])
+sum(mymrf$mrf_mat[(10*5+1):(10*5+5),(22*5+1):(22*5+5)])
+gg_mat(mymrf$mrf_mat[(10*5+1):(10*5+5),(22*5+1):(22*5+5)])
+```
+
+```{r}
+gg_mat(as.matrix(mymrf$h[,2:6]))
+```
+
+```{r}
+tmp=as.matrix(mymrf$h[,2:6])
+```
+
+
+```{r}
+tmp[1:5,]
+```
+
+```{r}
+rowSums(tmp)
+```
+
+
+```{r}
+sum(mymrf$h[,2:6])
+```
+
+

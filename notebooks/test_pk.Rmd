@@ -1,0 +1,23 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+source(here::here("R/isorank.R"))
+```
+
+## R Markdown
+
+
+```{r}
+cpeb3_mrf = RNAmrf::read_mrf_renum("~/GIT/DATA/rna_pk/mrf/CPEB3_ribozyme/tmp.sto.afa.mrf")
+```
+
+```{r}
+gg_mat(cpeb3_mrf$mat_mrf0)
+
+```
+

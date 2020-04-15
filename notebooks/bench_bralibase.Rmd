@@ -1,0 +1,307 @@
+---
+title: "Untitled"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+
+library(ggplot2)
+```
+
+## R Markdown
+
+```{r}
+benchs2.f=list.files("../data/bralibase_2.1/k2_cmaln/",full.names = TRUE)
+
+benchs2=lapply(benchs2.f, function(fname){
+  df= data.table::fread(fname)
+  df
+  
+  caseid=gsub(".mrfaln.*","",basename(fname))
+
+  df2 = df %>%
+    mutate(
+      caseid=caseid,
+      apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+      sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+      id = gsub(".raw.fa.*", "", V1)
+    ) %>%
+    select(
+      caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
+    )
+  df2$method="cmaln"
+  return(df2)
+})
+
+
+names(benchs2)=basename(benchs2.f)
+
+benchs2.all=do.call(rbind, benchs2)
+
+# benchs2.all$method="cmaln"
+```
+
+
+
+
+```{r}
+benchs.f=list.files("../data/bralibase_2.1/k2_mrfscores/",full.names = TRUE)
+
+benchs=lapply(benchs.f, function(fname){
+  df= data.table::fread(fname)
+  
+  caseid=gsub(".mrfaln.*","",basename(fname))
+  
+  df2 = df %>%
+    mutate(
+      caseid=caseid,
+      apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+      sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+      id = gsub(".raw.fa.*", "", V1)
+    ) %>% 
+    select(
+      caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
+    )
+  df2$method="mrfaln"
+  return(df2)
+})
+
+
+names(benchs)=basename(benchs.f)
+
+
+benchs.all=do.call(rbind, benchs)
+
+benchs.all$method="mrfaln"
+```
+
+```{r}
+
+benchs.mrfcm=rbind(benchs.all,benchs2.all)
+
+```
+
+
+```{r}
+gg2=
+benchs.all %>% 
+  ggplot(aes(x=apsi,y=score_sci))+
+  geom_point(alpha=0.1)+
+  # scale_y_continuous(breaks=seq(0,1,0.1))+
+  
+  scale_x_continuous(breaks=c(20,30,40,50,60,70))+
+  geom_smooth(method="loess")+theme_classic()
+
+gg2
+```
+
+```{r}
+plot_sps=function(df){
+  gg=
+  df %>% 
+  ggplot(aes(x=apsi,y=score_SPS,color=method))+
+  geom_point(alpha=0.1)+
+    ylim(0,1)+
+    # scale_y_continuous(breaks=seq(0,1,0.1))+
+  # scale_x_continuous(breaks=c(20,30,40,50,60,70))+
+  geom_smooth(method="loess") +theme_classic()
+  return(gg)
+}
+```
+
+```{r}
+benchs3=lapply(1:length(benchs),function(i){
+  return(rbind(benchs[[i]],benchs2[[i]]))
+})
+# names(benchs)==names(benchs2)
+```
+
+
+```{r}
+ggs=lapply(benchs3, plot_sps)
+
+names(ggs)=names(benchs2)
+
+ggs2=lapply(1:length(ggs), function(i){
+  gg=ggs[[i]]+ggtitle(names(ggs)[i])
+})
+
+ggs2
+```
+
+```{r}
+save(ggs2, file="../rdata/ggs2.rda")
+```
+
+
+```{r}
+# plot_sps(benchs2$`yybP-ykoY.mrfaln.compalignp`)
+
+# lapply(benchs2, plot_sps)
+
+trna.all=rbind(benchs$tRNA.mrfaln.compalignp,benchs2$tRNA.mrfaln.compalignp)
+
+plot_sps(trna.all)
+```
+
+```{r}
+library(tidyr)
+
+tmp=
+trna.all %>% 
+  pivot_wider(id_cols =c(id,apsi,sci), names_from = method,values_from = c(score_SPS,score_sci))
+```
+
+```{r}
+tmp %>% 
+  ggplot(aes(score_SPS_cmaln,score_SPS_mrfaln))+
+  geom_point(aes(color=apsi <50))+
+  geom_abline()
+```
+
+
+```{r}
+
+gg1=
+benchs.mrfcm %>% 
+  filter(caseid != "tRNA") %>%
+  ggplot(aes(x=apsi,y=score_SPS,color=method))+
+  geom_point(alpha=0.1)+
+    scale_y_continuous(breaks=seq(0,1,0.1))+
+  scale_x_continuous(breaks=seq(0,100,10))+
+  geom_smooth(aes(color=method)) +theme_classic()
+
+gg1
+
+gg1list=list()
+
+gg1list$gg1=gg1
+
+gg1list$gg1_all=benchs.mrfcm %>% 
+  # filter(caseid != "tRNA") %>%
+  ggplot(aes(x=apsi,y=score_SPS,color=method))+
+  geom_point(alpha=0.1)+
+    scale_y_continuous(breaks=seq(0,1,0.1))+
+  scale_x_continuous(breaks=seq(0,100,10))+
+  geom_smooth(aes(color=method)) +theme_classic()
+```
+
+
+```{r}
+save(gg1list, file="../rdata/gg1list.rda")
+```
+
+## new TRNA
+
+```{r}
+fname="~/GIT/sandbox/mrftmp/new.trna.scores"
+
+  df= data.table::fread(fname)
+  
+  caseid=gsub(".mrfaln.*","",basename(fname))
+  
+  df2 = df %>%
+    mutate(
+      caseid=caseid,
+      apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+      sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+      id = gsub(".raw.fa.*", "", V1)
+    ) %>% 
+    select(
+      caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
+    )
+  df2$method="mrfaln_new"
+
+trna.all=rbind(df2, benchs$tRNA.mrfaln.compalignp,benchs2$tRNA.mrfaln.compalignp)
+
+trna.all.wide=
+  trna.all %>% 
+  pivot_wider(id_cols =c(id,apsi,sci), names_from = method,values_from = c(score_SPS,score_sci)) %>% 
+  filter(!is.na(score_SPS_mrfaln_new))
+```
+
+```{r}
+plot_sps(trna.all)
+```
+
+
+
+
+```{r}
+trna.all.wide %>% 
+  filter(score_SPS_cmaln > 0.8, score_SPS_mrfaln_new <0.4)
+```
+
+```{r}
+trna.all.wide %>% 
+  filter(score_SPS_mrfaln< 0.5,score_SPS_cmaln>0.9)
+```
+
+
+
+```{r}
+trna.all.wide %>% 
+  ggplot(aes(score_SPS_cmaln,score_SPS_mrfaln_new))+
+  geom_point()+geom_abline()
+```
+
+```{r}
+gg_trna=list()
+
+gg_trna$gg1=plot_sps(trna.all)
+gg_trna$gg2=trna.all.wide %>% 
+  ggplot(aes(score_SPS_mrfaln,score_SPS_mrfaln_new))+
+  geom_point()+geom_abline()
+```
+
+```{r}
+gg_trna
+```
+
+
+```{r}
+save(gg_trna, file="../rdata/gg_trna.rda")
+```
+
+```{r}
+library(patchwork)
+```
+
+
+```{r, fig.width=9}
+gg1|gg2
+```
+
+
+```{r}
+tmp2=
+
+benchs2[[1]] %>%  mutate(
+  caseid=benchs[[1]]$caseid[1],
+       apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+       sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+       id = gsub(".raw.fa.*", "", V1)
+
+     )  %>% 
+    select(
+       caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
+     )
+
+tmp1=benchs[[1]]
+
+tmp1$grp="mrfaln"
+
+tmp2$grp="CMalign"
+
+tmpall=rbind(tmp1,tmp2)
+
+tmpall %>% 
+  ggplot(aes(x=apsi,y=score_SPS,color=grp))+
+  geom_point(alpha=0.1)+
+    scale_y_continuous(breaks=seq(0,1,0.1))+
+  geom_smooth(method="loess",aes(color=grp)) +theme_classic()
+```
