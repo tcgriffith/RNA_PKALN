@@ -1,0 +1,309 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+library(dplyr)
+```
+
+## R Markdown
+
+
+```{r}
+mrf_wcag=RNAmrf::read_mrf_renum("~/GIT/DATA/rna_pk/mrf/wcaG/tmp.sto.afa.mrf")
+```
+
+
+```{r}
+a2b2seq= function(a2b_1b,seq,mrflen,type=c("c","s")){
+
+  type=match.arg(type)
+
+  a2b=a2b_1b
+  seq_aln = character(length = mrflen)
+  seq_aln[] = "-"
+
+  seq_aln[a2b[a2b>0]] = seq[a2b > 0]
+
+  if (type=="s"){
+    seq_aln = paste0(seq_aln,collapse = "")
+  }
+
+  return(seq_aln)
+
+}
+```
+
+```{r}
+seqs=seqinr::read.fasta("~/GIT/DATA/rna_pk/mrf/wcaG/tmp.sto.afa")
+```
+
+```{r}
+ss=system2("cat","~/GIT/DATA/rna_pk/mrf/wcaG/tmp.sto |grep '^#=GC SS_cons' |awk '{print $3}' ",stdout = TRUE)
+```
+
+
+```{r}
+seq=seqs[[1]]
+
+testenc=RNAmrf::encode_seq(seqs[[1]])
+
+testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf_wcag$h$i_ori)
+```
+
+```{r}
+a2b=align_seq2mrf(seq,mrf = mrf_wcag)
+a2b_1b=a2b+1
+```
+
+
+
+
+
+```{r}
+
+iteration=20
+wt_h=1.0
+wt_j=1.0
+gap_ext=0.1
+gap_open=-1
+debug=TRUE
+
+seq=seqs[[8]]
+mrf=mrf_wcag
+
+
+
+  exp_seq = encode_seq(seq)
+
+  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,mrf_h = mrf$mrf_h)
+  
+
+  
+  SCO_mod= RNAmrf:::mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_open,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+  
+    gg_mat(SCO_mod)
+    gg_mat(SCO_init)
+  
+```
+
+
+##ss
+
+dot2ct
+
+
+```{r}
+
+ss2pairsdf = function(ss, mrf) {
+  pairs = integer(length = length(ss))
+  
+  stack1 = integer() # <>
+  
+  stack2 = integer() # Aa
+  
+  for (i in 1:length(ss_c)) {
+    if (ss[i] == "<") {
+      stack1 = append(stack1, i)
+    }
+    if (ss[i] == ">") {
+      pairs[tail(stack1, 1)] = i
+      stack1 = head(stack1, -1)
+    }
+    if (ss[i] == "A") {
+      stack2 = append(stack2, i)
+    }
+    if (ss[i] == "a") {
+      pairs[tail(stack2, 1)] = i
+      stack2 = head(stack2, -1)
+    }
+  }
+  
+  pairsdf = data.frame(i = 0:(length(pairs) - 1),
+                       j = pairs - 1) %>%
+    mutate(i_new = match(i, mrf$h$i_ori),
+           j_new = match(j, mrf$h$i_ori)) %>%
+    filter(j_new > 0) %>%
+    select(i = i_new, j = j_new)
+  
+  return(pairsdf)
+}
+ss_c=seqinr::s2c(ss)
+
+pairsdf=ss2pairsdf(ss_c,mrf = mrf_wcag)
+
+pairspk= pairsdf %>% filter(i %in% 55:58)
+  
+pair_positions=unlist(pairsdf)
+```
+
+
+
+
+
+### bench1 SPS
+```{r}
+seqs_encall=lapply(seqs,function(seq){
+  testenc=RNAmrf::encode_seq(seq)
+  testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf_wcag$h$i_ori)
+  
+  return(testenc)
+})
+```
+
+```{r}
+seqs_enc_int_ref_renum=lapply(seqs,function(seq){
+  testenc=RNAmrf::encode_seq(seq)
+  testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf_wcag$h$i_ori)
+  
+  return(testenc$seq_int_ref_renum)
+})
+```
+
+aln
+```{r eval=FALSE}
+aln_a2b=pbapply::pblapply(seqs,function(seq){
+  a2b=align_seq2mrf(seq,mrf = mrf_wcag,debug = FALSE)
+  a2b_1b=a2b+1
+  return(a2b_1b)
+})
+
+```
+```{r  eval=FALSE}
+save(aln_a2b,file="../rdata/aln_a2b_wcag.rda")
+```
+
+```{r}
+
+load("../rdata/aln_a2b_wcag.rda")
+```
+
+
+
+
+```{r}
+
+
+sps_all=pbapply::pbsapply(1:length(aln_a2b),function(i){
+  len=length(aln_a2b[[i]])
+
+    
+  sps=sum(aln_a2b[[i]]==seqs_enc_int_ref_renum[[i]],na.rm = TRUE)/len
+  
+  # message(sum(is.na(seqs_enc_int_ref_renum[[i]])))
+  return(sps)
+})
+
+plot(sps_all)
+summary(sps_all)
+```
+
+
+
+
+```{r}
+
+sps_bp=pbapply::pbsapply(1:length(aln_a2b),function(i){
+  len=length(pair_positions)
+  sps=sum(aln_a2b[[i]][pair_positions]==seqs_enc_int_ref_renum[[i]][pair_positions],na.rm = TRUE)/len
+  raw=sum(aln_a2b[[i]][pair_positions]==seqs_enc_int_ref_renum[[i]][pair_positions],na.rm = TRUE)
+  
+  return(sps)
+})
+
+plot(sps_bp)
+summary(sps_bp)
+```
+
+
+
+```{r}
+pairsinfo=pbapply::pbsapply(1:length(aln_a2b),function(i){
+   npair=nrow(pairsdf)
+   
+   aligned_seq=a2b2seq(aln_a2b[[i]],seq=seqs_encall[[i]]$seq_ungapped,mrflen = mrf$len,"c")
+   
+   pairs_in_aln=paste0(aligned_seq[pairsdf[,1]],aligned_seq[pairsdf[,2]])
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+  
+})
+
+
+
+pairsinfo2=pbapply::pbsapply(1:length(aln_a2b),function(i){
+   npair=nrow(pairsdf)
+   
+   a2b_tmp=seqs_encall[[i]]$seq_int_ref_renum
+   a2b_tmp[is.na(a2b_tmp)]=-1
+   aligned_seq=a2b2seq(a2b_tmp,seq=seqs_encall[[i]]$seq_ungapped,mrflen = mrf$len,"c")
+   
+   pairs_in_aln=paste0(aligned_seq[pairsdf[,1]],aligned_seq[pairsdf[,2]])
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+  
+})
+
+plot(pairsinfo2)
+plot(pairsinfo)
+dfpairinfo=data.frame(
+  mrfalign_pair=pairsinfo,
+  cmalign_pair=pairsinfo2
+)
+library(ggplot2)
+
+dfpairinfo %>% 
+  ggplot(aes(cmalign_pair,mrfalign_pair))+
+  geom_point()+geom_abline()
+
+table(dfpairinfo$mrfalign_pair>dfpairinfo$cmalign_pair)
+
+table(dfpairinfo$mrfalign_pair<dfpairinfo$cmalign_pair)
+
+
+table(dfpairinfo$mrfalign_pair==dfpairinfo$cmalign_pair)
+
+summary(dfpairinfo)
+```
+
+```{r}
+dfpairinfo %>% filter(mrfalign_pair >cmalign_pair)
+```
+
+
+```{r}
+rslt_wcga=list(
+  sps_all,
+  sps_bp,
+  dfpairinfo
+  
+)
+```
+
+```{r}
+save(rslt_wcga,file="~/rslt_wcga.rda")
+```
+
+
+
+

@@ -1,0 +1,145 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+library(dplyr)
+source(here::here("R/misc.R"))
+```
+
+## R Markdown
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("../data/synth/seq1000.mrf")
+```
+
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/synth/seq1000_gaps.afa")
+```
+
+```{r}
+
+aln_a2m=pbapply::pblapply(seqs,function(aseq){
+  a2b=align_seq2mrf(aseq,mrf = mrf,gap_open = -3,debug = FALSE,iteration = 50)
+  a2b_1b=a2b+1
+  a2m=a2b2a2m(a2b_1b,aseq,len_seq = mrf$len)
+  return(a2m)
+})
+
+```
+
+```{r}
+seqinr::write.fasta(aln_a2m,names = names(aln_a2m),file.out = "/home/tc/GIT/RNA_PKALN/data/synth/seq1000_gaps.realign.a2m")
+```
+
+
+
+### 
+
+
+```{r}
+mrf2=RNAmrf::read_mrf_renum("/home/tc/GIT/RNA_PKALN/data/synth/mrf_realign.afa.mrf")
+```
+
+```{r}
+gg1=gg_mat(mrf2$mat_apc)
+```
+
+```{r}
+mrf3=RNAmrf::read_mrf_renum("/home/tc/GIT/RNA_PKALN/data/synth/seq1000_gaps_rmgp.fasta.cmaln.sto.afa.mrf")
+
+gg2=gg_mat(mrf3$mat_apc)
+```
+
+
+```{r}
+save(gg1,gg2,file = "~/synth_DCA.rda")
+```
+
+
+```{r}
+RNAmrf::encode_seq
+```
+
+
+###
+```{r}
+testafa=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/synth/mrf_realign.afa")
+```
+
+```{r}
+aln_a2m[[1]]
+```
+
+
+```{r}
+testseq=testafa[[1]]
+
+testseq[testseq!="."]
+
+seqs[[1]]
+# testafa[[1]][test]
+```
+
+```{r}
+testafa[[1]]
+```
+
+
+```{r}
+RNAmrf::encode_seq(testafa[[1]])
+```
+
+
+
+```{r}
+seqmrfaln=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/synth/mrf_realign.afa",forceDNAtolower = FALSE)
+
+seqcmaln=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/synth/seq1000_gaps_rmgp.fasta.cmaln.sto.afa",forceDNAtolower = FALSE)
+```
+
+```{r}
+seqmrfaln[[1]] %in% c("a","u","c","g")
+```
+
+
+```{r}
+
+analysis_aln=function(seqs){
+  stats=lapply(seqs,function(seq){
+  ins=sum(seq %in% c("a","u","c","g"))
+  dels=sum(seq=="-")
+  return(data.frame(ins=ins,del=dels))
+})
+df=do.call(rbind,stats) 
+
+# summary(df)
+df
+}
+
+
+```
+
+```{r}
+df1=analysis_aln(seqmrfaln)
+```
+
+```{r}
+df2=analysis_aln(seqcmaln)
+```
+
+```{r}
+df3=analysis_aln(seqs)
+```
+
+
+```{r}
+summary(df1)
+summary(df2)
+summary(df3)
+```
+

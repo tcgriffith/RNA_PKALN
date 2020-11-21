@@ -1,0 +1,323 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library("RNAmrf")
+library(ggplot2)
+library(patchwork)
+```
+
+## R Markdown
+
+```{r}
+mrfj_add_bp=function(mrfj,i,j,mat_bp){
+  if (i<j){
+    mrfj[((i-1)*5+1):((i-1)*5+5),((j-1)*5+1):((j-1)*5+5)]=mat_bp
+  }
+  else{
+    mrfj[((j-1)*5+1):((j-1)*5+5),((i-1)*5+1):((i-1)*5+5)]=mat_bp
+  }
+  return(mrfj)
+}
+```
+
+
+```{r}
+mat_bp2=matrix(rnorm(50,0,sd=0.1),5,5)
+
+mat_bp2[2,1]=mat_bp2[1,2]=mat_bp2[4,3]=mat_bp2[3,4]=1
+
+mat_bp2
+
+
+
+mrfh=matrix(rnorm(50,sd=0.01),10,5)
+
+
+
+mrfj=matrix(0,50,50)
+
+# mrfj[1:5,46:50]=mat_bp2 # 1 10 au/cg
+# mrfj[6:10,41:45]=mat_bp2 # 2 9 au/cg
+# mrfj[11:15, 36:40]=mat_bp2 # 3 10 au/cg
+mrfj=mrfj_add_bp(mrfj,1,9,mat_bp2)
+mrfj=mrfj_add_bp(mrfj,2,8,mat_bp2)
+mrfj=mrfj_add_bp(mrfj,3,7,mat_bp2)
+
+mrf=list(mrf_h=mrfh,mrf_mat=mrfj)
+```
+
+
+
+```{r}
+bench_a2b_a2bref=function(a2b_1b,a2bref_1b,pairs=NULL){
+  
+  p=sum(a2bref_1b>0)
+  tpfp=sum(a2b_1b>0)
+  
+  tp=sum(a2bref_1b[a2bref_1b>0]==a2b_1b[a2bref_1b>0])
+  
+  message(p," ",tp)
+  prec=tp/tpfp
+  sens=tp/p
+  rslt=data.frame(
+    precision=prec,
+    sensitivity=sens
+  )
+  
+  if (!is.null(pairs)){
+    p_pair=nrow(pairs)
+    
+    ppred=sapply(1:nrow(pairs),function(i){
+      pair_predicted=FALSE
+      idx=a2bref_1b %in% pairs[i,]
+      
+      if (sum(idx)==2){
+        pair_predicted=all(a2b_1b[idx]==a2bref_1b[idx])
+      }
+      return(pair_predicted)
+    })
+    # message(nrow(pairs))
+    
+    tp=sum(ppred)
+    
+    rslt$sens_pair=tp/p_pair
+  }
+
+  return(rslt)
+}
+
+
+```
+
+
+```{r}
+a2b1=c(1,2,3,4,6,7,8,9,0)
+
+a2b2=c(1,2,3,0,0,0,7,8,9)
+
+pairs=data.table::fread(
+"
+i j
+1 9
+2 8
+3 7
+"
+)
+
+
+bench_a2b_a2bref(a2b1,a2b2,pairs)
+```
+
+
+
+
+```{r}
+seq=seqinr::s2c("auaccccuau-")
+encode_seq(seq)
+```
+
+
+```{r}
+seq=seqinr::s2c("auaccccuau")
+
+a2bref=c(1,2,3,0,0,0,0,7,8,9)
+pairs=data.table::fread(
+"
+i j
+1 9
+2 8
+3 7
+"
+)
+
+
+iteration=20
+wt_h=1
+wt_j=1
+gap_ext=0.1
+gap_open=-1
+debug=TRUE
+gap_profile=c(
+  -1,-1,-1,0,0,0,0,-1,-1,-1
+)
+
+  exp_seq = encode_seq(seq)
+
+  # SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped, mrf_h = mrf$mrf_h)
+  SCO_init = RNAmrf:::ini_SCO(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h,mrf_mat = mrf$mrf_mat)
+  
+  SCO_init2 = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h)
+  
+  SCO_mod = RNAmrf:::mod_SCO_PSgap(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_profile,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+  
+  
+
+
+  a2b=RNAmrf:::align(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
+  a2b1b=a2b+1
+  bench_a2b_a2bref(a2b1b,a2bref,pairs)
+
+  
+a2bdf=data.frame(
+  x=a2b+1,
+  y=1:length(a2b)
+)
+
+a2bdf2=a2bdf %>% filter(x>0)
+gg1=gg_mat(SCO_mod)
+gg0=gg_mat(SCO_init)+
+  scale_y_continuous(breaks = 1:length(a2b))+
+  scale_x_continuous(breaks=1:length(mrf$mrf_h))+
+  scale_fill_gradient2()
+
+gg1=gg_mat(SCO_mod)+
+  scale_y_continuous(breaks = 1:length(a2b))+
+  scale_x_continuous(breaks=1:length(mrf$mrf_h))+
+  scale_fill_gradient2()
+
+gg2=  gg_mat(SCO_mod)+
+    geom_point(data=a2bdf2,aes(x,y),color="red")+
+  scale_y_continuous(breaks = 1:length(a2b))+
+  scale_x_continuous(breaks=1:length(mrf$mrf_h))+
+  scale_fill_gradient2()
+# 
+gg0|gg1|gg2
+```
+
+
+```{r}
+# a2bref=rep(-1,length(exp_seq$seq_ungapped))
+# a2bref[1:3]=c(0,1,2)
+# # a2bref[]
+# a2bref[(length(a2bref)-2):length(a2bref)]=c(6,7,8)
+# a2bref
+# # a2bref=c(0, 1,2, -1, -1, -1, -1, 6, 7, 8)
+# RNAmrf:::score_aln(a2bref,seq = exp_seq$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG=TRUE)
+```
+
+
+```{r}
+sco_c= RNAmrf:::align_C_mat(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
+```
+
+```{r}
+lab_c= RNAmrf:::align_C_lab(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
+```
+
+
+
+
+```{r}
+align_R_label=function(score_mtx, gap_open=-1,gap_e=0.1,debug=FALSE){
+  rows=nrow(score_mtx)
+  cols=ncol(score_mtx)
+
+  sco=matrix(0, rows+1,cols+1)
+  label=matrix(0, rows+1,cols+1)
+  max_sco=0
+  a2b=integer(rows)
+  a2b[]=-1
+  max_i=0
+  max_j=0
+
+  for (i in 2:(rows+1)){
+
+    for (j in 2:(cols+1)){
+      A = sco[i-1,j-1] + score_mtx[i-1,j-1]
+      D = sco[i-1,j]
+      R = sco[i,j-1]
+      if(label[i-1,j] == 1){D =D+ gap_open}else{D =D+ gap_open * gap_e}
+      if(label[i,j-1] == 1){R =R+ gap_open}else{R =R+ gap_open * gap_e}
+      # if(label[i-1,j] == 1){D =D+ gap_b[j-1]}else{D =D+ gap_b[j-1] * gap_e}
+      # if(label[i,j-1] == 1){R =R+ gap_a[i-1]}else{R =D+ gap_a[i-1] * gap_e}
+
+      if(A <= 0 && D <= 0 && R <= 0){label[i,j] = 0;sco[i,j] = 0;}
+      else{
+        if(A >= R){if(A >= D){label[i,j] = 1;sco[i,j] = A;}else{label[i,j] = 2;sco[i,j] = D;}}
+        else{if(R >= D){label[i,j] = 3;sco[i,j] = R;}else{label[i,j] = 2;sco[i,j] = D;}}
+        if(sco[i,j] > max_sco){max_i = i;max_j = j;max_sco = sco[i,j];}
+      }
+    }
+  }
+
+  i = max_i;
+  j = max_j;
+
+  while (1) {
+    if (label[i,j] == 0) {
+      break
+    }
+    else if (label[i,j] == 1) {
+      a2b[i - 1] = j - 1
+      i=i-1
+      j=j-1
+    }
+    else if (label[i,j] == 2) {
+      i=i-1
+    }
+    else if (label[i,j] == 3) {
+      j=j-1
+    }
+  }
+  return(label)
+}
+```
+
+
+
+
+```{r}
+
+gapo=gap_open
+
+
+SCO_init_2=SCO_init
+
+# SCO_init_2[SCO_init_2<0.5]=-0.2
+# SCO_init_2=SCO_init
+# 
+SCO_init_2[SCO_init_2<0.5]=-1
+SCO_init_2[SCO_init_2>0.5]=1
+
+
+gg_mat(SCO_init_2)
+SCO_init_alnmat=RNAmrf:::align_C_mat(SCO_init_2,gap_ext = 0.1,gap_open = -1)
+
+gg_mat(SCO_init_alnmat)
+
+SCO_init_lab=RNAmrf:::align_C_lab(SCO_init_2,gap_ext,gapo)
+
+gg_mat(SCO_init_lab)
+
+RNAmrf:::align(SCO_init_2,gap_open = gapo,gap_e = 0.1)
+# RNAmrf:::align(SCO_init,gap_open = gapo,gap_e = 0.1)
+
+# RNAmrf:::align_C_lab(SCO_init,gap_ext,gapo)
+
+# RNAmrf:::align_C_mat(SCO_init,gap_ext,gapo)
+
+
+```
+
+
+
+
+

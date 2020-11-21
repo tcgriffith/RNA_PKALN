@@ -1,0 +1,58 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+## R Markdown
+
+```{r}
+seqs=seqinr::read.fasta("~/GIT/sandbox/tRNA/RF00005.a2m",forceDNAtolower = FALSE)
+```
+
+```{r}
+seq=seqs[[5]]
+```
+
+```{r}
+seqs2=seqinr::read.fasta("~/GIT/sandbox/tRNA/RF00005.afa",forceDNAtolower = FALSE)
+```
+
+```{r}
+seqs2.mat=do.call(rbind,seqs2)
+```
+
+```{r}
+gaps=apply(seqs2.mat,2, function(col){
+  return(sum(col=="-")/nrow(seqs2.mat))
+})
+
+plot(gaps)
+```
+
+```{r}
+seqs2.mat.rmgap=seqs2.mat[,gaps<0.6]
+ncol(seqs2.mat.rmgap)
+```
+
+```{r}
+calc_d=function(seqmat){
+  w=nrow(seqmat)
+  
+  w=sapply(1:nrow(seqmat),function(i){
+    row=seqmat[i,]
+    seqmat[i,]
+  })
+}
+```
+
+
+```{r}
+
+seq[!seq %in% c("a","u","c","g")]
+```
+

@@ -1,0 +1,88 @@
+---
+title: "Work plan"
+output:
+  html_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+-----
+
+# Plan
+
+I'll keep a weekly update on the thesis progress
+
+My tasks:
+
+- Thesis writing: I plan to write them in the following order  
+   1. Chapter4 RNA SS prediction: writing the paper-formatted manuscript (intro, method, result, discussion) in 1 week
+   2. Chapter5 RNA MRFalign: 1~2 weeks for paper-formatted manuscript
+   3. Intro and summary 1~2 weeks
+
+
+- The MRFalign project: 
+   - Main program is implemented, but needs more thorough test/tuning to justify its value.
+   - Current test show its alignment is not better than Infernal's CM based model, probably because the tests are based on RFAM, which maybe biased.
+
+
+
+---
+
+
+
+# MRFalign project
+## Current status
+
+- Benchmarks:
+  - Bralibase 2.1 K2, 27 families without pseudoknot, pairwise sequence alignment test
+    - Goal: to test the accuracy of aligning low-seqid RNAs
+    - Result: MRFalign can generate good alignment for low sequence ID, but not better than CMalign
+  -  5 RFAM families with pseudoknot,re-aligned with MRFalign and CMalign 
+    - Result: alignment are very close but not better than CMalign
+    
+## Issues
+
+- RFAM Data may be biased: Tested RFAM families with PK can align the PK regions well due to sequence conservation.It's possible that complicated pseudoknot RNAs cannot be aligned well, therefore not recorded in RFAM.
+
+
+So how can I prove that MRFalign is better than CMalign at aligning RNA with pseudoknot? 
+
+## Possible plans
+
+- Experiment with synthetic MSA  
+    - The goal of using synthetic MSA is to test if MRF models can align PK structures better than CM
+    - Plan A
+      - Given a pseudoknotted RNA secondary structure, generate MSA (train/test) that satisfies the constraint.  
+      - Construct MRF and CM from MSA, align test sequence with MRF and CM model
+      - Benchmark the alignment
+    - Plan B
+      - Start from existing MSA with PK, introduce double mutations to basepairs
+      - Construct MRF and CM from MSA, align test sequence with MRF and CM model
+      - Benchmark the alignment
+
+- ncRNA (with PK) homolog search with CMalign and MRFalign, 
+    - In theory MRFalign should find more candidate homologs 
+
+
+
+--------------------
+
+# Thesis 
+
+|Chapter                      |status|Required time|
+|:----------------------------|-----:|:----
+|Chapter1 intro               |      |1 week
+|Chapter2 DFIRE_RNA           |  done| 
+|Chapter3 RNAcmap             |  done|   
+|Chapter4 RNA SS prediction   |      |1~2 weeks draft  
+|Chapter5 RNA MRFalign        |      |1~2 weeks draft 
+|Chapter6 Summary             |      |1 week
+
+

@@ -1,0 +1,356 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library("RNAmrf")
+library(ggplot2)
+```
+
+## old align, tRNA
+
+```{r}
+msa=seqinr::read.fasta("~/GIT/sandbox/tRNA/RF00005.afa")
+
+msa.mat=do.call(rbind,msa)
+
+gap_profile3=
+apply(msa.mat,2,function(col){
+  log((1+sum(col=="-"))/length(msa))
+})
+
+```
+
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("~/GIT/sandbox/mrftmp/mrfonly/tRNA/tmp.sto.afa.mrf")
+# mrf=RNAmrf::read_mrf_renum("~/GIT/sandbox/tRNA/newtRNA.mrf")
+```
+
+```{r}
+# mrf2=RNAmrf::read_mrf_renum("~/GIT/sandbox/mrftmp/mrfonly/tRNA/tmp.sto.afa.mrf")
+```
+
+
+
+
+```{r}
+a2b2seq= function(a2b_1b,seq,mrflen,type=c("c","s")){
+
+  type=match.arg(type)
+
+  a2b=a2b_1b
+  seq_aln = character(length = mrflen)
+  seq_aln[] = "-"
+
+  seq_aln[a2b[a2b>0]] = seq[a2b > 0]
+
+  if (type=="s"){
+    seq_aln = paste0(seq_aln,collapse = "")
+  }
+
+  return(seq_aln)
+
+}
+
+pair2dbn=function(pairs,mrflen){
+  seqdbn=character(length=mrflen)
+  
+  seqdbn[]="."
+  seqdbn[pairs[,1]]="("
+  seqdbn[pairs[,2]]=")"
+  
+  seqdbn_s=paste0(seqdbn,collapse = "")
+  return(seqdbn)
+}
+
+
+bench_pair=function(aligned_seq, pairs,debug=FALSE){
+  
+  pairs_in_aln=paste0(aligned_seq[pairs[,1]],aligned_seq[pairs[,2]])
+  
+  npair=nrow(pairs)
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+  if(debug){
+    print(paste(pairs_in_aln))
+  }
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+}
+extract_mrfmat=function(i,j,mrfmat){
+  return(mrfmat[((i-1)*5+1):((i-1)*5+5),((j-1)*5+1):((j-1)*5+5)])
+}
+```
+
+
+```{r}
+
+# gap_profile2= mrf$mrf_h[,5]
+# 
+# gap_profile2[gap_profile2>-1]=-1
+# 
+# tmp=mrf$mrf_h[,5]
+# plot(tmp)
+# 
+# tmpdf=data.frame(
+#   id=1:118,
+#   mrfh=mrf$mrf_h[,5]
+# ) %>%
+#   mutate(
+#     is.pair=(id %in% mrf_top_pair)
+#   )
+# 
+# 
+# data.frame(
+#   id=1:118,
+#   gap_profile,
+#   tmp
+# )   %>%
+#   mutate(
+#     is.pair=(id %in% mrf_top_pair)
+#   ) %>%
+#   ggplot(aes(id,gap_profile, color=is.pair))+
+#   geom_point()
+# 
+# tmpdf %>%
+#   ggplot(aes(id,mrfh,color=is.pair)) +
+#   geom_point()
+
+# gg_mat(mrf$mrf_h[26:30,])
+```
+
+
+
+```{r}
+mrfapc=mrf$mat_apc
+gg_mat(mrfapc)
+mrfapc[mrfapc<2]=0
+gg_mat(mrfapc)
+
+mrf_top_pair=which(mrfapc>2,arr.ind = TRUE)
+
+mrf_top_pair=mrf_top_pair[mrf_top_pair[,1]<mrf_top_pair[,2],]
+
+
+
+```
+
+
+
+trna 18 119
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/bralibase_2.1/k2/tRNA/tRNA.apsi-18.sci-119.no-1.raw.fa")
+
+seq=seqs[[2]]
+
+```
+
+```{r}
+# plot(gap_profile3)
+```
+
+
+```{r}
+
+ss=pair2dbn(mrf_top_pair,mrflen=mrf$len)
+# ss
+# seqinr::c2s(ss)
+gap_profile=numeric(length=length(ss))
+gap_profile[]=-4
+gap_profile[ss=="."]=0
+
+gap_profile4=numeric(length=length(ss))
+
+gap_profile4[]=-1
+
+# gap_profile[60:80]=0
+
+gap_profile2= mrf$mrf_h[,5]
+
+gap_profile2[gap_profile2>-1]=-1
+
+
+df=data.frame(ss,gap_profile)
+# df
+
+# gap_profile[]=-1
+iteration=20
+wt_h=1.0
+wt_j=1.0
+gap_ext=0.1
+gap_open=-1
+debug=TRUE
+
+
+  exp_seq = encode_seq(seq)
+
+  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,mrf_h = mrf$mrf_h)
+  
+  # SCO_init= RNAmrf::ini_SCO(exp_seq$seq_int_ungapped,mrf_h = mrf$mrf_h,mrf_mat = mrf$mrf_mat,mrf_len = mrf$len,sep_x = 0,sep_y = 1)
+  
+  SCO_mod=RNAmrf:::mod_SCO_PSgap(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_profile,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+  
+  SCO_mod2= RNAmrf:::mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_open,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+
+
+## diagnosis
+  
+  
+  # message("init")
+  # a2b=RNAmrf:::align(SCO_init,gap_ext = gap_ext,gap_open = gap_open)
+  # aln_init=a2b2seq(a2b+1, seq,mrf$len,type = "c")
+  # 
+  # a2b2seq(a2b+1, seq,mrf$len,type = "s")
+  # pair2dbn(mrf_top_pair,mrflen=mrf$len)
+  # bench_pair(aln_init, pairs=mrf_top_pair)
+  # 
+  message("aln1")
+  
+  gg_mat(SCO_mod)
+  gg_mat(SCO_mod2)
+  
+
+
+  message("Position specific gap")
+  a2b_ps=RNAmrf:::align_PSgap(SCO_mod,gap_ext = gap_ext,gap_open = gap_profile)
+  a2b_ps
+  a2b2seq(a2b_ps+1, seq,mrf$len,type = "s")
+  aligned_seq=a2b2seq(a2b_ps+1, seq,mrf$len,type = "c")
+  bench_pair(aligned_seq, pairs=mrf_top_pair)
+  
+  message("fixed gap")
+  
+  a2b=RNAmrf:::align(SCO_mod2,gap_ext = gap_ext,gap_open = gap_open)
+  a2b
+  a2b2seq(a2b+1, seq,mrf$len,type = "s")
+  aligned_seq=a2b2seq(a2b+1, seq,mrf$len,type = "c")
+  bench_pair(aligned_seq, pairs=mrf_top_pair)
+  # gg_mat(SCO_mod)
+
+  
+  # a2b2seq(a2b+1, seq,mrf$len,type = "s")
+  # a2b
+  # pair2dbn(mrf_top_pair,mrflen=mrf$len)
+```
+
+```{r}
+plot(gap_profile)
+```
+
+
+```{r}
+
+trnalist$fig1=gap_profile3
+
+trnalist$fig1
+```
+
+```{r}
+a2b
+```
+
+
+```{r}
+RNAmrf:::score_aln(a2b = seqtmp.enc$seq_int_ref-1,seq = seqtmp.enc$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG=TRUE)
+```
+
+
+```{r}
+library(patchwork)
+a2bdf=data.frame(
+  x=a2b_ps+1,
+  y=1:length(a2b)
+)
+a2bdf2=a2bdf %>% filter(x>0)
+gg0=gg_mat(SCO_init)
+gg1=gg_mat(SCO_mod)
+
+gg2=  gg_mat(SCO_mod)+
+    geom_point(data=a2bdf2,aes(x,y),color="red")
+
+gg0
+gg1
+gg2
+```
+
+```{r}
+trnalist$gg0=gg0
+trnalist$gg1=gg1
+trnalist$gg2=gg2
+
+trnalist$gg_sim1=gg_mat(mrf$mat_apc)
+trnalist$gg_sim2=gg_mat(mrf2$mat_apc)
+```
+
+```{r}
+
+
+gg_mat(mrf2$mat_apc)
+```
+
+
+```{r}
+save(trnalist,file="~/trnalist.rda")
+```
+
+
+```{r}
+seqinr::c2s(seq)
+```
+
+```{r}
+seq2=seq
+ss=pair2dbn(mrf_top_pair,mrflen=mrf$len)
+seqinr::c2s(seq)
+seq2[a2b==-1]="."
+
+seq2[a2b>-1]=toupper(seq2[a2b>-1])
+
+
+a2b_1=a2b+1
+
+a2b_1
+ss2=character(length=length(seq2))
+
+ss2[]="-"
+
+ss2[a2b>-1]=ss[a2b_1[a2b>-1]]
+paste0(ss2,collapse = "")
+paste0(ss,collapse = "")
+seqinr::c2s(seq2)
+seqinr::c2s(seq)
+```
+
+
+
+
+
+

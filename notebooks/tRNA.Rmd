@@ -1,0 +1,160 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+
+library(ggplot2)
+library(tidyr)
+```
+
+
+```{r}
+benchs2.f=list.files("../data/bralibase_2.1/k2_cmaln/",full.names = TRUE)
+
+benchs2=lapply(benchs2.f, function(fname){
+  df= data.table::fread(fname)
+  df
+  
+  caseid=gsub(".mrfaln.*","",basename(fname))
+
+  df2 = df %>%
+    mutate(
+      caseid=caseid,
+      apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+      sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+      id = gsub(".raw.fa.*", "", V1)
+    ) %>%
+    select(
+      caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
+    )
+  df2$method="cmaln"
+  return(df2)
+})
+
+
+names(benchs2)=basename(benchs2.f)
+
+benchs2.all=do.call(rbind, benchs2)
+
+# benchs2.all$method="cmaln"
+```
+
+
+
+
+```{r}
+benchs.f=list.files("../data/bralibase_2.1/k2_mrfscores/",full.names = TRUE)
+
+benchs=lapply(benchs.f, function(fname){
+  df= data.table::fread(fname)
+  
+  caseid=gsub(".mrfaln.*","",basename(fname))
+  
+  df2 = df %>%
+    mutate(
+      caseid=caseid,
+      apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+      sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+      id = gsub(".raw.fa.*", "", V1)
+    ) %>% 
+    select(
+      caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
+    )
+  df2$method="gap_o_1"
+  return(df2)
+})
+
+
+names(benchs)=basename(benchs.f)
+
+
+# benchs.all=do.call(rbind, benchs)
+
+# benchs.all$method="gap_o_-1"
+```
+
+
+
+## R Markdown
+
+```{r}
+plot_sps=function(df){
+  gg=
+  df %>% 
+  ggplot(aes(x=apsi,y=score_SPS,color=method))+
+  geom_point(alpha=0.1)+
+    ylim(0,1)+
+    # scale_y_continuous(breaks=seq(0,1,0.1))+
+  # scale_x_continuous(breaks=c(20,30,40,50,60,70))+
+  geom_smooth(method="loess") +theme_classic()
+  return(gg)
+}
+```
+
+
+```{r}
+  fnamelist=c(
+      weight_mrf_01="~/GIT/sandbox/mrftmp/new.trna.scores",
+      msa_seed="~/GIT/sandbox/mrftmp/seed.trna.scores",
+      psgap="~/GIT/sandbox/mrftmp/seed.PSgap.trna.scores",
+      # seedgapo4="~/GIT/sandbox/mrftmp/seed.gapo4.scores",
+      gap_o_4="~/GIT/sandbox/mrftmp/full.gap4.scores"
+  )
+
+  # fname="~/GIT/sandbox/mrftmp/new.trna.scores"
+  # fname2="~/GIT/sandbox/mrftmp/seed.trna.scores"
+
+get_trnanew = function(fnamelist) {
+  dflist = lapply(1:length(fnamelist), function(i) {
+    fname=fnamelist[[i]]
+    
+    df = data.table::fread(fname)
+    
+    # caseid = gsub(".mrfaln.*", "", basename(fname))
+    caseid="tRNA"
+    
+    df2 = df %>%
+      mutate(
+        caseid = caseid,
+        apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+        sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+        id = gsub(".raw.fa.*", "", V1)
+      ) %>%
+      select(caseid,
+             id,
+             apsi,
+             sci,
+             score_SPS = V2,
+             score_sci = V3)
+    df2$method = names(fnamelist)[i]
+    return(df2)
+  })
+  
+  return(do.call(rbind, dflist))
+}
+
+trna.new=get_trnanew(fnamelist)
+
+
+trna.all=rbind(trna.new, benchs$tRNA.mrfaln.compalignp,benchs2$tRNA.mrfaln.compalignp)
+
+trna.all.wide=
+  trna.all %>% 
+  pivot_wider(id_cols =c(id,apsi,sci), names_from = method,values_from = c(score_SPS,score_sci)) 
+
+gg_trna=plot_sps(trna.all)
+
+gg_trna
+
+
+```
+
+
+```{r}
+save(gg_trna,file="~/gg_trna.rda")
+```
+

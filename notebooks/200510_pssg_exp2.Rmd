@@ -1,0 +1,123 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## extract profile from MSA
+
+```{r}
+msa_trna=seqinr::read.fasta("/home/tc/GIT/sandbox/tRNA/RF00005.afa",forceDNAtolower = FALSE)
+
+msa.mat=do.call(rbind,msa_trna)
+```
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("/home/tc/GIT/sandbox/tRNA/RF00005.mrf")
+```
+
+
+```{r}
+dummy=apply(msa.mat,2,function(col){
+  ngap=sum(col=="-")
+  len=length(col)
+  
+  return((ngap+1)/(len+1))
+})
+```
+
+```{r}
+plot(dummy)
+```
+
+
+```{r}
+# idx_ins=which(dummy>0.5)
+# dummy
+inserts=character(length(dummy))
+inserts[]="."
+inserts[dummy>0.5]="-"
+
+inserts.s=seqinr::c2s(inserts)
+# inserts.s
+
+insert_starts=stringr::str_locate_all(inserts.s,"-{1,}")[[1]][,"start"]
+
+dummy[insert_starts]
+
+```
+
+
+```{r}
+log(1-dummy[insert_starts])
+```
+
+```{r}
+
+dels=dummy<0.5 & dummy >0
+
+
+
+```
+
+```{r}
+gap_del=numeric(length(dummy))
+gap_ins=numeric(length(dummy))
+
+gap_del[dels]=log(dummy[dels])
+gap_ins[]=min(gap_del)
+gap_ins[insert_starts-1]=log(1-dummy[insert_starts])
+
+```
+
+```{r}
+gap_profiles=data.frame(
+  idx=1:length(gap_ins),
+  gap_ins=gap_ins,
+  gap_del=gap_del,
+  dummy=dummy
+)
+```
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+gap_profiles %>%
+  filter(gap_del<0) %>%
+  pivot_longer(cols=c(gap_ins,gap_del)) %>%
+  ggplot(aes(idx,value))+
+  geom_point()+
+  facet_grid(name ~.)
+```
+
+
+```{r}
+gap_profiles
+```
+
+
+```{r}
+gap_profiles$i=match(gap_profiles$idx-1, mrf$h$i_ori)
+```
+
+```{r}
+gap_profiles
+```
+
+```{r}
+!is.na(gap_profiles$i)
+```
+
+```{r}
+gap_profiles2=gap_profiles %>% filter(!is.na(i))
+```
+
+```{r}
+save(gap_profiles2,file="../rdata/trna.gaps.rda")
+```
+

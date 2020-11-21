@@ -1,0 +1,320 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+library(dplyr)
+```
+
+## R Markdown
+
+
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("~/GIT/DATA/rna_pk/mrf/Downstream-peptide/tmp.sto.afa.mrf")
+
+seqs=seqinr::read.fasta("~/GIT/DATA/rna_pk/mrf/Downstream-peptide/tmp.sto.afa")
+
+ss=system2("cat","~/GIT/DATA/rna_pk/mrf/Downstream-peptide/tmp.sto |grep '^#=GC SS_cons' |awk '{print $3}' ",stdout = TRUE)
+```
+
+
+```{r}
+seqs_encall=lapply(seqs,function(seq){
+  testenc=RNAmrf::encode_seq(seq)
+  testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf$h$i_ori)
+  
+  return(testenc)
+})
+
+seqs_enc_int_ref_renum=lapply(seqs,function(seq){
+  testenc=RNAmrf::encode_seq(seq)
+  testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf$h$i_ori)
+  
+  return(testenc$seq_int_ref_renum)
+})
+```
+
+
+```{r}
+a2b2seq= function(a2b_1b,seq,mrflen,type=c("c","s")){
+
+  type=match.arg(type)
+
+  a2b=a2b_1b
+  seq_aln = character(length = mrflen)
+  seq_aln[] = "-"
+
+  seq_aln[a2b[a2b>0]] = seq[a2b > 0]
+
+  if (type=="s"){
+    seq_aln = paste0(seq_aln,collapse = "")
+  }
+
+  return(seq_aln)
+
+}
+
+
+ss2pairsdf = function(ss, mrf,pk=FALSE) {
+  pairs = integer(length = length(ss))
+  stack1 = integer() # <>
+  stack2 = integer() # Aa
+  
+  for (i in 1:length(ss_c)) {
+    if (ss[i] == "<") {
+      stack1 = append(stack1, i)
+    }
+    if (ss[i] == ">") {
+      if(!pk){
+        pairs[tail(stack1, 1)] = i
+      }
+      stack1 = head(stack1, -1)
+    }
+    if (ss[i] == "A") {
+      stack2 = append(stack2, i)
+    }
+    if (ss[i] == "a") {
+      pairs[tail(stack2, 1)] = i
+      stack2 = head(stack2, -1)
+    }
+  }
+  
+  pairsdf = data.frame(i = 0:(length(pairs) - 1),
+                       j = pairs - 1) %>%
+    mutate(i_new = match(i, mrf$h$i_ori),
+           j_new = match(j, mrf$h$i_ori)) %>%
+    filter(j_new > 0) %>%
+    mutate(i_ori=i+1,j_ori=j+1) %>% 
+    select(i = i_new, j = j_new,i_ori,j_ori)
+  
+  return(pairsdf)
+}
+
+ss_c=seqinr::s2c(ss)
+pairsdf=ss2pairsdf(ss_c,mrf = mrf)
+
+pairsdf_pk=ss2pairsdf(ss_c,mrf,pk = TRUE)
+
+pair_positions=unlist(pairsdf[,1:2])
+
+```
+
+
+
+```{r}
+gg_mat(mrf$mat_apc)+ annotate(geom = "point",y=pair_positions,x=-1)
+gg_mat(mrf$mrf_h)+ annotate(geom = "point",y=pair_positions,x=-1)
+```
+
+```{r eval=FALSE}
+aln_a2b=pbapply::pblapply(seqs,function(seq){
+  a2b=align_seq2mrf(seq,mrf = mrf,debug = FALSE,gap_open = -2)
+  a2b_1b=a2b+1
+  return(a2b_1b)
+})
+
+
+save(aln_a2b,file="../rdata/alna2b_pk2.rda")
+```
+
+
+```{r}
+load("../rdata/alna2b_pk2.rda")
+```
+
+
+```{r}
+
+
+sps_all=pbapply::pbsapply(1:length(aln_a2b),function(i){
+  len=length(aln_a2b[[i]])
+
+    
+  sps=sum(aln_a2b[[i]]==seqs_enc_int_ref_renum[[i]],na.rm = TRUE)/len
+  
+  # message(sum(is.na(seqs_enc_int_ref_renum[[i]])))
+  return(sps)
+})
+
+plot(sps_all)
+
+median(sps_all)
+```
+
+
+
+
+```{r}
+
+sps_bp=pbapply::pbsapply(1:length(aln_a2b),function(i){
+  len=length(pair_positions)
+  sps=sum(aln_a2b[[i]][pair_positions]==seqs_enc_int_ref_renum[[i]][pair_positions],na.rm = TRUE)/len
+  raw=sum(aln_a2b[[i]][pair_positions]==seqs_enc_int_ref_renum[[i]][pair_positions],na.rm = TRUE)
+  
+  return(sps)
+})
+
+plot(sps_bp)
+median(sps_bp)
+```
+
+
+
+```{r}
+pairsinfo=pbapply::pbsapply(1:length(aln_a2b),function(i){
+   npair=nrow(pairsdf)
+   
+   aligned_seq=a2b2seq(aln_a2b[[i]],seq=seqs_encall[[i]]$seq_ungapped,mrflen = mrf$len,"c")
+   
+   pairs_in_aln=paste0(aligned_seq[pairsdf[,1]],aligned_seq[pairsdf[,2]])
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+  
+})
+
+
+
+pairsinfo2=pbapply::pbsapply(1:length(aln_a2b),function(i){
+   npair=nrow(pairsdf)
+   
+   a2b_tmp=seqs_encall[[i]]$seq_int_ref_renum
+   a2b_tmp[is.na(a2b_tmp)]=-1
+   aligned_seq=a2b2seq(a2b_tmp,seq=seqs_encall[[i]]$seq_ungapped,mrflen = mrf$len,"c")
+   
+   pairs_in_aln=paste0(aligned_seq[pairsdf[,1]],aligned_seq[pairsdf[,2]])
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+  
+})
+
+plot(pairsinfo2)
+plot(pairsinfo)
+dfpairinfo=data.frame(
+  mrfalign_pair=pairsinfo,
+  cmalign_pair=pairsinfo2
+)
+library(ggplot2)
+
+dfpairinfo %>% 
+  ggplot(aes(cmalign_pair,mrfalign_pair))+
+  geom_point()+geom_abline()
+
+table(dfpairinfo$mrfalign_pair>dfpairinfo$cmalign_pair)
+
+table(dfpairinfo$mrfalign_pair<dfpairinfo$cmalign_pair)
+
+
+table(dfpairinfo$mrfalign_pair==dfpairinfo$cmalign_pair)
+
+```
+
+
+```{r}
+
+
+pairs_test=pairsdf_pk
+
+pairsinfo=pbapply::pbsapply(1:length(aln_a2b),function(i){
+   npair=nrow(pairs_test)
+   
+   aligned_seq=a2b2seq(aln_a2b[[i]],seq=seqs_encall[[i]]$seq_ungapped,mrflen = mrf$len,"c")
+   
+   pairs_in_aln=paste0(aligned_seq[pairs_test[,1]],aligned_seq[pairs_test[,2]])
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+  
+})
+
+
+
+pairsinfo2=pbapply::pbsapply(1:length(aln_a2b),function(i){
+   npair=nrow(pairs_test)
+   
+   a2b_tmp=seqs_encall[[i]]$seq_int_ref_renum
+   a2b_tmp[is.na(a2b_tmp)]=-1
+   aligned_seq=a2b2seq(a2b_tmp,seq=seqs_encall[[i]]$seq_ungapped,mrflen = mrf$len,"c")
+   
+   pairs_in_aln=paste0(aligned_seq[pairs_test[,1]],aligned_seq[pairs_test[,2]])
+
+  pairs_in_aln=toupper(pairs_in_aln)
+
+
+  return(sum(pairs_in_aln %in% RNAmrf::BP_canonical)/npair)
+  
+})
+
+dfpairinfo=data.frame(
+  mrfalign_pair=pairsinfo,
+  cmalign_pair=pairsinfo2
+)
+library(ggplot2)
+
+dfpairinfo %>% 
+  ggplot(aes(cmalign_pair,mrfalign_pair))+
+  geom_point()+geom_abline()
+
+```
+
+
+```{r}
+summary((dfpairinfo))
+```
+
+
+```{r}
+rslt_pk2=list(
+  sps_all,
+  sps_bp,
+  dfpairinfo
+  
+)
+```
+
+```{r}
+save(rslt_pk2,file="~/rslt_pk2.rda")
+```
+
+====
+exp
+
+```{r}
+seqmat=do.call(rbind,seqs)
+
+ncol(seqmat)
+length(ss_c)
+```
+
+```{r}
+pairsdf_pk
+```
+
+```{r}
+table(seqmat[,4],seqmat[,112])
+table(seqmat[,5],seqmat[,111])
+table(seqmat[,6],seqmat[,110])
+table(seqmat[,7],seqmat[,109])
+table(seqmat[,8],seqmat[,108])
+```
+
+
+```{r}
+check_pk=function(seqmat,pk){
+  
+}
+```
+

@@ -1,0 +1,58 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r}
+msa=seqinr::read.fasta("~/GIT/sandbox/tRNA/RF00005.afa")
+
+msa.mat=do.call(rbind,msa)
+
+gap_profile3=
+apply(msa.mat,2,function(col){
+  log((1+sum(col=="-"))/length(msa))
+})
+
+plot(dummy)
+plot(gap_profile2)
+```
+
+```{r}
+du
+```
+
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("~/GIT/sandbox/tRNA/newtRNA.mrf")
+```
+
+```{r}
+gap_profile2= mrf$mrf_h[,5]
+
+df=data.frame(
+  id=1:118,
+  gap1=dummy,
+  gap2=gap_profile2
+)
+library(ggplot2)
+library(dplyr)
+df %>% 
+  ggplot(aes(gap1,gap2))+
+  geom_point()+
+  geom_smooth()
+```
+
+
+```{r}
+df %>% 
+  ggplot(aes(x=gap1))+
+  geom_histogram(bins = 10)
+```
+

@@ -198,33 +198,51 @@ save(gg1list, file="../rdata/gg1list.rda")
 ## new TRNA
 
 ```{r}
-fname="~/GIT/sandbox/mrftmp/new.trna.scores"
+  fnamelist=c(
+      new.trna="~/GIT/sandbox/mrftmp/new.trna.scores",
+      seedmsa="~/GIT/sandbox/mrftmp/seed.trna.scores",
+      psgap="~/GIT/sandbox/mrftmp/seed.PSgap.trna.scores"
+  )
 
-  df= data.table::fread(fname)
-  
-  caseid=gsub(".mrfaln.*","",basename(fname))
-  
-  df2 = df %>%
-    mutate(
-      caseid=caseid,
-      apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
-      sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
-      id = gsub(".raw.fa.*", "", V1)
-    ) %>% 
-    select(
-      caseid,id, apsi, sci, score_SPS=V2,score_sci=V3
-    )
-  df2$method="mrfaln_new"
+  # fname="~/GIT/sandbox/mrftmp/new.trna.scores"
+  # fname2="~/GIT/sandbox/mrftmp/seed.trna.scores"
 
-trna.all=rbind(df2, benchs$tRNA.mrfaln.compalignp,benchs2$tRNA.mrfaln.compalignp)
+get_trnanew = function(fnamelist) {
+  dflist = lapply(fnamelist, function(fname) {
+    df = data.table::fread(fname)
+    
+    # caseid = gsub(".mrfaln.*", "", basename(fname))
+    caseid="tRNA"
+    
+    df2 = df %>%
+      mutate(
+        caseid = caseid,
+        apsi = as.numeric(gsub(".*apsi-(.*).sci.*", "\\1", V1)),
+        sci = as.numeric(gsub(".*sci-(.*).no.*", "\\1", V1)),
+        id = gsub(".raw.fa.*", "", V1)
+      ) %>%
+      select(caseid,
+             id,
+             apsi,
+             sci,
+             score_SPS = V2,
+             score_sci = V3)
+    df2$method = basename(fname)
+    return(df2)
+  })
+  
+  return(do.call(rbind, dflist))
+}
+
+trna.new=get_trnanew(fnamelist)
+
+
+trna.all=rbind(trna.new, benchs$tRNA.mrfaln.compalignp,benchs2$tRNA.mrfaln.compalignp)
 
 trna.all.wide=
   trna.all %>% 
-  pivot_wider(id_cols =c(id,apsi,sci), names_from = method,values_from = c(score_SPS,score_sci)) %>% 
-  filter(!is.na(score_SPS_mrfaln_new))
-```
+  pivot_wider(id_cols =c(id,apsi,sci), names_from = method,values_from = c(score_SPS,score_sci)) 
 
-```{r}
 plot_sps(trna.all)
 ```
 
@@ -305,3 +323,16 @@ tmpall %>%
     scale_y_continuous(breaks=seq(0,1,0.1))+
   geom_smooth(method="loess",aes(color=grp)) +theme_classic()
 ```
+
+
+
+```{r}
+gap_e_list=c(0.001,0.01, 0.05, 0.1, 0.5)
+# gap_e=as.numeric(args[6])
+# gap_o=as.numeric(args[7])
+
+gap_o_list=c(-0.1, -0.5, -1, -2, -5, -10,-20, -50)
+
+expand.grid(gap_e_list,gap_o_list)
+```
+

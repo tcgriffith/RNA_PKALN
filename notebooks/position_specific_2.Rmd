@@ -1,0 +1,31 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## position specific gap
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/sandbox/tRNA/RF00005.afa")
+
+seq.mat=do.call(rbind,seqs)
+```
+
+```{r}
+table(seq.mat)
+```
+
+```{r}
+gaps=apply(seq.mat,2,function(col){
+  return(sum(col=="-")/length(col))
+})
+
+gaps
+plot(gaps)
+```
+
+

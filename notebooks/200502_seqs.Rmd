@@ -1,0 +1,96 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+```
+
+## R Markdown
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("~/GIT/sandbox/mrftmp/mrfonly/tRNA/tmp.sto.afa.mrf")
+```
+
+
+
+```{r}
+library(plotly)
+```
+
+```{r}
+mrf$array_j[29,39,,]
+```
+
+```{r}
+mrf$array_j[29,38,,]
+```
+
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/bralibase_2.1/k2/tRNA/tRNA.apsi-18.sci-119.no-1.raw.fa")
+
+seq=seqs[[2]]
+
+
+
+# gap_profile[]=-1
+iteration=1
+wt_h=1.0
+wt_j=1.0
+gap_ext=0.1
+gap_open=-1
+debug=FALSE
+
+
+  exp_seq = encode_seq(seq)
+
+  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,mrf_h = mrf$mrf_h)
+
+  
+  SCO_mod= RNAmrf:::mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_open,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+
+
+  message("aln1")
+  
+  gg_mat(SCO_mod)
+
+  message("fixed gap")
+  
+  a2b=RNAmrf:::align(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
+  
+a2bdf=data.frame(
+  x=a2b+1,
+  y=1:length(a2b)
+) %>% filter(x>0)
+
+gg_mat(SCO_mod)+
+    geom_point(data=a2bdf,aes(x,y),color="red")
+  # a2b2seq(a2b+1, seq,mrf$len,type = "s")
+  # aligned_seq=a2b2seq(a2b+1, seq,mrf$len,type = "c")
+  # bench_pair(aligned_seq, pairs=mrf_top_pair)
+```
+
+```{r}
+gg_mat(SCO_init)
+gg_mat(SCO_mod)
+```
+
+
+```{r}
+a2b
+```
+

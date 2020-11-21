@@ -1,0 +1,213 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+bench_alna2b = function(a2bs, seqs) {
+  aln_sens = sapply(1:length(a2bs), function(i) {
+    a2bref = seqs[[i]]$seq_int_ref_renum
+    a2btest = a2bs[[i]]
+    idx = which(a2btest > 0)
+    ncols = sum(a2bref > 0)
+    sens = sum(a2btest[idx] == a2bref[idx]) / ncols
+    return(sens)
+  })
+  return((aln_sens))
+  # return(aln_sens)
+}
+```
+
+
+
+## R Markdown
+
+362 536 596 607 635 763 903
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("/home/tc/GIT/DATA/rfam_builder/test/RF00005.seed.mrf")
+```
+
+```{r}
+RNAmrf::encode_seq
+```
+
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/DATA/rfam_builder/test/RF00005.seed.afa")
+seqs_encall=lapply(seqs,function(seq){
+  testenc=RNAmrf::encode_seq(seq)
+  testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf$h$i_ori)
+  testenc$seq_int_ref_renum[is.na(testenc$seq_int_ref_renum)]=0
+  return(testenc)
+})
+
+
+
+```
+
+```{r}
+# idx=c(362, 536, 596, 607, 635, 763, 903)
+idx=c(362)
+aln_a2b=pbapply::pblapply(idx,function(i){
+  
+  a2b=align_seq2mrf(seqs[[i]],mrf = mrf,debug = FALSE,gap_open = -1)
+  a2b_1b=a2b+1
+  return(a2b_1b)
+})
+
+bench_alna2b(aln_a2b,seqs_encall[idx])
+```
+
+## try psgap
+
+```{r}
+load("../rdata/trna.gaps.rda")
+```
+
+```{r}
+align_seq2mrf_psgap2=function(seq, mrf,iteration=20,wt_h=1.0,wt_j=1.0,gap_ext=0.1, gap_ins,gap_del,debug=TRUE) {
+
+  exp_seq = RNAmrf::encode_seq(seq)
+
+  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h)
+  SCO_mod = RNAmrf:::mod_SCO_PSgap2(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_ins = gap_ins,
+    gap_del = gap_del,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+
+  a2b=RNAmrf:::align_PSgap2(SCO_mod,gap_ext = gap_ext,gap_ins = gap_ins,gap_del = gap_del)
+  return(a2b)
+}
+```
+
+
+
+```{r}
+
+
+aln_a2b_ps2=pbapply::pblapply(idx,function(i){
+  
+  a2b=align_seq2mrf_psgap2(seqs[[i]],mrf = mrf,gap_ins = gap_profiles2$gap_ins,gap_del = gap_profiles2$gap_del,debug = FALSE)
+  
+  a2b_1b=a2b+1
+  return(a2b_1b)
+})
+
+bench_alna2b(aln_a2b_ps2,seqs_encall[idx])
+bench_alna2b(aln_a2b,seqs_encall[idx])
+
+```
+
+```{r eval=FALSE}
+# idx=1:length(seqs)
+aln_a2b_ps2_full=pbapply::pblapply(seqs,function(seq){
+  
+  # seq=seqs[[i]]
+  
+  a2b=align_seq2mrf_psgap2(seq,mrf = mrf,gap_ins = gap_profiles2$gap_ins,gap_del = gap_profiles2$gap_del,debug = FALSE)
+  
+  a2b_1b=a2b+1
+  return(a2b_1b)
+})
+saveRDS(aln_a2b_ps2_full, file="../rdata/trna_aln_a2b_ps2_run3.rda")
+
+```
+
+
+```{r eval=FALSE}
+save(aln_a2b_ps2_full, file="../rdata/trna_aln_a2b_ps2_run2.rda")
+```
+
+```{r eval=FALSE}
+save(aln_a2b_ps2_full, file="../rdata/trna_aln_a2b_ps2.rda")
+```
+
+### compare
+```{r}
+aln_a2b_ps2_full=readRDS("../rdata/trna_aln_a2b_ps2_run3.rda")
+load("../rdata/trna_aln_a2b.rda")
+aln_a2b_g5=aln_a2b
+load("../rdata/trna_wt2.rda")
+load("../rdata/trna_aln_a2b_run2.rda")
+aln_a2b_g1=aln_a2b
+```
+
+
+
+```{r}
+df=data.frame(
+  wt=wt2,
+  s_nogap=bench_alna2b(aln_a2b,seqs_encall),
+  s_g5=bench_alna2b(aln_a2b_g5,seqs_encall),
+  s_g1=bench_alna2b(aln_a2b_g1,seqs_encall),
+  s_psgap=bench_alna2b(aln_a2b_ps2_full,seqs_encall)
+)
+
+df %>% 
+  # filter(wt2>0.5) %>% 
+ggplot(aes(s_g1,s_g5))+geom_point()+
+  geom_abline()
+
+df %>% 
+  # filter(wt2>0.5) %>% 
+ggplot(aes(s_g5,s_psgap))+geom_point()+
+  geom_abline()
+```
+
+```{r}
+df %>% summarise_all(mean)
+```
+
+
+```{r}
+table(df$s_nogap>df$s_psgap)
+```
+
+### debug
+
+```{r}
+df %>% filter(s_g5 <0.5)
+```
+
+```{r}
+which(df$s_g5<0.3)
+```
+
+
+```{r}
+idx_psbad=which(df$s_psgap<0.5)
+idx_psbad
+```
+
+```{r}
+aln_a2b[idx_psbad[5]]
+aln_a2b_ps2_full[idx_psbad[5]]
+```
+
+
+
+```{r}
+i=idx_psbad[5]
+
+a2b=align_seq2mrf_psgap2(seqs[[i]],mrf = mrf,gap_ins = gap_profiles2$gap_ins,gap_del = gap_profiles2$gap_del,debug = FALSE)
+a2b+1  
+```
+

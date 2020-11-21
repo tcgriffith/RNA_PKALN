@@ -1,0 +1,70 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+```
+
+
+```{r}
+# seq: 4*(1|2)
+
+score_mrf=function(seq,mrf_h,mrf_mat){
+  
+  single=0
+  pair=0
+  
+  for(i in 1:length(seq)){
+    single=single+mrf_h[i,seq[i]]
+    
+    for(j in 1:length(seq)){
+      if(i>=j) next;
+      pair=pair+ mrf_mat[(i-1)*2+seq[i],(j-1)*2+seq[j]]
+      
+    }
+  }
+  
+  total=single+pair
+  return(total)
+}
+```
+
+
+
+## R Markdown
+
+```{r}
+set.seed(42)
+mrf_h=matrix(rnorm(8),4,2)
+mrf_mat=matrix(rnorm(64,sd = 0.01),4*2,4*2)
+
+
+
+mrf_h
+mrf_mat
+
+mrf_mat=mrf_mat+1
+mrf_h=mrf_h 
+
+seqs=expand.grid(c(1,2),c(1,2),c(1,2),c(1,2))
+seqs
+
+seqs$score=apply(seqs,1, function(row){
+  tmpseq=row
+  return(score_mrf(tmpseq,mrf_h,mrf_mat))
+})
+
+seqs$prob=exp(-seqs$score)/sum(exp(-seqs$score))
+
+seqs
+seqs %>% 
+  mutate(id=paste0(Var1,Var2,Var3,Var4)) %>% 
+  ggplot(aes(id,prob))+geom_point()
+```
+
+
+

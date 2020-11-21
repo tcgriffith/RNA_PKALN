@@ -1,0 +1,335 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+```
+
+## R Markdown
+
+
+```{r}
+seq="GgagauaU.A.GCucAgU...GGU...AgaGCg.u.cgGaC.UuaaAAuCcg.aag........................g...cgcg.GGU.UCg.Aa..UCCcg.c.uaucucC.a"
+
+
+seq2=seqinr::s2c(seq)
+```
+
+```{r}
+sum(seq2!=".")
+```
+
+
+```{r}
+mrf=RNAmrf::read_mrf_renum("/home/tc/GIT/DATA/rfam_builder/test/RF00005.seed.mrf")
+```
+
+```{r}
+RNAmrf::gg_mat(mrf$mat_apc)
+```
+
+```{r}
+seq1=seqinr::read.fasta("/home/tc/GIT/DATA/rfam_builder/test/tmpseq2.fa")
+
+exp_seq = RNAmrf::encode_seq(seq1[[1]])
+```
+
+```{r}
+seq2=seqinr::s2c(tolower("GGAGAGAU-G-GCUGAGU---GGUUG-AUAGCU-C-CGGUC-UUGAAAACCG-GC--AUA-GUUCUUUAUUCAGAACUAU----CGAG-GGU-UCG-AA--UCCCU-C-UCUCUCC-U"))
+
+exp_seq2= RNAmrf::encode_seq(seq2)
+
+exp_seq2$seqintref_renum=match(exp_seq2$seq_int_ref-1,mrf$h$i_ori)
+exp_seq2$seqintref_renum[is.na(exp_seq2$seqintref_renum)]=0
+
+exp_seq2$seqintref_renum
+```
+
+```{r}
+ss=seqinr::s2c("(((((((,.,.<<<<___...___..._>>>>,.<.<<<<_.______>>>>.>,,........................,...,<<<.<<_.___.__.._>>>>.>.))))))).:")
+
+ss_mingap=ss[!is.na(match(0:117,mrf$h$i_ori))]
+
+ss_mingaps=seqinr::c2s(ss_mingap)
+
+```
+
+
+
+```{r}
+
+iteration=20
+wt_h=1.0
+wt_j=1.0
+gap_ext=0.1
+gap_open=-5
+debug=TRUE
+
+  exp_seq= RNAmrf::encode_seq(seq2)
+
+  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h)
+  SCO_mod = RNAmrf:::mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_open,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+
+  a2b=RNAmrf:::align(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
+  # return(a2b)
+  a2b
+
+a2binit=RNAmrf:::align(SCO_init,gap_ext = gap_ext,gap_open = gap_open)
+```
+
+
+
+```{r}
+RNAmrf:::score_aln(a2b,seq = exp_seq$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG = TRUE)
+
+RNAmrf:::score_aln(exp_seq2$seqintref_renum-1,seq = exp_seq$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG = TRUE)
+```
+
+```{r}
+a2b2seq_full = function(a2b1b, seq_ungapped) {
+  # a2binit_1b = a2binit + 1
+  newseq = seq_ungapped
+  newseq[a2b1b > 0] = toupper(newseq[a2b1b > 0])
+  out=seqinr::c2s(newseq)
+  return(out)
+}
+```
+
+```{r}
+
+a2binit_1b=a2binit+1
+
+newseq=exp_seq$seq_ungapped
+newseq[a2binit_1b>0]=toupper(newseq[a2binit_1b>0])
+
+seqinr::c2s(newseq)
+
+a2b1b=a2b+1
+
+newseq=exp_seq$seq_ungapped
+newseq[a2b1b>0]=toupper(newseq[a2b1b>0])
+
+seqinr::c2s(newseq)
+
+
+
+
+strct=character(length(a2b1b))
+strct[]="-"
+strct[a2b1b>0]="|"
+seqinr::c2s(strct
+            )
+
+
+aln=character(length(a2b1b))
+aln[]="-"
+aln[a2b1b==exp_seq2$seqintref_renum & a2b1b>0]="|"
+
+seqinr::c2s(aln)
+
+
+newseq=exp_seq2$seq_ungapped
+newseq[exp_seq2$seqintref_renum>0]=toupper(newseq[exp_seq2$seqintref_renum>0])
+seqinr::c2s(newseq)
+
+# ss_mingaps
+
+seqinr::c2s(ss[(1:118 %in% exp_seq2$seq_int_ref)])
+
+
+
+```
+
+
+
+
+
+```{r}
+
+a2b2seq = function(a2b1b, seq_ungap, len) {
+  seqaln = character(len)
+  seqaln[] = "-"
+  seqaln[a2b1b[a2b1b > 0]] = seq_ungap[a2b1b > 0]
+  seqinr::c2s(seqaln)
+}
+
+
+```
+
+```{r}
+a2b2seq(a2binit_1b,exp_seq$seq_ungapped,mrf$len)
+a2b2seq(a2b1b,exp_seq$seq_ungapped,mrf$len)
+a2b2seq(exp_seq2$seqintref_renum,exp_seq$seq_ungapped,mrf$len)
+```
+
+###msa
+
+
+```{r}
+seed.msa=seqinr::read.fasta("/home/tc/GIT/DATA/rfam_builder/test/RF00005.seed.afa")
+
+seqmat=do.call(rbind,seed.msa)
+seqmat.rmgap=seqmat[,mrf$h$i_ori+1]
+```
+
+```{r}
+calc_conserv=function(seqmat){
+  conserv=apply(seqmat,2,function(col){
+    na=sum(col=="a")
+    nu=sum(col=="u")
+    nc=sum(col=="c")
+    ng=sum(col=="g")
+    return(max(na,nu,nc,ng)/length(col))
+  })
+  
+}
+```
+
+```{r}
+cons=calc_conserv(seqmat.rmgap)
+
+plot(cons)
+```
+
+=================
+
+```{r}
+Rcpp::sourceCpp(here::here("src/utils.cpp"))
+```
+
+```{r}
+testmat=seqmat.rmgap
+```
+
+
+```{r}
+wt=calc_wt(testmat)
+wt2=1/wt
+```
+
+###
+
+align all seqs and establish healthy metrics
+
+
+```{r}
+seqs=seqinr::read.fasta("/home/tc/GIT/DATA/rfam_builder/test/RF00005.seed.afa")
+```
+
+```{r}
+seqs_encall=lapply(seqs,function(seq){
+  testenc=RNAmrf::encode_seq(seq)
+  testenc$seq_int_ref_renum=match(testenc$seq_int_ref-1,mrf$h$i_ori)
+  testenc$seq_int_ref_renum[is.na(testenc$seq_int_ref_renum)]=0
+  return(testenc)
+})
+```
+
+
+```{r eval=FALSE}
+aln_a2b=pbapply::pblapply(seqs,function(seq){
+  a2b=align_seq2mrf(seq,mrf = mrf,debug = FALSE,gap_open = -1)
+  a2b_1b=a2b+1
+  return(a2b_1b)
+})
+save(aln_a2b,file="../rdata/trna_aln_a2b_run2.rda")
+```
+
+
+```{r}
+load(file="../rdata/trna_aln_a2b.rda")
+```
+
+
+```{r}
+# compares columns in the mrf
+
+aln_sens=sapply(1:length(aln_a2b),function(i){
+  a2bref=seqs_encall[[i]]$seq_int_ref_renum
+  a2btest=aln_a2b[[i]]
+  idx=which(a2btest>0)
+  ncols=sum(a2bref>0)
+  sens=sum(a2btest[idx] == a2bref[idx])/ncols
+  return(sens)
+})
+```
+
+```{r}
+df=data.frame(
+  wt=wt2,
+  sens=aln_sens
+)
+# plot(aln_sens)
+
+library(ggplot2)
+library(dplyr)
+
+df %>%
+  ggplot(aes(wt,sens))+
+  geom_point()
+```
+
+
+```{r}
+id_lowsens=which(aln_sens<0.6)
+id_lowsens
+```
+
+```{r}
+aln_a2b[[903]]
+
+seqs_encall[[903]]$seq_int_ref_renum
+
+RNAmrf:::score_aln(seqs_encall[[903]]$seq_int_ref_renum-1,seq = seqs_encall[[903]]$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG = TRUE)
+
+```
+
+
+```{r}
+
+id=903
+
+a2b2seq(aln_a2b[[id]],seqs_encall[[id]]$seq_ungapped,mrf$len)
+a2b2seq_full(aln_a2b[[id]],seqs_encall[[id]]$seq_ungapped)
+a2b2seq_full(seqs_encall[[id]]$seq_int_ref_renum,seqs_encall[[id]]$seq_ungapped)
+```
+
+```{r}
+# seqs_encall$`AB003409.1/96-167`
+for(id in id_lowsens){
+  print(id)
+  score_aln=RNAmrf:::score_aln(aln_a2b[[id]]-1,seq = seqs_encall[[id]]$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG = TRUE)
+  score_ref=RNAmrf:::score_aln(seqs_encall[[id]]$seq_int_ref_renum-1,seq = seqs_encall[[id]]$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG = TRUE)
+  seqaln=a2b2seq(aln_a2b[[id]],seqs_encall[[id]]$seq_ungapped,mrf$len)
+  seqref=a2b2seq(seqs_encall[[id]]$seq_int_ref_renum,seqs_encall[[id]]$seq_ungapped,mrf$len)
+  print(seqaln)
+  print(seqref)
+  print(sprintf("%f %f",score_aln,score_ref))
+}
+# a2b2seq(a2binit_1b,exp_seq$seq_ungapped,mrf$len)
+
+
+```
+
+
+```{r}
+save(wt2,file="../rdata/trna_wt2.rda")
+```
+
+
+
