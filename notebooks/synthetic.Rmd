@@ -42,7 +42,7 @@ seqss
 set.seed(123)
 rng_seq=function(pairs=NULL,len=25){
   # myseq=character(25)
-  myseq=sample(c("A","U","C","G","-"),25,replace = TRUE,prob = c(1,1,1,1,0.3))
+  myseq=sample(c("A","U","C","G","-"),25,replace = TRUE, prob=c(1,1,1,1,0.5))
   
   
   ## add pairs
@@ -111,16 +111,6 @@ echo "//" >> seq1000_gaps.sto
 
 
 
-#head -n -1 $input_dir/$seq_id.sto > $input_dir/temp.sto
-#        echo "#=GC SS_cons                     "`cat $input_dir/$seq_id.dbn` > $input_dir/temp.txt
-#        cat $input_dir/temp.sto $input_dir/temp.txt > $input_dir/$seq_id.sto
-#        echo "//" >> $input_dir/$seq_id.sto
-
-#echo $PATH
-#sed 's/-//g' seq1000_gaps.fasta > seq1000_gaps.unaligned.fasta
-
-#esl-reformat stockholm seq1000_gaps.fasta > seq1000_gaps.fasta
-
 ```
 
 
@@ -137,157 +127,4 @@ cd $mywd
 gremlin_cpp -alphabet rna -i seq1000_gaps.fasta -o seq1000_gaps.fasta.gremlincpp -gap_cutoff 1.0 -mrf_o seq1000_gaps.mrf -gap_cutoff 1.0 > seq1000_gaps.fasta.gremlin.log
 
 ```
-
-
-
-
-## align
-
-```{r}
-mrf=RNAmrf::read_mrf(here::here("data/synth/seq1000_gaps.mrf"))
-```
-
-```{r}
-gg_mat(mrf$mrf_h)
-gg_mat(mrf$mat_apc)
-```
-
-
-#### gaps
-
-
-
-```{r}
-seqs=seqinr::read.fasta("/home/tc/GIT/RNA_PKALN/data/synth/seq1000_gaps.unaligned.fasta",forceDNAtolower=FALSE)
-```
-
-```{r}
-seqs.ref=seqinr::read.fasta(here::here("data/synth/seq1000_gaps.a2m"),forceDNAtolower=FALSE)
-```
-
-
-
-```{r debugit, eval=FALSE}
-
-myseq=seqs[[1]]
-myseq
-
-a2b=align_seq2mrf(myseq,mrf,-3, iteration=50)
-```
-
-### align
-
-
-```{r}
-aln_a2m=pbapply::pblapply(seqs,function(aseq){
-  aseq.low=tolower(aseq)
-  a2b=align_seq2mrf(aseq.low,mrf = mrf,gap_open = -3,debug = FALSE,iteration = 50,init_method=2)
-  a2b_1b=a2b+1
-  a2m=a2b2a2m(a2b_1b,aseq,len_seq = mrf$len)
-  return(a2m)
-})
-```
-
-```{r}
-seqidx.test= RNAmrf:::msa_a2m2seqidx(aln_a2m[[1]])
-seqidx.ref = RNAmrf:::msa_a2m2seqidx(seqs.ref[[1]])
-```
-
-
-
-```{r}
-msa_a2m2seqidx_all = function(seqs, idx_aln=NULL){
-  idx_seqidx=lapply(seqs, function(aseq){
-    seq_idx = RNAmrf:::msa_a2m2seqidx(aseq, idx_aln=idx_aln)
-    return(seq_idx)
-  })
-
-  seqidx_mat= do.call(rbind,idx_seqidx)
-}
-```
-
-```{r}
-seqidx.test = msa_a2m2seqidx_all(aln_a2m)
-seqidx.ref = msa_a2m2seqidx_all(seqs.ref)
-```
-
-```{r}
-seqidx.ref[1,]
-seqidx.test[1,]
-```
-
-```{r}
-seqs[[1]]
-```
-
-
-```{r}
-
-
-RNAmrf:::bench_by_range(seqidx.test=seqidx.test,seqidx.ref=seqidx.ref)
-```
-
-
-### debug
-
-```{r}
-
-iteration=10
-wt_h=1.0
-wt_j=1.0
-gap_ext=0.1
-gap_open=-5
-seq=seqtmp[[6]]
-seq=tolower(seq)
-debug=TRUE
-
-mrf=mrf
-
-  exp_seq = RNAmrf:::encode_seq(seq)
-
-  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,
-                            mrf_h = mrf$mrf_h)
-  
-  SCO_init2=RNAmrf:::ini_SCO(exp_seq$seq_int_ungapped,
-                             mrf_mat = mrf$mrf_mat,
-                             mrf_h = mrf$mrf_h)
-  
-  SCO_mod = RNAmrf:::mod_SCO(
-    SCO_init2,
-    iteration = iteration,
-    exp_seq$seq_int_ungapped,
-    mrf_mat = mrf$mrf_mat,
-    mrf_h = mrf$mrf_h,
-    wt_h = wt_h,
-    wt_j = wt_j,
-    gap_o=gap_open,
-    gap_e=gap_ext,
-    DEBUG = debug
-  )
-  # 
-  a2b=RNAmrf:::align(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
-  # # return(a2b)
-  a2b
-  
-  a2m=RNAmrf:::a2b2a2m(a2b,seq,mrflen=mrf$len)
-  
-  a2m
-
-  
-# gg_mat(SCO_mod)
-
-# gg_mat(SCO_init)
-# gg_mat(SCO_init2)
-```
-
-
-
-```{r}
-seq1=seqtmp[[1]]
-seq1enc=encode_seq(seq1)
-seq1enc
-
-RNAmrf:::score_aln(seq1enc$seq_int_ref-1,seq=seq1enc$seq_int_ungapped,mrf_mat = mrf$mrf_mat,mrf_h = mrf$mrf_h,DEBUG = TRUE)
-```
-
 

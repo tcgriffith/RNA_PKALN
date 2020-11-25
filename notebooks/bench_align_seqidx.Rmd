@@ -75,6 +75,24 @@ unlist(RNAmrf:::bench_dfref(seqidx.cm.test, seqidx.ref, dfref))
 
 
 
+
+## validation
+
+```{r}
+tmpmrf=RNAmrf::read_mrf(here::here("data/synth/rnamrf/rnamrf.afa.mrf"))
+
+gg_mat(tmpmrf$mrf_h)
+gg_mat(tmpmrf$mat_apc)
+```
+
+
+```{r}
+tmpmrf=RNAmrf::read_mrf(here::here("data/synth/cmalign/cmalign.afa.mrf"))
+
+gg_mat(tmpmrf$mrf_h)
+gg_mat(tmpmrf$mat_apc)
+```
+
 ## debug
 
 

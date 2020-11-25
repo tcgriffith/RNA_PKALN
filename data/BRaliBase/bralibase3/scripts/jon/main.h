@@ -1,1 +1,0 @@
-int GetInputValues(int argc, char *argv[], int commandline, int *is_harmonic, double *lambda, int *condition_pairs, int *debug_status, int *nsamples, int *output_original, char *dataName, char *treeName, char *outName, char *paramName);
