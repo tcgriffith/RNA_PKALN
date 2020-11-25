@@ -10,11 +10,7 @@ library(dplyr)
 source(here::here("R/misc.R"))
 ```
 
-## R Markdown
-
-```{r}
-mrf=RNAmrf::read_mrf_renum("../data/synth/seq1000.mrf")
-```
+## generate synthetic seqs
 
 
 ```{r}

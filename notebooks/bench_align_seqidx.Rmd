@@ -1,0 +1,130 @@
+---
+title: "Untitled"
+author: "TC"
+date: "11/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+# source(here::here("R/misc.R"))
+```
+
+## data
+
+```{r}
+mrf=RNAmrf::read_mrf(here::here("data/synth/seq1000_gaps.mrf"))
+```
+
+## align
+```{r eval=FALSE}
+seqs=seqinr::read.fasta(here::here("data/synth/seq1000_gaps.unaligned.fasta"),forceDNAtolower=FALSE)
+
+aln_a2m=pbapply::pblapply(seqs,function(aseq){
+  aseq.low=tolower(aseq)
+  seq.enc= RNAmrf:::encode_seq(aseq.low)
+  seq.int=seq.enc$seq_int_ungapped
+  
+  a2b=RNAmrf:::align_seq2mrf(aseq.low,mrf = mrf,gap_open = -3,debug = FALSE,iteration = 20,init_method=2)
+  a2b_1b=a2b+1
+  
+  a2m=RNAmrf:::a2b2a2m(a2b,seq.int,mrflen = mrf$len)
+  return(a2m)
+})
+seqinr::write.fasta(aln_a2m,names=names(aln_a2m), file.out=here::here("data/synth/seq1000_gaps.RNAmrf.a2m"))
+```
+
+
+```{r}
+
+
+seqs.ref=seqinr::read.fasta(here::here("data/synth/seq1000_gaps.a2m"),forceDNAtolower=FALSE)
+
+seqs.cm=seqinr::read.fasta(here::here("data/synth/seq1000_gaps.cmalign.a2m"),forceDNAtolower=FALSE)
+
+seqs.rnamrf=seqinr::read.fasta(here::here("data/synth/seq1000_gaps.RNAmrf.a2m"),forceDNAtolower=FALSE)
+
+```
+
+
+### performance overall
+```{r}
+seqidx.rnamrf.test = RNAmrf:::msa_a2m2seqidx_all(seqs.rnamrf)
+seqidx.cm.test=RNAmrf:::msa_a2m2seqidx_all(seqs.cm)
+seqidx.ref = RNAmrf:::msa_a2m2seqidx_all(seqs.ref)
+
+```
+
+
+```{r}
+dfref=RNAmrf:::read_dfref(here::here("data/synth/seq1000_gaps.sto"),fmrf=here::here("data/synth/seq1000_gaps.mrf"))
+
+# idx_select=RNAmrf:::get_idx_select(dfref)
+```
+
+```{r}
+library(RNAmrf)
+```
+
+```{r}
+unlist(RNAmrf:::bench_dfref(seqidx.rnamrf.test, seqidx.ref, dfref))
+
+unlist(RNAmrf:::bench_dfref(seqidx.cm.test, seqidx.ref, dfref))
+```
+
+
+
+## debug
+
+
+```{r eval=FALSE}
+
+iteration=50
+wt_h=1.0
+wt_j=1.0
+gap_ext=0.1
+gap_open=-3
+seq=seqs[[6]]
+seq=tolower(seq)
+debug=FALSE
+
+mrf=mrf
+
+  exp_seq = RNAmrf:::encode_seq(seq)
+  seq.int=exp_seq$seq_int_ungapped
+
+  SCO_init = RNAmrf:::ini_SCO_simple(exp_seq$seq_int_ungapped,
+                            mrf_h = mrf$mrf_h)
+  
+  SCO_init2=RNAmrf:::ini_SCO(exp_seq$seq_int_ungapped,
+                             mrf_mat = mrf$mrf_mat,
+                             mrf_h = mrf$mrf_h)
+  
+  SCO_mod = RNAmrf:::mod_SCO(
+    SCO_init,
+    iteration = iteration,
+    exp_seq$seq_int_ungapped,
+    mrf_mat = mrf$mrf_mat,
+    mrf_h = mrf$mrf_h,
+    wt_h = wt_h,
+    wt_j = wt_j,
+    gap_o=gap_open,
+    gap_e=gap_ext,
+    DEBUG = debug
+  )
+  # 
+  a2b=RNAmrf:::align(SCO_mod,gap_ext = gap_ext,gap_open = gap_open)
+  # # return(a2b)
+  a2b
+  
+  a2m=RNAmrf:::a2b2a2m(a2b,seq.int,mrflen=mrf$len)
+  
+  a2m
+
+  
+# gg_mat(SCO_mod)
+
+# gg_mat(SCO_init)
+# gg_mat(SCO_init2)
+```
