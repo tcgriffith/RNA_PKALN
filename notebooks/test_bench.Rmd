@@ -21,11 +21,12 @@ source(here::here("R/misc.R"))
 
 ```{r}
 # testdir="/home/tc/GIT/RNA_PKALN/data/RFAM_PK/RF00028"
-testdir="/home/tc/GIT/RNA_PKALN/data/synth/"
+# testdir="/home/tc/GIT/RNA_PKALN/data/synth/"
+testdir="~/remotedir/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF01725"
 
 mypkaln=read_pkaln_dir(testdir)
 
-bench_pkaln(mypkaln)
+# bench_pkaln(mypkaln)
 
 
 
@@ -34,10 +35,69 @@ bench_pkaln(mypkaln)
 ```
 
 
+```{r}
+tmp = mypkaln$seqidx.aln.list$rnamrf
+
+dfref=mypkaln$dfref
+
+tmpref=matrix(0,nrow=nrow(tmp),ncol=nrow(mypkaln$dfref))
+
+tmpref[,dfref$id_ref[dfref$id_mrf>0]]=tmp
+
+```
+
+```{r}
+mypkaln$seqidx.aln.list$rnamrf=tmpref
+```
+
+```{r}
+bench_pkaln(mypkaln)
+```
+
+
+
+
+```{r}
+RNAmrf:::read_dfref(fsto=paste0(testdir,"/RF01725.sto"),
+                    fmrf=paste0(testdir,"/input/RF01725.afa.mrf"))
+```
+
+
+
+```{r}
+seqidx.test=mypkaln$seqidx.aln.list$rnamrf
+seqidx.ref=mypkaln$seqidx.ref
+idx_select=RNAmrf:::get_idx_select(mypkaln$dfref)
+
+RNAmrf:::bench_by_range(seqidx.test,seqidx.ref, idx_select$col_all)
+```
+
+```{r}
+mypkaln$dfref
+```
+
+
 
 
 
 ### debug
+
+
+```{r}
+seqs=seqinr::read.fasta("~/remotedir/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF01725/input/RF01725.afa", forceDNAtolower=FALSE)
+
+seqs.mat=do.call(rbind,seqs)
+
+seqs.mat.ref=seqs.mat[,dfref$id]
+
+wts=RNAmrf:::calc_wt(seqs.mat.ref,0.8)
+
+seqs.test=seqs[wts< length(seqs) * 0.05]
+
+seqinr::write.fasta(seqs.test,names(seqs.test),file.out="~/remotedir/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF01725/input/RF01725.test.afa")
+```
+
+
 
 ```{r}
 filepkaln="/home/tc/remotedir/GIT/RNA_PKALN/data/RFAM_PK/RFAM.rds"
