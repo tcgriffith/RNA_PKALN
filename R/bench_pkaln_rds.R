@@ -14,7 +14,7 @@ source(here::here("R/misc.R"))
 
 filepkaln=args[1]
 
-pkaln.all=readRDS(filects)
+pkaln.all=readRDS(filepkaln)
 
 rslt.all = lapply(pkaln.all,bench_pkaln)
 
