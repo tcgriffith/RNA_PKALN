@@ -77,6 +77,15 @@ unlist(RNAmrf:::bench_dfref(seqidx.cm.test, seqidx.ref, dfref))
 
 
 ## validation
+/home/tc/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF00009
+
+```{r}
+tmpmrf=RNAmrf::read_mrf("/home/tc/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF00009/RF00009.afa.mrf")
+
+gg_mat(tmpmrf$mrf_h)
+gg_mat(tmpmrf$mat_apc)
+```
+
 
 ```{r}
 tmpmrf=RNAmrf::read_mrf(here::here("data/synth/rnamrf/rnamrf.afa.mrf"))
