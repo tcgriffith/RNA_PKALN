@@ -6,7 +6,7 @@ read_pkaln_dir = function(testdir) {
   dirlist = list.dirs(testdir, recursive = FALSE)
   dirlist = dirlist[!grepl("input", dirlist)]
   
-  seqs.ref = seqinr::read.fasta(file.path(testdir, "input", paste0(caseid, ".test.a2m")), forceDNAtolower =
+  seqs.ref = seqinr::read.fasta(file.path(testdir, "input", paste0(caseid, ".a2m")), forceDNAtolower =
                                   FALSE)
   pkaln$seqidx.ref = RNAmrf:::msa_a2m2seqidx_all(seqs.ref)
   
@@ -17,16 +17,26 @@ read_pkaln_dir = function(testdir) {
     RNAmrf:::msa_a2m2seqidx_all(seqs.aln)
   })
   
+  dfref=RNAmrf:::read_dfref(paste0(testdir,"/",caseid,".sto"),
+                                  file.path(testdir, "input", paste0(caseid, ".afa.mrf"))) 
   names(seqidx.aln.list) = basename(dirlist)
+  ## fix rnamrf idx to idx_ref
+  # if ("rnamrf" %in% names(seqidx.aln.list))
+  {
+    tmp = seqidx.aln.list$rnamrf
+    # dfref=dfref
+    tmpref=matrix(0,nrow=nrow(tmp),ncol=nrow(dfref))
+    tmpref[,dfref$id_ref[dfref$id_mrf>0 & dfref$id_ref >0]]=tmp[,dfref$id_mrf[dfref$id_mrf>0 & dfref$id_ref >0]]
+    seqidx.aln.list$rnamrf=tmpref
+  }
+
+  
+  
   pkaln$seqidx.aln.list=seqidx.aln.list
   
 
-  pkaln$dfref=RNAmrf:::read_dfref(paste0(testdir,"/",caseid,".sto"))
-  if (file.exists(file.path(testdir, "input", paste0(caseid, ".afa.mrf")))){
-    pkaln$dfref=RNAmrf:::read_dfref(paste0(testdir,"/",caseid,".sto"),
-                                    file.path(testdir, "input", paste0(caseid, ".afa.mrf"))                                    )
-  }  
   pkaln$caseid=caseid
+  pkaln$dfref=dfref
   return(pkaln)
 }
 
