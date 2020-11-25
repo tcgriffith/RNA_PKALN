@@ -12,13 +12,19 @@ caseid=$(basename $casedir)
 
 cd $casedir
 
+## run cmalign
 
+mkdir -p cmalign
+
+cmalign -o cmalign/$caseid.cmalign.a2m --outformat A2M $caseid.cm  input/$caseid.test.fasta 
 
 ## run mrfalign
 
-gremlin_cpp -alphabet rna -i input/$caseid.afa -o input/$caseid.afa.gremlincpp -gap_cutoff 0.5 -mrf_o input/$caseid.afa.mrf
+if [ ! -f input/$caseid.afa.mrf ]; then
+    gremlin_cpp -alphabet rna -i input/$caseid.afa -o input/$caseid.afa.gremlincpp -gap_cutoff .8 -mrf_o input/$caseid.afa.mrf
+fi
 
 
 mkdir -p rnamrf
 
-$DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.unaligned.fasta rnamrf/$caseid.rnamrf.a2m
+$DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.test.fasta  rnamrf/$caseid.rnamrf.a2m
