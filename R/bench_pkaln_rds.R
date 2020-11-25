@@ -16,7 +16,9 @@ filepkaln=args[1]
 
 pkaln.all=readRDS(filepkaln)
 
-rslt.all = lapply(pkaln.all,bench_pkaln)
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln(pkaln))
+})
 
 rslt.df.s = do.call(rbind,rslt.all)
 

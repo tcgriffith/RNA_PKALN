@@ -38,3 +38,24 @@ bench_pkaln(mypkaln)
 
 
 ### debug
+
+```{r}
+filepkaln="/home/tc/remotedir/GIT/RNA_PKALN/data/RFAM_PK/RFAM.rds"
+```
+
+
+
+
+```{r}
+pkaln.all=readRDS(filepkaln)
+
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln(pkaln))
+})
+
+rslt.df.s = do.call(rbind,rslt.all)
+
+print(rslt.df.s,digits = 2)
+```
+
+
