@@ -14,12 +14,12 @@ library(RNAmrf)
 ## data
 
 ```{r}
-mrf=RNAmrf::read_mrf(here::here("data/synth/seq1000_gaps.mrf"))
+mrf=RNAmrf::read_mrf(here::here("data/synth/input/synth.afa.mrf"))
 ```
 
 ## align
 ```{r eval=FALSE}
-seqs=seqinr::read.fasta(here::here("data/synth/seq1000_gaps.unaligned.fasta"),forceDNAtolower=FALSE)
+seqs=seqinr::read.fasta(here::here("data/synth/input/synth.unaligned.fasta"),forceDNAtolower=FALSE)
 
 aln_a2m=pbapply::pblapply(seqs,function(aseq){
   aseq.low=tolower(aseq)
@@ -32,8 +32,11 @@ aln_a2m=pbapply::pblapply(seqs,function(aseq){
   a2m=RNAmrf:::a2b2a2m(a2b,seq.int,mrflen = mrf$len)
   return(a2m)
 })
-seqinr::write.fasta(aln_a2m,names=names(aln_a2m), file.out=here::here("data/synth/seq1000_gaps.RNAmrf.a2m"))
+
+dir.create(here::here("data/synth/rnamrf"))
+seqinr::write.fasta(aln_a2m,names=names(aln_a2m), file.out=here::here("data/synth/rnamrf/synth.rnamrf.a2m"))
 ```
+
 
 
 ```{r}
@@ -79,12 +82,6 @@ unlist(RNAmrf:::bench_dfref(seqidx.cm.test, seqidx.ref, dfref))
 ## validation
 /home/tc/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF00009
 
-```{r}
-tmpmrf=RNAmrf::read_mrf("/home/tc/GIT/RNA_PKALN/data/RFAM_PK/RFAM/RF00009/RF00009.afa.mrf")
-
-gg_mat(tmpmrf$mrf_h)
-gg_mat(tmpmrf$mat_apc)
-```
 
 
 ```{r}

@@ -1,0 +1,40 @@
+---
+title: "Untitled"
+author: "TC"
+date: "11/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+source(here::here("R/misc.R"))
+```
+
+## R Markdown
+
+```{r}
+
+
+```
+
+
+```{r}
+# testdir="/home/tc/GIT/RNA_PKALN/data/RFAM_PK/RF00028"
+testdir="/home/tc/GIT/RNA_PKALN/data/synth/"
+
+mypkaln=read_pkaln_dir(testdir)
+
+bench_pkaln(mypkaln)
+
+
+
+
+
+```
+
+
+
+
+
+### debug

@@ -2,39 +2,52 @@
 args = commandArgs(trailingOnly=TRUE)
 
 suppressPackageStartupMessages(library(RNAmrf))
-
-suppressPackageStartupMessages(library(tidyr))
-suppressPackageStartupMessages(library(dplyr))
-
+# suppressPackageStartupMessages(library(tidyr))
+# suppressPackageStartupMessages(library(dplyr))
 
 
+
+
+### funcs
+
+mrfaln_seqs = function(seqs, mrf, init_method=1) {
+  pbapply::pboptions(type="txt")
+  aln_a2m=pbapply::pblapply(seqs,function(aseq){
+    aseq.low=tolower(aseq)
+    seq.enc= RNAmrf:::encode_seq(aseq.low)
+    seq.int=seq.enc$seq_int_ungapped
+    
+    a2b=RNAmrf:::align_seq2mrf(aseq.low,
+                               mrf = mrf,
+                               gap_open = -3,
+                               debug = FALSE,
+                               iteration = 20,
+                               init_method=init_method)
+    # a2b_1b=a2b+1
+    
+    a2m=RNAmrf:::a2b2a2m(a2b,seq.int,mrflen = mrf$len)
+    return(a2m)
+  })
+  
+  return(aln_a2m)
+}
 
 ### main
 
-# filemrf="/home/tc/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/tmp.sto.afa.mrf"
-# fileout="/home/tc/GIT/sandbox/mrftmp/mrf/5_8S_rRNA/"
-# fileseqs="/home/tc/GIT/sandbox/mrftmp/5_8S_rRNA/"
-
 filemrf=args[1]
-fileout=args[2]
-fileseqs=args[3]
+fileseqs=args[2]
+fileout=args[3]
+
+seqs=seqinr::read.fasta(fileseqs,forceDNAtolower=FALSE)
+
+mymrf=read_mrf(filemrf)
 
 
-seqfiles=list.files(fileseqs,pattern = "raw")
+out_a2m =mrfaln_seqs(seqs,mymrf)
+
+seqinr::write.fasta(out_a2m,names=names(out_a2m), 
+                    file.out=fileout)
 
 
-mymrf=read_mrf_renum(filemrf)
 
 
-pbapply::pboptions(type="txt")
-dummy = pbapply::pblapply(seqfiles, function(seqfile) {
-  seqs = seqinr::read.fasta(file.path(fileseqs, seqfile))
-  
-  a2b_1 = align_seq2mrf(seqs[[1]], mymrf,gap_open=-4, debug = FALSE)
-  a2b_2 = align_seq2mrf(seqs[[2]], mymrf,gap_open=-4, debug = FALSE)
-  seqaln = pair_a2b2aln(a2b_1, a2b_2, seqs = seqs)
-  
-  seqinr::write.fasta(seqaln,
-                      names = names(seqs),
-                      file.out = file.path(fileout, paste0(seqfile, ".mrfaln.fa")))
-})
