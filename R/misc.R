@@ -1,4 +1,4 @@
-read_pkaln_dir = function(dir) {
+read_pkaln_dir = function(testdir) {
   caseid = basename(testdir)
   
   pkaln=list()
