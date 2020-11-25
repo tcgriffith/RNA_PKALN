@@ -16,7 +16,7 @@ cd $casedir
 
 ## run mrfalign
 
-gremlin_cpp -alphabet rna -i input/$caseid.afa -o input/$caseid.afa.gremlincpp -gap_cutoff 0.5 -mrf_o input/$caseid.afa.mrf
+gremlin_cpp -alphabet rna -i input/$caseid.afa -o input/$caseid.afa.gremlincpp -gap_cutoff 1.0 -mrf_o input/$caseid.afa.mrf
 
 
 mkdir -p rnamrf

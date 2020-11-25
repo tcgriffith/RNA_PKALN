@@ -6,7 +6,7 @@ read_pkaln_dir = function(testdir) {
   dirlist = list.dirs(testdir, recursive = FALSE)
   dirlist = dirlist[!grepl("input", dirlist)]
   
-  seqs.ref = seqinr::read.fasta(file.path(testdir, "input", paste0(caseid, ".a2m")), forceDNAtolower =
+  seqs.ref = seqinr::read.fasta(file.path(testdir, "input", paste0(caseid, "test.a2m")), forceDNAtolower =
                                   FALSE)
   pkaln$seqidx.ref = RNAmrf:::msa_a2m2seqidx_all(seqs.ref)
   
@@ -20,7 +20,12 @@ read_pkaln_dir = function(testdir) {
   names(seqidx.aln.list) = basename(dirlist)
   pkaln$seqidx.aln.list=seqidx.aln.list
   
+
   pkaln$dfref=RNAmrf:::read_dfref(paste0(testdir,"/",caseid,".sto"))
+  if (file.exists(file.path(testdir, "input", paste0(caseid, ".afa.mrf")))){
+    pkaln$dfref=RNAmrf:::read_dfref(paste0(testdir,"/",caseid,".sto"),
+                                    file.path(testdir, "input", paste0(caseid, ".afa.mrf"))                                    )
+  }  
   pkaln$caseid=caseid
   return(pkaln)
 }
