@@ -22,6 +22,9 @@ if [ ! -f input/$caseid.unaligned.fasta ]; then
     esl-reformat  a2m $caseid.sto > input/$caseid.a2m
 
     esl-reformat  afa $caseid.sto > input/$caseid.afa
+    
+    # esl-reformat --replace acgturyswkmbdhvn:................ a2m $caseid.sto > input/$caseid.rmgap.a2m
+
 
     esl-reformat fasta $caseid.sto > input/$caseid.unaligned.fasta
 
@@ -38,6 +41,11 @@ if [ ! -f cmalign/$caseid.cmalign.a2m ]; then
 mkdir -p cmalign
 
 cmalign -o cmalign/$caseid.cmalign.a2m --outformat A2M $caseid.cm  input/$caseid.unaligned.fasta 
+
+
+
+esl-reformat  afa cmalign/$caseid.cmalign.a2m > cmalign/$caseid.cmalign.afa
+
 
 else
     echo "# cmalign ok"
@@ -60,6 +68,11 @@ if [ ! -f rnamrf/$caseid.rnamrf.a2m ]; then
     mkdir -p rnamrf
 
    time $DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.unaligned.fasta  rnamrf/$caseid.rnamrf.a2m
+
+
+    esl-reformat  afa rnamrf/$caseid.rnamrf.a2m > rnamrf/$caseid.rnamrf.afa
+
+
 else
     echo "# mrf ok"
 fi
