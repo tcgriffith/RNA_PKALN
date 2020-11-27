@@ -1,5 +1,10 @@
 
 
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+DIR_PROJROOT=$(dirname $DIR)
+
 casedir=$1
 
 
@@ -10,23 +15,51 @@ cd $casedir
 
 ## prep input files
 
-mkdir -p input
+if [ ! -f input/$caseid.unaligned.fasta ]; then
 
-esl-reformat a2m $caseid.sto > input/$caseid.a2m
+    mkdir -p input
 
-esl-reformat afa $caseid.sto > input/$caseid.afa
+    esl-reformat a2m $caseid.sto > input/$caseid.a2m
 
-esl-reformat fasta $caseid.sto > input/$caseid.unaligned.fasta
+    esl-reformat afa $caseid.sto > input/$caseid.afa
 
+    esl-reformat fasta $caseid.sto > input/$caseid.unaligned.fasta
+
+
+else
+    echo "# input ok"
+
+fi
 
 ## run cmalign
+
+if [ ! -f cmalign/$caseid.cmalign.a2m ]; then
 
 mkdir -p cmalign
 
 cmalign -o cmalign/$caseid.cmalign.a2m --outformat A2M $caseid.cm  input/$caseid.unaligned.fasta 
-# cmalign $caseid.cm $caseid.cm
+
+else
+    echo "# cmalign ok"
+
+fi
 
 
-## run gremlin
+if [ ! -f input/$caseid.afa.mrf ]; then
+  gremlin_cpp -alphabet rna -i input/$caseid.afa -o input/$caseid.afa.gremlincpp  -mrf_o input/$caseid.afa.mrf
 
-# gremlin_cpp -alphabet rna -i input/$caseid.afa -o input/$caseid.afa.gremlincpp -gap_cutoff 0.5 -mrf_o input/$caseid.afa.mrf
+else
+    echo "# gremlin ok"
+
+fi
+
+## run RNAmrfalign
+
+if [ ! -f rnamrf/$caseid.rnamrf.a2m ]; then
+
+    mkdir -p rnamrf
+
+    $DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.unaligned.fasta  rnamrf/$caseid.rnamrf.a2m
+else
+    echo "# mrf ok"
+fi
