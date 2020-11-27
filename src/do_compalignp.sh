@@ -17,6 +17,6 @@ score1=$(compalignp -r $ref -t $test1)
 
 score2=$(compalignp -r $ref -t $test2)
 
-echo "cmalign $score1"
+echo "cmalign $caseid $score1"
 
-echo "rnamrf $score2"
+echo "rnamrf $caseid $score2"
