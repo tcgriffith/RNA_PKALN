@@ -124,4 +124,25 @@ rslt.df.s = do.call(rbind,rslt.all)
 print(rslt.df.s,digits = 2)
 ```
 
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+
+ggdata=
+rslt.df.s  %>% select (pair_pk, method, caseid) %>% 
+  pivot_wider(id_cols=caseid,names_from=method,values_from=pair_pk) 
+
+ggdata %>% 
+  
+  ggplot() +
+  geom_point(aes(x=cmalign,y=rnamrf))+geom_abline()+xlim(0,1)+ylim(0,1)+coord_fixed()
+```
+
+```{r}
+t.test(ggdata$cmalign,ggdata$rnamrf,paired=TRUE)
+```
 
