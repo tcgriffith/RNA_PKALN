@@ -1,0 +1,109 @@
+---
+title: "Untitled"
+author: "TC"
+date: "11/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+source(here::here("R/misc.R"))
+```
+
+## R Markdown
+
+
+```{r}
+testdir =here::here("data/synth2/")
+mypkaln=read_pkaln_dir(testdir)
+
+synth_tab=bench_pkaln(mypkaln)
+
+
+```
+
+```{r}
+synth_tab
+```
+
+
+```{r}
+save(synth_tab,file="~/GIT/thesis_tc/data/synth_tab.rda")
+```
+
+
+
+
+```{r}
+mrfs=list.files(testdir,pattern="\\.mrf",recursive=TRUE,full.names=TRUE)
+
+mrfs_test=mrfs[1:3]
+
+mrflist=lapply(mrfs_test, RNAmrf::read_mrf)
+
+names(mrflist)= basename(dirname(mrfs_test))
+```
+
+
+```{r}
+RNAmrf::gg_mat
+```
+
+```{r}
+gg_mat =function(mat, matref) {
+  df = as.data.frame(which(!is.na(mat), arr.ind = TRUE))
+  
+  dfref=as.data.frame(which(!is.na(matref), arr.ind = TRUE))
+  
+  df$val = mat[which(!is.na(mat))]
+  dfref$val=matref[which(!is.na(matref))]
+  
+  df=df[df$col<df$row,]
+  dfref=df[df$col>df$row,]
+  
+  dfall=rbind(df,dfref)
+  
+  ggplot(df) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
+}
+```
+
+
+```{r}
+
+library(ggplot2)
+
+
+gg_mrfcontact= function(mrf){
+  ggdata=mrf$mat_apc
+  RNAmrf::gg_mat(ggdata)+
+    
+  scale_fill_gradient2(name="DCA")+
+    labs(x="Sequence Index",y="Sequence Index")
+}
+
+  
+```
+
+
+
+```{r}
+gglist= lapply(mrflist, gg_mrfcontact)
+
+
+library(patchwork)
+
+synth_contact = (
+gglist$input+ theme(legend.position="none")+ggtitle("Seed MSA")+
+  gglist$cmalign+theme(legend.position="none")+ggtitle("cmalign")+
+  gglist$rnamrf +ggtitle("MRFalign"))+
+   plot_annotation(tag_levels = 'A')
+  # patchwork::plot_layout(guides="collect")
+
+synth_contact
+```
+
+```{r}
+save(synth_contact,file="~/GIT/thesis_tc/data/synth_contact.rda")
+```
+

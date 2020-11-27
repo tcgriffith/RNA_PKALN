@@ -1,0 +1,105 @@
+---
+title: "Untitled"
+author: "TC"
+date: "11/27/2020"
+output: bookdown::pdf_document2
+---
+
+
+
+# RNAmrf, evolutional covariation aided RNA sequence alignment  
+
+
+## Introduction
+
+Sequences of proteins, nucleotides(DNAs and RNAs) are essential in the modern biology research. Interestingly, sequences of these molecules have undergone considerable changes in the evolution process, however, they manage to preserve the folded structures and biological functions. This conservation is useful for filling gaps between new findings and existing knowledge, as we would expect two molecules with similar sequence and structure may have the same ancester, therefore they may function in the same way. Today, alignment methods have become essential tools, which are widely applied in tasks like fold recognition, function annotation, building phylogenetic trees, finding new motifs or non-coding RNAs, predicting structural or functional features.
+
+Researchers have developed various alignment strategies, which fall into two categories: first, pairwise alignment can be efficiently solved by dynamic programming based methods. Further development of pairwise alignment include the use of additional information from structure constraints and predicted features. Pairwise-based alignment methods can be generalized to progressively produce Multiple-sequence alignment, which starts by aligning two sequences and further adds other sequences into alignment. The drawback of this pairwise-based strategy, however, is that the computation complexity grows exponentially with the number of sequences to be aligned. Currently, it is still difficult to build alignment greater than 1000 sequences using pairwise-based method. 
+
+Second, as more and more sequences are available, it is highly desirable to construct larger alignments efficiently. sequence-to-profile or profile-profile based aligners (HMMer,HHblits, Infernal) were developed.
+
+
+In this work, we present RNAmrf, a new RNA sequence aligner based on the Markov Random Field(MRF) model. Compared with existing pseudoknot-alignment methods(locaRNA, MARNA), RNAmrf does not need to predict the secondary structures. Compared with covariance model, MRF is more general as it allows for the description of a fully connected covariation dependency, while Covariance model only allows for incorporating nested base-pairing interactions (pseudoknots are ignored).
+
+
+We showed that RNAmrf outperforms cmalign in both synthetic and actual RNA alignment tasks including pseudoknotted structure.
+
+
+
+
+## Methods
+
+### Markov Random Field model for RNA alignment
+
+An RNA structure can be described by a probablistic graph model: nucleotides(A,U,G and C) are represented by nodes, interactions between nucleotides are represented by edges. The distribution of nucleotide types observed in a site is jointly determined by the site preference and coupling interactions.A markov random field (MRF) is introduced to disentangle direct and indirect coupling. It aims at inferring a statistical model $P(A_1,...,A_L)$ for the entire sequence space $A_1,...,A_L$. Given a RNA sequence ($A_1$,...$A_L$), the joint probability $P(A_1,...,A_L)$ in a Boltzmann distribution is described by
+
+$$
+P(A_1,...,A_L)=\frac{1}{Z}exp\left \{ {\sum_{i<j}{e_{ij}(A_i,A_j)}}+\sum_{i}{h_i(A_i)} \right \}
+$$
+
+where i and j are sequence index of nucleotides $A_i$ and $A_j$. The model parameters are fitted to the MSA. Various approaches are designed to infer the model, include message-passing, mean-field approximation, and pseudolikelihood model. Researchers have used the coupling term $e_{ij}$ to infer physical contacts with success. 
+
+From a thermodynamics perspective, the probability of observing a sequence $A_1,...,A_L$ under a MRF model is determined by its energy. Similarly, we can see the sequence-to-MRF alignment problem as to find the alignment with the highest probability. Additional gap energy terms are required In order to calculate the free energy of a given alignment, but are not included in the MRF model. We used the affine gap penalty to penalize the creation of gaps in an alignment.
+
+Inferring the global optimal alignment in a sequence-to-MRF alignment is an NP problem. Inspired by the map_align method, we sought out to develop a heuristic alignment approach: First, an initial alignment is guessed by using the one-body field accounting for field conservation, using dynamic programming; then the alignment is iteratively refined in search for alignment with lowest energy. 
+
+### Alignment Accuracy Assessment and Test sets
+
+Both the MRF and CM model shares a reference column indexing from the MSA they are built upon, which facilitates the comparison of the alignment from MRF and CM.
+The alignment accuracy is evaluated by the percentage of correctly aligned bases in the alignment columns, comparing the test and reference MSA. Additionally, accuracy is evaluated in the loop region, pseudoknot base-pair region and non-pseudoknot base-pair region. When evaluating base-pairs, both nucleotides in a pair are required to be correctly aligned. 
+
+The re-aligned MSAs are further evaluated in the contact prediction task: We employed R-scape to find covariate pairs with statistical significance, and compared with the reference secondary structure.
+
+
+
+#### Synthetic Alignment
+
+A synthetic alignment dataset is constructed to compare the performance of MRFalign to state-of-the-art aligner in an extreme setting: starting with a predefined secondary structure that contains two pseudoknotted stems, one thousand random sequences are generated: all four types of nucleotides plus gap are distributed with a frequency of 1/4 on un-paired sites. For the eight base pairs, they are randomly selected from the three canonical base pair types (AU, CG, and GU). A random insertion of 0~4 bases is inserted. 
+
+A covariance model was built with the synthetic MSA and secondary structure annotation using cmbuild. Then the covariance model is used to re-align the sequences. Similarly, a MRF model was trained on the synthetic MSA by GREMLIN, and used to re-align the sequences with MRFalign.
+
+#### Rfam Pseudoknot Families
+
+A total of 37 seed alignment are retrieved from RFAM database. These seed alignments are selected from RNA families with pseudoknots. We only selected RNA families with length less than 200 due to long computation time for constructing the MRF model and alignment. The covariance models shipped with RFAM database was used to re-align the seed alignment. For MRF, the seed alignment is used to construct the model by GREMLIN, and aligned by RNAmrf.
+
+
+## Results
+
+### Synthetic alignment performance
+
+Table \@ref(tab:tabsynth) shows the alignment accuracy comparing RNAmrf and cmalign. Overall, RNAmrf has higher alignment accuracy than cmalign,  X of pseudoknot pairs are correctly aligned, as compared to X by cmalign. 
+
+
+Figure \@ref(fig:synthcontact) 
+
+
+```{r synthcontact, echo=FALSE, fig.cap="Comparison of DCA predicted contacts using A: synthetic MSA; B: MSA re-aligned by cmalign and C: MSA aligned by MRFalign."}
+# load(here::here("data/synth_contact.rda"))
+load("~/GIT/thesis_tc/data/synth_contact.rda")
+library(patchwork)
+synth_contact 
+```
+
+
+```{r tabsynth, echo=FALSE,caption= "Alignment accuracy of cmalign and RNAmrf on the synthetic MSA"}
+load("~/GIT/thesis_tc/data/synth_tab.rda")
+library(kableExtra)
+
+synth_tab=synth_tab[1:2,1:5]
+
+knitr::kable(synth_tab,caption="", booktab=TRUE, digits=2) 
+# mytable=tab
+# library(papaja)
+
+```
+
+
+
+### RFAM
+
+
+
+## Discussion
+
+
+The available sequences in a 

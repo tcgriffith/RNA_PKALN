@@ -20,17 +20,17 @@ source(here::here("R/misc.R"))
 
 ```{r}
 # SS
-pairs=rep(0,25)
+pairs=rep(0,30)
 
 pairs[1:4]=15:12
-pairs[6:9]=22:19
+pairs[6:9]=28:25
 pairs
 
-ss=rep(".",25)
+ss=rep(".",30)
 ss[1:4]="("
 ss[15:12]=")"
 ss[6:9]="A"
-ss[22:19]="a"
+ss[28:25]="a"
 
 seqss=seqinr::c2s(ss)
 seqss
@@ -40,9 +40,13 @@ seqss
 ```{r}
 
 set.seed(123)
-rng_seq=function(pairs=NULL,len=25){
+rng_seq=function(pairs=NULL,len=30){
   # myseq=character(25)
-  myseq=sample(c("A","U","C","G","-"),25,replace = TRUE, prob=c(1,1,1,1,0.5))
+  myseq=sample(c("A","U","C","G","-"),len,replace = TRUE, prob=c(1,1,1,1,0.5))
+  
+  myseq[18:22]="-"
+  myseq[18:22]=sample(c("a","u","c","g","."),5,replace = TRUE, prob=c(1,1,1,1,3))
+  
   
   
   ## add pairs
@@ -63,21 +67,21 @@ seq1=rng_seq(pairs=pairs,len=25)
 
 
 seqtmp=lapply(1:1000,function(i){
- return(rng_seq(pairs=pairs,len=25)) 
+ return(rng_seq(pairs=pairs,len=30)) 
 })
 
 seqnames=paste0("seq",1:1000)
 
-dir.create(here::here("data/synth/"),recursive=TRUE)
+dir.create(here::here("data/synth2/"),recursive=TRUE)
 
 seqtmp[[1]]
 
-seqinr::write.fasta(seqtmp,names=seqnames,file.out=here::here("data/synth/seq1000_gaps.fasta"))
+seqinr::write.fasta(seqtmp,names=seqnames,file.out=here::here("data/synth2/seq1000_gaps.a2m"))
 ```
 
 
 ```{r}
-wd=here::here("data/synth")
+wd=here::here("data/synth2")
 
 Sys.setenv(mywd=wd)
 Sys.setenv(seqss=seqss)
@@ -88,9 +92,16 @@ Sys.setenv(seqss=seqss)
 
 cd $mywd
 
-sed 's/-//g' seq1000_gaps.fasta > seq1000_gaps.unaligned.fasta
+#sed 's/-//g' seq1000_gaps.fasta > seq1000_gaps.unaligned.fasta
 
+esl-reformat stockholm seq1000_gaps.a2m > seq1000_gaps.sto.tmp
+
+head -n -1 seq1000_gaps.sto.tmp > seq1000_gaps.sto
+echo "#=GC SS_cons $seqss" >> seq1000_gaps.sto
+echo "//" >> seq1000_gaps.sto
 #esl-reformat stockholm seq1000_gaps.fasta > seq1000_gaps.fasta
+
+cp seq1000_gaps.sto synth2.sto
 
 ```
 
