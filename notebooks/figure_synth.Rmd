@@ -51,7 +51,7 @@ RNAmrf::gg_mat
 ```
 
 ```{r}
-gg_mat =function(mat, matref) {
+gg_mat2 =function(mat, matref) {
   df = as.data.frame(which(!is.na(mat), arr.ind = TRUE))
   
   dfref=as.data.frame(which(!is.na(matref), arr.ind = TRUE))
@@ -60,12 +60,16 @@ gg_mat =function(mat, matref) {
   dfref$val=matref[which(!is.na(matref))]
   
   df=df[df$col<df$row,]
-  dfref=df[df$col>df$row,]
+  dfref=dfref[dfref$col>dfref$row,]
   
   dfall=rbind(df,dfref)
   
-  ggplot(df) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
+  ggplot(dfall) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
 }
+```
+
+```{r}
+gg_mat2(mrflist$cmalign$mat_apc,mrflist$input$mat_apc)
 ```
 
 
@@ -76,6 +80,7 @@ library(ggplot2)
 
 gg_mrfcontact= function(mrf){
   ggdata=mrf$mat_apc
+
   RNAmrf::gg_mat(ggdata)+
     
   scale_fill_gradient2(name="DCA")+
