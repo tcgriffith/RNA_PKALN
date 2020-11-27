@@ -14,11 +14,17 @@ library(RNAmrf)
 
 ```{r}
 
-ss=rep(".",25)
+pairs=rep(0,30)
+
+pairs[1:4]=15:12
+pairs[6:9]=28:25
+pairs
+
+ss=rep(".",30)
 ss[1:4]="("
 ss[15:12]=")"
 ss[6:9]="A"
-ss[22:19]="a"
+ss[28:25]="a"
 
 seqss=seqinr::c2s(ss)
 seqss

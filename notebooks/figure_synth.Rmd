@@ -15,7 +15,7 @@ source(here::here("R/misc.R"))
 
 
 ```{r}
-testdir =here::here("data/synth2/")
+testdir =here::here("data/synth3/")
 mypkaln=read_pkaln_dir(testdir)
 
 synth_tab=bench_pkaln(mypkaln)
@@ -43,37 +43,7 @@ mrfs_test=mrfs[1:3]
 mrflist=lapply(mrfs_test, RNAmrf::read_mrf)
 
 names(mrflist)= basename(dirname(mrfs_test))
-```
 
-
-```{r}
-RNAmrf::gg_mat
-```
-
-```{r}
-gg_mat2 =function(mat, matref) {
-  df = as.data.frame(which(!is.na(mat), arr.ind = TRUE))
-  
-  dfref=as.data.frame(which(!is.na(matref), arr.ind = TRUE))
-  
-  df$val = mat[which(!is.na(mat))]
-  dfref$val=matref[which(!is.na(matref))]
-  
-  df=df[df$col<df$row,]
-  dfref=dfref[dfref$col>dfref$row,]
-  
-  dfall=rbind(df,dfref)
-  
-  ggplot(dfall) + geom_tile(aes(x=col, y=row, fill = val)) + coord_fixed()
-}
-```
-
-```{r}
-gg_mat2(mrflist$cmalign$mat_apc,mrflist$input$mat_apc)
-```
-
-
-```{r}
 
 library(ggplot2)
 
@@ -110,5 +80,15 @@ synth_contact
 
 ```{r}
 save(synth_contact,file="~/GIT/thesis_tc/data/synth_contact.rda")
+```
+
+
+```{r}
+tmp=
+data.table::fread("~/remotedir/GIT/RNA_PKALN/data/synth2/rnamrf/synth2.rnamrf.rmgap_1.cov")
+```
+
+```{r}
+ggplot(tmp)+geom_tile(aes(x=V2,y=V3,fill=V4))+scale_fill_gradient2()+coord_fixed()
 ```
 

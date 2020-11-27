@@ -19,9 +19,9 @@ if [ ! -f input/$caseid.unaligned.fasta ]; then
 
     mkdir -p input
 
-    esl-reformat a2m $caseid.sto > input/$caseid.a2m
+    esl-reformat  a2m $caseid.sto > input/$caseid.a2m
 
-    esl-reformat afa $caseid.sto > input/$caseid.afa
+    esl-reformat  afa $caseid.sto > input/$caseid.afa
 
     esl-reformat fasta $caseid.sto > input/$caseid.unaligned.fasta
 
@@ -59,7 +59,7 @@ if [ ! -f rnamrf/$caseid.rnamrf.a2m ]; then
 
     mkdir -p rnamrf
 
-    $DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.unaligned.fasta  rnamrf/$caseid.rnamrf.a2m
+   time $DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.unaligned.fasta  rnamrf/$caseid.rnamrf.a2m
 else
     echo "# mrf ok"
 fi

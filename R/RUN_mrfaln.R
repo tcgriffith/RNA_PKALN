@@ -16,7 +16,8 @@ mrfaln_seqs = function(seqs, mrf, init_method=2) {
     aseq.low=tolower(aseq)
     seq.enc= RNAmrf:::encode_seq(aseq.low)
     seq.int=seq.enc$seq_int_ungapped
-    
+    # set open as the maximum value in mrf
+    # gap_o = -max(mrf$mat_mrf,na.rm=T)
     a2b=RNAmrf:::align_seq2mrf(aseq.low,
                                mrf = mrf,
                                gap_open = -3,

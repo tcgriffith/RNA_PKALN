@@ -12,19 +12,16 @@ output: bookdown::pdf_document2
 
 ## Introduction
 
-Sequences of proteins, nucleotides(DNAs and RNAs) are essential in the modern biology research. Interestingly, sequences of these molecules have undergone considerable changes in the evolution process, however, they manage to preserve the folded structures and biological functions. This conservation is useful for filling gaps between new findings and existing knowledge, as we would expect two molecules with similar sequence and structure may have the same ancester, therefore they may function in the same way. Today, alignment methods have become essential tools, which are widely applied in tasks like fold recognition, function annotation, building phylogenetic trees, finding new motifs or non-coding RNAs, predicting structural or functional features.
+Sequences of proteins, nucleotides(DNAs and RNAs) are essential in the modern biology research. Interestingly, sequences of these molecules have undergone considerable changes during evolution, while preserving the folded structures and biological functions. It has now become a main task to detect homology from diversed sequences, which is usually achieved by alignment methods. Today, alignment methods have been used in fold recognition, function annotation, building phylogenetic trees, finding new motifs or non-coding RNAs, predicting structural and functional features.
 
-Researchers have developed various alignment strategies, which fall into two categories: first, pairwise alignment can be efficiently solved by dynamic programming based methods. Further development of pairwise alignment include the use of additional information from structure constraints and predicted features. Pairwise-based alignment methods can be generalized to progressively produce Multiple-sequence alignment, which starts by aligning two sequences and further adds other sequences into alignment. The drawback of this pairwise-based strategy, however, is that the computation complexity grows exponentially with the number of sequences to be aligned. Currently, it is still difficult to build alignment greater than 1000 sequences using pairwise-based method. 
+There are two closely related alignment problems: pairwise alignment and multiple sequence alignment. Pairwise alignment aims to align two sequences, which can be efficiently solved by dynamic programming methods. Further development of pairwise alignment include the use of additional information from structure constraints and predicted features. 
 
-Second, as more and more sequences are available, it is highly desirable to construct larger alignments efficiently. sequence-to-profile or profile-profile based aligners (HMMer,HHblits, Infernal) were developed.
-
-
-In this work, we present RNAmrf, a new RNA sequence aligner based on the Markov Random Field(MRF) model. Compared with existing pseudoknot-alignment methods(locaRNA, MARNA), RNAmrf does not need to predict the secondary structures. Compared with covariance model, MRF is more general as it allows for the description of a fully connected covariation dependency, while Covariance model only allows for incorporating nested base-pairing interactions (pseudoknots are ignored).
+The multiple sequence alignment problem aims to build an alignment for multiple homologous sequences. Several strategies have been developed: First, pairwise-based alignment methods can be generalized to progressively produce Multiple-sequence alignment, which starts by aligning two sequences and further adds other sequences into alignment. The alignment quality of these methods are determined by the order of the added sequences. Second, researchers have developed consistency scores to evaluate an MSA, and the goal is to iteratively optimize for alignment consistency. However, it is still difficult to build alignment greater than 1000 sequences using these method. Until recently, sequences has become abundant, making it highly desirable to construct larger MSA with thousands and even millions of sequences. For example, the tRNA family has about 1.4 million full sequences. Alignment methods based on the probablistic framework has been developed, as represented by HMMblits and infernal. A simple yet effective strategy to construct larger MSA is to align new sequences to a pre-compiled, manually curated seed alignment. This strategy is closely related to our work presented here.
 
 
-We showed that RNAmrf outperforms cmalign in both synthetic and actual RNA alignment tasks including pseudoknotted structure.
+In this work, we developed MRFalign, a new RNA sequence aligner based on the Markov Random Field(MRF) model. Compared with existing pseudoknot-alignment methods(locaRNA, MARNA), RNAmrf does not need to predict the secondary structures and perform pairwise alignment. Compared with covariance model, CM only allows for incorporating nested base-pairing interactions (pseudoknots are ignored), while MRF is more general, as it allows for the description of a fully connected covariation dependency.
 
-
+We showed that RNAmrf outperforms cmalign in a synthetic alignment test and real RNA alignment tasks including pseudoknotted structure.
 
 
 ## Methods
@@ -54,7 +51,7 @@ The re-aligned MSAs are further evaluated in the contact prediction task: We emp
 
 #### Synthetic Alignment
 
-A synthetic alignment dataset is constructed to compare the performance of MRFalign to state-of-the-art aligner in an extreme setting: starting with a predefined secondary structure that contains two pseudoknotted stems, one thousand random sequences are generated: all four types of nucleotides plus gap are distributed with a frequency of 1/4 on un-paired sites. For the eight base pairs, they are randomly selected from the three canonical base pair types (AU, CG, and GU). A random insertion of 0~4 bases is inserted. 
+A synthetic alignment dataset is constructed to compare the performance of MRFalign to state-of-the-art aligner in an extreme setting: starting with a predefined secondary structure that contains two pseudoknotted stems, one thousand random sequences are generated: all four types of nucleotides plus gap are distributed with a frequency of 1/4 on un-paired sites. For the eight base pairs, they are randomly selected from the three canonical base pair types (AU, CG, and GU). 
 
 A covariance model was built with the synthetic MSA and secondary structure annotation using cmbuild. Then the covariance model is used to re-align the sequences. Similarly, a MRF model was trained on the synthetic MSA by GREMLIN, and used to re-align the sequences with MRFalign.
 
@@ -67,10 +64,7 @@ A total of 37 seed alignment are retrieved from RFAM database. These seed alignm
 
 ### Synthetic alignment performance
 
-Table \@ref(tab:tabsynth) shows the alignment accuracy comparing RNAmrf and cmalign. Overall, RNAmrf has higher alignment accuracy than cmalign,  X of pseudoknot pairs are correctly aligned, as compared to X by cmalign. 
-
-
-Figure \@ref(fig:synthcontact) 
+Table \@ref(tab:tabsynth) shows the alignment accuracy comparing MRFalign and cmalign. Comparing all columns and non-paired columns, RNAmrf has slightly higher alignment accuracy than cmalign. Comparing the alignment for the two stems, cmalign has an average accuracy of 0.49. This is because cmalign aligned the non-pseudoknotted stem almost perfectly (0.96), but failed to align the pairs in the pseudoknot region (accuracy: 0.02). On the other hand, RNAmrf aligns both stems with a robust accuracy (~0.7). Figure \@ref(fig:synthcontact) shows the predicted contacts by DCA, using the synthetic MSA, cmalign-realigned MSA, and MRFalign-realigned MSA, showing a improved accuracy
 
 
 ```{r synthcontact, echo=FALSE, fig.cap="Comparison of DCA predicted contacts using A: synthetic MSA; B: MSA re-aligned by cmalign and C: MSA aligned by MRFalign."}
@@ -100,6 +94,3 @@ knitr::kable(synth_tab,caption="", booktab=TRUE, digits=2)
 
 
 ## Discussion
-
-
-The available sequences in a 
