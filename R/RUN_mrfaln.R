@@ -10,7 +10,7 @@ suppressPackageStartupMessages(library(RNAmrf))
 
 ### funcs
 
-mrfaln_seqs = function(seqs, mrf, init_method=1) {
+mrfaln_seqs = function(seqs, mrf, init_method=2) {
   pbapply::pboptions(type="txt")
   aln_a2m=pbapply::pblapply(seqs,function(aseq){
     aseq.low=tolower(aseq)
