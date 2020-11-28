@@ -1,12 +1,12 @@
-cmalign synth10 0.39
-rnamrf synth10 0.46
-cmalign synth3 0.67
-rnamrf synth3 0.66
-cmalign synth4 0.73
-rnamrf synth4 0.66
-cmalign synth5 0.68
-rnamrf synth5 0.50
-cmalign synth6 0.60
-rnamrf synth6 0.43
-cmalign synth9 0.55
-rnamrf synth9 0.46
+cmalign synth10 0.39 0.3872
+rnamrf synth10 0.46 0.3175
+cmalign synth3 0.67 0.9059
+rnamrf synth3 0.66 0.7391
+cmalign synth4 0.73 0.7930
+rnamrf synth4 0.66 0.7391
+cmalign synth5 0.68 0.7435
+rnamrf synth5 0.50 0.5086
+cmalign synth6 0.60 0.7465
+rnamrf synth6 0.43 0.5309
+cmalign synth9 0.55 0.4270
+rnamrf synth9 0.46 0.3175

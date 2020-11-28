@@ -1,0 +1,317 @@
+---
+title: "Untitled"
+author: "TC"
+date: "11/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+source(here::here("R/misc.R"))
+library(dplyr)
+```
+
+
+
+```{r}
+filerscape=here::here("data/RFAM_PK//rscape.scores")
+
+score_rscape= data.table::fread(filerscape)
+names(score_rscape)=c("caseid","method","method2","SEN","PPV","F")
+score_rscape=score_rscape[,-"method2"]
+score_rscape[,3:5]=score_rscape[,3:5]/100
+
+fileneff=here::here("data/RFAM_PK//neff.txt")
+
+myneff=data.table::fread(fileneff)
+
+names(myneff)=c("caseid","neff")
+
+filenc=here::here("data/RFAM_PK//CLEN.txt")
+
+mync=data.table::fread(filenc)
+
+names(mync)=c("caseid","nc")
+# 
+
+```
+
+```{r}
+filecomp=here::here("data/RFAM_PK/sci.scores")
+score_trad= data.table::fread(filecomp,fill=TRUE)
+names(score_trad)=c("method","caseid","SCI")
+```
+
+
+```{r}
+filepkaln=here::here("data/RFAM_PK/RFAM.rds")
+
+pkaln.all=readRDS(filepkaln)
+
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln(pkaln))
+})
+
+rslt.df.s = do.call(rbind,rslt.all)
+names(rslt.df.s)=c(
+  "all",
+  "non-pair",
+  "all-bp",
+  "pseudoknot",
+  "non-pseudoknot",
+  "method",
+  "caseid"
+)
+
+# rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
+
+rslt.df.all=rslt.df.s %>% 
+  select(method,caseid, 1:5) %>% 
+
+left_join(score_rscape) %>% 
+  left_join(score_trad) %>%
+    left_join(myneff) %>% 
+  left_join(mync)
+
+rslt.contact= score_rscape %>% 
+  left_join(score_trad) %>%
+    left_join(myneff) %>% 
+  left_join(mync)
+  
+  # dplyr::left_join(rslt.df.1,score_rscape)
+print(rslt.df.all,digits = 2)
+```
+
+
+```{r}
+library(kableExtra)
+library(dplyr)
+```
+
+```{r}
+mytable= rslt.df.all
+
+mytable
+```
+
+
+```{r}
+kable(mytable, booktabs = T,digits=2) %>%
+  kable_styling() %>%
+  add_header_above(c(" "," ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Contact Pred"=3," "," "," ")) %>%
+  pack_rows(index=table(mytable$caseid)) 
+```
+
+## figures
+
+
+```{r}
+library(tidyverse)
+library(patchwork)
+library(ggrepel)
+```
+
+```{r}
+mytable.wide=
+mytable %>% 
+  pivot_wider(id_cols=c(caseid,nc,neff),names_from=method,values_from=3:11)
+```
+
+
+```{r}
+mytable.wide %>% 
+  ggplot(aes (x=SCI_cmalign,y=SCI_rnamrf,size=neff))+
+  
+  geom_point(aes(size=nc,color=neff>50))+
+  # geom_point()+
+  geom_abline()
+```
+
+```{r}
+mytable.wide %>% 
+  filter(neff>40) %>% 
+  ggplot(aes (x=all_cmalign,y=all_rnamrf,size=neff))+
+  
+  geom_point(aes(size=neff,color=neff>40))+
+  # geom_point()+
+  geom_abline()
+```
+
+```{r}
+
+mytable %>% 
+        ggplot(aes (x=neff,y=SCI,color=method))+
+  stat_smooth()+
+  
+  geom_point()+
+  scale_x_log10()
+#+
+  # geom_point()+
+  # geom_abline()
+```
+
+
+
+```{r}
+# wilcox.test(x,y, paired=TRUE)
+
+with(mytable.wide %>% filter(neff>40),wilcox.test(all_cmalign,all_rnamrf,paired=TRUE))
+```
+
+```{r}
+
+
+data.filt = mytable.wide %>%
+  filter(pseudoknot_rnamrf - pseudoknot_cmalign > 0.2)
+
+mytable.wide %>%
+  ggplot(aes (x = pseudoknot_cmalign, y = pseudoknot_rnamrf, )) +
+  geom_point(aes(color = neff>40,size=neff)) +
+  geom_abline() +
+  # geom_point(data = data.filt, aes(size = neff),color="red") +
+  geom_text_repel(data = data.filt,
+                  aes(label = caseid))+
+  xlab("Pseudoknot BP alignment accuracy (cmalign)")+
+  ylab("Pseudoknot BP alignment accuracy (MRFalign)")
+```
+
+```{r}
+# wilcox.test(x,y, paired=TRUE)
+with(mytable.wide %>% filter(neff>40),wilcox.test(pseudoknot_rnamrf,pseudoknot_cmalign,paired=TRUE))
+```
+
+
+```{r}
+mytable.wide %>% 
+  ggplot(aes (x=F_cmalign,y=F_rnamrf,size=neff))+
+  
+  geom_point(aes(size=nc,color=neff>40))+
+  geom_abline()
+```
+
+
+
+```{r}
+with(mytable.wide %>% filter(neff>40),wilcox.test(F_cmalign,F_rnamrf,paired=TRUE))
+```
+
+
+```{r}
+mytable.wide %>% filter(neff>50) %>% select(caseid,starts_with("SEN"))
+```
+
+```{r}
+data.filt = mytable.wide %>%
+  filter(SEN_rnamrf - SEN_cmalign > 0.15)
+
+mytable.wide %>% 
+  # filter(neff>50) %>% 
+  ggplot(aes (x=SEN_cmalign,y=SEN_rnamrf))+
+  geom_point(aes(size=neff,color=neff>40))+
+  geom_abline()+
+  geom_point(data = data.filt, aes(size = neff),color="red") +
+  geom_text_repel(data = data.filt,
+                  aes(label = caseid))+
+  xlab("Sensitivity (cmalign)")+
+  ylab("Sensitivity (MRFalign)")
+```
+
+```{r}
+with(mytable.wide %>% filter(neff > 40),wilcox.test(F_rnamrf,F_cmalign,paired=TRUE))
+```
+
+```{r}
+
+ggplotColours <- function(n = 6, h = c(0, 360) + 15){
+  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
+  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
+}
+
+mycolors = ggplotColours(3)
+mylevels=c("rnamrf","cmalign","input")
+
+ggdata_boxplot_contact =  rslt.contact %>% 
+  pivot_longer(cols=3:5,names_to="metric") %>% 
+  mutate(method=factor(method,
+    levels=mylevels
+  )) %>% 
+  mutate(metric=factor(
+    metric,
+    levels=c("F",
+  "SEN",
+  "PPV"
+  ),labels=c(
+    "F-score",
+  "Sensitivity",
+  "Precision"
+  )
+  )) 
+
+
+gg1=
+ggdata_boxplot_contact %>% 
+  filter(neff>40) %>%
+  # filter(mygroup == "Contact Prediction") %>% 
+  ggplot(aes(x=metric,y=value,fill=method))+
+  geom_boxplot()+
+  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("MRFalign","cmalign","Reference"))+
+  # scale_fill_manual(values=mycolors,limits=mylevels)+
+  theme(axis.text.x=element_text(angle = 45,  hjust=1))+
+  xlab("")+ggtitle("Contact Prediction")
+
+
+
+gg1
+
+
+ggdata_boxplot =
+
+mytable %>% 
+  filter(neff>40) %>%
+  pivot_longer(cols=3:10,names_to="metric") %>% 
+  mutate(metric=factor(
+    metric,
+    levels=c(
+  "all",
+  "non-pair",
+  "all-bp",
+  "non-pseudoknot",
+  "pseudoknot",
+  "SEN",
+  "PPV",
+  "F"),labels=c(
+  "all",
+  "non-pair",
+  "all-bp",
+  "non-pseudoknot-bp",
+  "pseudoknot-bp",
+  "Sensitivity",
+  "Precision",
+  "F-measure")
+  )) %>% 
+  mutate(mygroup = ifelse(metric %in% c("Sensitivity","Precision","F-measure"),"Contact Prediction","Alignment Accuracy"))
+
+# ggplotColours(3)
+
+gg2=
+ggdata_boxplot %>% 
+  mutate(method=factor(method,
+    levels=mylevels
+  )) %>% 
+  filter(mygroup == "Alignment Accuracy") %>%
+  ggplot(aes(x=metric,y=value,fill=method))+
+  geom_boxplot()+
+  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("MRFalign","cmalign","Reference"))+
+  
+  labs(x="",y="")+ggtitle("Alignment Accuracy")#+
+  # theme(legend.position="none")
+  # facet_grid(.~mygroup)
+
+
+# gg2
+# gg1+gg2
+gg1+gg2+plot_layout(guides="collect")&theme_classic()&theme(axis.text.x=element_text(angle = 45,  hjust=1))
+```
+
+

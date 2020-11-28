@@ -10,13 +10,29 @@ cd $casedir
 
 ref=input/$caseid.afa
 
-test1=cmalign/$caseid.cmalign.afa
-test2=rnamrf/$caseid.rnamrf.afa
+test1=cmalign/$caseid.cmalign.a2m
 
-score1=$(compalignp -r $ref -t $test1)
 
-score2=$(compalignp -r $ref -t $test2)
 
-echo "cmalign $caseid $score1"
+test2=rnamrf/$caseid.rnamrf.a2m
 
-echo "rnamrf $caseid $score2"
+esl-reformat stockholm $test1 >${test1%.a2m}.sto
+
+esl-reformat stockholm $test2 >${test2%.a2m}.sto
+
+esl-reformat afa $test1 >${test1%.a2m}.afa
+
+esl-reformat afa $test2 >${test2%.a2m}.afa
+
+score1=$(compalignp -r $ref -t ${test1%.a2m}.afa)
+# RNAalifold 2.4.13
+score1scif=$(RNAalifold -q --sci ${test1%.a2m}.sto |grep "sci = "|sed -r 's/.*sci = (.*)]/\1/')
+
+score2=$(compalignp -r $ref -t ${test2%.a2m}.afa)
+
+score2scif=$(RNAalifold -q --sci ${test2%.a2m}.sto |grep "sci = "|sed -r 's/.*sci = (.*)]/\1/')
+
+# echo "method caseid SPS SCIF"
+echo "cmalign $caseid $score1 $score1scif"
+
+echo "rnamrf $caseid $score2 $score2scif"

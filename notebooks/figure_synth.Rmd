@@ -9,40 +9,102 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(RNAmrf)
 source(here::here("R/misc.R"))
+library(dplyr)
 ```
 
 ## R Markdown
 
-
 ```{r}
-testdir =here::here("data/synth3/")
-mypkaln=read_pkaln_dir(testdir)
+filerscape=here::here("data/synthetic/rscape.scores")
 
-synth_tab=bench_pkaln(mypkaln)
+score_rscape= data.table::fread(filerscape)
 
+names(score_rscape)=c("caseid","method","method2","SEN","PPV","F")
 
+score_rscape=score_rscape[,-"method2"]
+
+score_rscape[,3:5]=score_rscape[,3:5]/100
 ```
 
 ```{r}
+filecomp=here::here("data/synthetic/compalignp.scores")
+
+score_trad= data.table::fread(filecomp)
+names(score_trad)=c("method","caseid","SPS","SCI")
+```
+
+
+```{r}
+filepkaln=here::here("data/synthetic/synthetic.rds")
+
+pkaln.all=readRDS(filepkaln)
+
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln(pkaln))
+})
+
+rslt.df.s = do.call(rbind,rslt.all)
+names(rslt.df.s)=c(
+  "all",
+  "non-pair",
+  "all-bp",
+  "pseudoknot",
+  "non-pseudoknot",
+  "method",
+  "caseid"
+)
+
+# rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
+
+rslt.df.all=rslt.df.s %>% 
+  select(method,caseid, 1:5) %>% 
+  left_join(score_trad) %>% 
+left_join(score_rscape) 
+  
+  # dplyr::left_join(rslt.df.1,score_rscape)
+print(rslt.df.all,digits = 2)
+```
+
+```{r}
+synth_tab=rslt.df.all
+
 synth_tab
 ```
 
 
 ```{r}
-save(synth_tab,file="~/GIT/thesis_tc/data/synth_tab.rda")
+library(kableExtra)
+library(dplyr)
+```
+
+```{r}
+synth_tab_sel=
+synth_tab %>% 
+  filter(caseid %in% c("synth3","synth5","synth9")) %>% 
+  # group_by(caseid,method) %>%
+  select(-caseid)
+```
+
+
+```{r}
+kable(synth_tab_sel, booktabs = T,digits=2) %>%
+  kable_styling() %>%
+  add_header_above(c(" ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Overall"=2,"Contact Pred"=3)) %>%
+  pack_rows("Synthetic-1", 1, 2) %>%
+  pack_rows("Synthetic-2", 3, 4) %>% 
+  pack_rows("Synthetic-3", 5, 6)
 ```
 
 
 
+```{r}
+save(synth_tab_sel,file="~/GIT/thesis_tc/data/synth_tab_sel.rda")
+```
+
+
+## figure
 
 ```{r}
-mrfs=list.files(testdir,pattern="\\.mrf",recursive=TRUE,full.names=TRUE)
-
-mrfs_test=mrfs[1:3]
-
-mrflist=lapply(mrfs_test, RNAmrf::read_mrf)
-
-names(mrflist)= basename(dirname(mrfs_test))
 
 
 library(ggplot2)
@@ -54,41 +116,90 @@ gg_mrfcontact= function(mrf){
   RNAmrf::gg_mat(ggdata)+
     
   scale_fill_gradient2(name="DCA")+
-    labs(x="Sequence Index",y="Sequence Index")
+    labs(x="",y="")
+}
+read_mrflist = function(testdir) {
+  mrfs = list.files(
+    testdir,
+    pattern = "\\.mrf",
+    recursive = TRUE,
+    full.names = TRUE
+  )
+  
+  # mrfs
+  
+  mrfs_test = mrfs[1:3]
+  
+  mrflist = lapply(mrfs_test, RNAmrf::read_mrf)
+  
+  names(mrflist) = basename(dirname(mrfs_test))
+  return(mrflist)
 }
 
-  
+
+```
+
+```{r}
+
+
+testdirs=list.dirs(here::here("data/synthetic/synthetic/"),recursive=FALSE)
+
+testdirs
+
+testdirs.filt=testdirs[basename(testdirs) %in% c("synth3","synth5","synth9")]
+
+names(testdirs.filt) =basename(testdirs.filt)
+
+testdirs.filt
 ```
 
 
+```{r}
+mrflist.list=lapply(testdirs.filt,read_mrflist)
+
+
+```
 
 ```{r}
-gglist= lapply(mrflist, gg_mrfcontact)
+gglist.list= lapply(mrflist.list, function(mrflist){
+  gglist=lapply(mrflist, gg_mrfcontact)
+  
+  gglist$cmalign+ggtitle("cmalign")
+  gglist$rnamrf+theme(legend.position="none") +ggtitle("MRFalign")
+  return(gglist)
+})
 
+```
+
+```{r}
 
 library(patchwork)
 
-synth_contact = (
-gglist$input+ theme(legend.position="none")+ggtitle("Seed MSA")+
-  gglist$cmalign+theme(legend.position="none")+ggtitle("cmalign")+
-  gglist$rnamrf +ggtitle("MRFalign"))+
-   plot_annotation(tag_levels = 'A')
-  # patchwork::plot_layout(guides="collect")
+p1 =gglist.list$synth3$input+ylab("Synthetic-1")+ theme(legend.position="none")+ggtitle("Reference")
+p2 =gglist.list$synth3$rnamrf+theme(legend.position="none") +ggtitle("MRFalign")
+p3 =gglist.list$synth3$cmalign+ggtitle("cmalign")+theme(legend.position="none")
 
-synth_contact
+p4 =gglist.list$synth5$input+ylab("Synthetic-2")+ theme(legend.position="none")#+ggtitle("Reference")
+p5 =gglist.list$synth5$rnamrf+theme(legend.position="none") #+ggtitle("MRFalign")
+p6 =gglist.list$synth5$cmalign#+ggtitle("cmalign")
+
+p7 =gglist.list$synth9$input+ylab("Synthetic-3")+ theme(legend.position="none")#+ggtitle("Reference")
+p8 =gglist.list$synth9$rnamrf+theme(legend.position="none")+
+  xlab("Sequence id")#+ggtitle("MRFalign")
+p9 =gglist.list$synth9$cmalign+theme(legend.position="none")#+ggtitle("cmalign")
+
+patch=
+(p1+p2+p3)/(p4+p5+p6)/(p7+p8+p9) +
+   plot_annotation(tag_levels = 'A')
 ```
 
 ```{r}
+patch
+```
+
+```{r}
+synth_contact=patch
 save(synth_contact,file="~/GIT/thesis_tc/data/synth_contact.rda")
 ```
 
-
-```{r}
-tmp=
-data.table::fread("~/remotedir/GIT/RNA_PKALN/data/synth2/rnamrf/synth2.rnamrf.rmgap_1.cov")
-```
-
-```{r}
-ggplot(tmp)+geom_tile(aes(x=V2,y=V3,fill=V4))+scale_fill_gradient2()+coord_fixed()
-```
 

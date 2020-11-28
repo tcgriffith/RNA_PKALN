@@ -42,54 +42,96 @@ Inferring the global optimal alignment in a sequence-to-MRF alignment is an NP p
 
 ### Alignment Accuracy Assessment and Test sets
 
-Both the MRF and CM model shares a reference column indexing from the MSA they are built upon, which facilitates the comparison of the alignment from MRF and CM.
-The alignment accuracy is evaluated by the percentage of correctly aligned bases in the alignment columns, comparing the test and reference MSA. Additionally, accuracy is evaluated in the loop region, pseudoknot base-pair region and non-pseudoknot base-pair region. When evaluating base-pairs, both nucleotides in a pair are required to be correctly aligned. 
+The alignment accuracy is assessed by column alignment accuracy and base-pair alignment accuracy. The column accuracy is the percentage of correctly aligned bases (or base-pairs) in the MSA columns, comparing the test and reference MSA. This accuracy can be understood as sensitivity. Column accuracy is calculated for all reference columns and non-paired columns.
+The base-pair alignment accuracy is calculated as the percentage of correctly aligned base-pairs comparing test and reference MSA. The base-pairs are from the pre-defined secondary structure in the reference alignment.
 
-The re-aligned MSAs are further evaluated in the contact prediction task: We employed R-scape to find covariate pairs with statistical significance, and compared with the reference secondary structure.
+Additionally, the overall alignment quality is evaluated by the Sum-of-Pair Scores (SPS), and Structure Conservation Index (SCI). SPS reflects the average pairwise-alignment accuracy between two MSAs with a range between 0 and 1. SCI evaluates the consistency of an alignment. SCI will be high if sequences fold together equally well as if fold individually. SCI will be low if no concensus fold can be found.
 
-
+The re-aligned MSAs are further evaluated in the contact prediction task by predicting contacts using DCA analysis.
 
 #### Synthetic Alignment
 
-A synthetic alignment dataset is constructed to compare the performance of MRFalign to state-of-the-art aligner in an extreme setting: starting with a predefined secondary structure that contains two pseudoknotted stems, one thousand random sequences are generated: all four types of nucleotides plus gap are distributed with a frequency of 1/4 on un-paired sites. For the eight base pairs, they are randomly selected from the three canonical base pair types (AU, CG, and GU). 
+A synthetic alignment dataset is constructed to compare the performance of MRFalign to cmalign, the state-of-the-art RNA aligner, in an extreme setting: starting with a predefined secondary structure that contains two pseudoknotted stems, all four types of nucleotides plus gap are distributed with a frequency of 1/4 on un-paired sites. For the eight base pairs, they are randomly selected from the three canonical base pair types (AU, CG, and GU). Random insertions of length 0-4 bases are inserted in the non-paired region. Similarly, each non-paired site has a probability of 0.1 to be deleted. Three secondary structure with pseudoknots are designed by hand. For each SS, three hundred random sequences are generated for a given SS to generate a reference MSA.
 
-A covariance model was built with the synthetic MSA and secondary structure annotation using cmbuild. Then the covariance model is used to re-align the sequences. Similarly, a MRF model was trained on the synthetic MSA by GREMLIN, and used to re-align the sequences with MRFalign.
+The secondary structure used to generate sequences are denoted below following a dot-bracket notation. Briefly, the second line denotes the reference index. Letter x stands for aligned positions and dot stands for the insertion of 0-4 bases. The third line denotes the secondary structure in dot-bracket annotation, where pairs are assigned by a pair of brackets or letter pairs in upper and lowercase(A and a).
+
+```
+>Synthetic-1
+xxxxxxxxxxxxxxxxx....xxxxxxxxx
+((((.AAAA..)))).........aaaa..
+
+>Synthetic-2
+xxxxx..xxxxx..xxxxxxxxxxxxxxxx
+.AAAA...((((....aaaa....))))..
+
+>Synthetic-3
+xxxxxx....xxxxxxxxxxxxxxxxxxxxxx....xxxxxxxxxxxxxx
+.AAAA..............((((..aaaa................)))).
+```
+
+For each reference MSA, a covariance model is built with cmbuild. Both synthetic reference MSA and the designed secondary structure are used as input. Then the covariance model is used to re-align the three hundred sequences. Similarly, a MRF model is trained on the synthetic MSA by GREMLIN. The MRF model is used to re-align the sequences with MRFalign.
+
 
 #### Rfam Pseudoknot Families
 
-A total of 37 seed alignment are retrieved from RFAM database. These seed alignments are selected from RNA families with pseudoknots. We only selected RNA families with length less than 200 due to long computation time for constructing the MRF model and alignment. The covariance models shipped with RFAM database was used to re-align the seed alignment. For MRF, the seed alignment is used to construct the model by GREMLIN, and aligned by RNAmrf.
+A total of 37 seed alignment are retrieved from RFAM database. These seed alignments are selected from RNA families with pseudoknots. We only selected RNA families with length less than 200 due to long computation time for constructing the MRF model and alignment. The covariance models shipped with RFAM database was used to re-align the seed alignment. For MRF, the seed alignment is used to construct the MRF model by GREMLIN, then the MRF model is used to align the seed sequences.
+
+The Code to build the covariance model and train the MRF model is provided below:
+
+```
+cmbuild --hand example.cm MSA.fasta
+
+gremlin_cpp -alphabet rna -i MSA.afa -mrf_o example.mrf -o example.gremlinscore
+```
 
 
 ## Results
 
-### Synthetic alignment performance
+### Synthetic Alignment Performance
 
-Table \@ref(tab:tabsynth) shows the alignment accuracy comparing MRFalign and cmalign. Comparing all columns and non-paired columns, RNAmrf has slightly higher alignment accuracy than cmalign. Comparing the alignment for the two stems, cmalign has an average accuracy of 0.49. This is because cmalign aligned the non-pseudoknotted stem almost perfectly (0.96), but failed to align the pairs in the pseudoknot region (accuracy: 0.02). On the other hand, RNAmrf aligns both stems with a robust accuracy (~0.7). Figure \@ref(fig:synthcontact) shows the predicted contacts by DCA, using the synthetic MSA, cmalign-realigned MSA, and MRFalign-realigned MSA, showing a improved accuracy
-
-
-```{r synthcontact, echo=FALSE, fig.cap="Comparison of DCA predicted contacts using A: synthetic MSA; B: MSA re-aligned by cmalign and C: MSA aligned by MRFalign."}
-# load(here::here("data/synth_contact.rda"))
-load("~/GIT/thesis_tc/data/synth_contact.rda")
-library(patchwork)
-synth_contact 
-```
+Table \@ref(tab:tabsynth) shows the alignment performance of MRFalign and cmalign on three synthetic MSAs. Comparing the overall performance, MRFalign appears to have lower alignment quality as indicated by the consistent lower SPS and SCI scores compared with cmalign. However, MRFalign shows consistent accuracy in aligning base-pairs in the pseudoknot and non-pseudoknot stem. Cmalign has the highest alignment accuracy for the non-pseudoknotted stem (0.92~0.97) but fail to align the pseudoknots in Synthetic-1 and Synthetic-3 MSA with poor accuracy of 0.01 and 0.09, respectively. This is expected, as only the non-pseudoknot SS is incorporated in the CM model. 
 
 
-```{r tabsynth, echo=FALSE,caption= "Alignment accuracy of cmalign and RNAmrf on the synthetic MSA"}
-load("~/GIT/thesis_tc/data/synth_tab.rda")
+The last three columns in Table \@ref(tab:tabsynth) denotes the sensitivity, precision(positive predictve value, PPV) and F-score for contact prediction using R-scape. Both sensitivity and precision are near perfect for MRFalign in all three tests, while cmalign generated MSA have lower precision and sensitivity. This result suggests that MRFalign can improve the downstream contact prediction performance. Figure \@ref(fig:synthcontact) provides visualization of the DCA covariation scores calculated using MSAs from reference, MRFalign and cmalign in the three synthetic test. In the reference and MRFalign (Figure \@ref(fig:synthcontact) A, B, D, E, G and H), both normal and pseudoknot stems have high covariance scores (GREMLIN score > 6), showing consistency between MRFalign MSA and the seed MSA. However, using cmalign generated MSA, the pseudoknotted base pairs shows weak and smear covariance signals (Figure \@ref(fig:synthcontact) C, F and I). In the synthetic-2 test, both MRFalign and cmalign has an accuracy of 0.53 in aligning the pseudoknot region. In synthetic-1 and synthetic-3, the pseudoknot pairs in the MRFalign MSA shows clear covariance signal, but the covariance signals are difficult to distinguish in the CMalign MSA(Figure \@ref(fig:synthcontact) C and I).
+
+The alignment result on the synthetic RNA suggest that MRFalign outperforms cmalign in aligning RNA sequences containing pseudoknotted structures. The improvement is further confirmed in the contact prediction task. 
+
+
+```{r tabsynth, echo=FALSE}
+load("~/GIT/thesis_tc/data/synth_tab_sel.rda")
+
 library(kableExtra)
 
-synth_tab=synth_tab[1:2,1:5]
 
-knitr::kable(synth_tab,caption="", booktab=TRUE, digits=2) 
+kable(synth_tab_sel, booktabs = T,digits=2, label="tabsynth",
+      caption= "Alignment accuracy of cmalign and RNAmrf on the synthetic MSA") %>%
+  kable_styling() %>%
+  add_header_above(c(" ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Overall"=2,"Contact Pred"=3)) %>%
+  pack_rows("Synthetic-1", 1, 2) %>%
+  pack_rows("Synthetic-2", 3, 4) %>% 
+  pack_rows("Synthetic-3", 5, 6)
+
+
+# synth_tab=synth_tab[1:2,1:5]
+
+# knitr::kable(synth_tab,caption="", booktab=TRUE, digits=2) 
 # mytable=tab
 # library(papaja)
 
 ```
 
 
+```{r synthcontact, echo=FALSE, fig.cap="DCA covariance scores calculated from reference MSA, MRFalign-generated MSA and cmalign-generated MSA in the three synthetic MSA alignment test. DCA score is calculated by GREMLIN, Darker blue stands for higher covariation signal."}
+# load(here::here("data/synth_contact.rda"))
+load("~/GIT/thesis_tc/data/synth_contact.rda")
+library(patchwork)
+synth_contact 
+```
 
 ### RFAM
+
+Next, we tested MRFalign on Rfam families with pseudoknot structure.
+
 
 
 
