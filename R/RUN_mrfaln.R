@@ -5,7 +5,11 @@ suppressPackageStartupMessages(library(RNAmrf))
 # suppressPackageStartupMessages(library(tidyr))
 # suppressPackageStartupMessages(library(dplyr))
 
+if (length(args) <3){
+  message("Usage: RUN input.mrf input.fasta output.a2m")
 
+  q("no",0)
+}
 
 
 ### funcs
