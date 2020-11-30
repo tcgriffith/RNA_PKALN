@@ -1,0 +1,199 @@
+---
+title: "Untitled"
+author: "TC"
+date: "11/27/2020"
+output: bookdown::pdf_document2
+---
+
+```{r setup, include=FALSE}
+# bookdown::pdf_document2()
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+source(here::here("R/misc.R"))
+library(dplyr)
+```
+
+## R Markdown
+
+```{r}
+filerscape=here::here("data/synthetic/rscape.scores")
+
+score_rscape= data.table::fread(filerscape)
+
+names(score_rscape)=c("caseid","method","method2","SEN","PPV","F")
+
+score_rscape=score_rscape[,-"method2"]
+
+score_rscape[,3:5]=score_rscape[,3:5]/100
+
+score_rscape %>% filter(method!="input")
+```
+
+```{r}
+filecomp=here::here("data/synthetic/compalignp.scores")
+
+score_trad= data.table::fread(filecomp)
+names(score_trad)=c("method","caseid","SPS","SCI")
+```
+
+
+```{r}
+filepkaln=here::here("data/synthetic/synthetic.rds")
+
+pkaln.all=readRDS(filepkaln)
+
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln(pkaln))
+})
+
+rslt.df.s = do.call(rbind,rslt.all)
+names(rslt.df.s)=c(
+  "all",
+  "non-pair",
+  "all-bp",
+  "pseudoknot",
+  "non-pseudoknot",
+  "method",
+  "caseid"
+)
+
+# rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
+
+rslt.df.all=rslt.df.s %>% 
+  select(method,caseid, 1:5) %>% 
+  left_join(score_trad) %>% 
+left_join(score_rscape)
+  
+  # dplyr::left_join(rslt.df.1,score_rscape)
+print(rslt.df.all,digits = 2)
+```
+
+```{r}
+synth_tab=rslt.df.all
+
+synth_tab
+```
+
+
+```{r}
+library(kableExtra)
+library(dplyr)
+```
+
+```{r}
+synth_tab_sel=
+synth_tab %>% 
+  filter(caseid %in% c("synth3","synth5","synth9")) %>% 
+  # group_by(caseid,method) %>%
+  select(-caseid)
+```
+
+
+```{r}
+kable(synth_tab_sel, booktabs = T,digits=2) %>%
+  kable_styling() %>%
+  add_header_above(c(" ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Overall"=2,"Contact Pred"=3)) %>%
+  pack_rows("Synthetic-1", 1, 2) %>%
+  pack_rows("Synthetic-2", 3, 4) %>% 
+  pack_rows("Synthetic-3", 5, 6)
+```
+
+
+
+
+
+
+
+## figure
+
+```{r}
+library(ggplot2)
+library(patchwork)
+```
+
+```{r}
+
+
+testdirs=list.dirs(here::here("data/synthetic/synthetic/"),recursive=FALSE)
+
+testdirs
+
+testdirs.filt=testdirs[basename(testdirs) %in% c("synth3","synth5","synth9")]
+
+names(testdirs.filt) =basename(testdirs.filt)
+
+testdirs.filt
+```
+
+
+```{r}
+plot_rscape = function(cov.path) {
+  ggdata =
+    data.table::fread(cov.path,
+                      skip = 6) %>%
+    mutate(V6=ifelse(V5 < 0.05, 1,0),
+           result=NA,
+           result=ifelse(V5<0.05 & V1=="*", "TP",result),
+           result=ifelse(V5<0.05 & V1 !="*", "FP",result))
+    # mutate(V5=ifelse(V5==0, 2e-16,V5)) #%>% 
+    # mutate(V5 = ifelse(V5 > 10, 10, V5))
+  
+  gg =
+    ggplot(ggdata)  +
+    geom_tile(data = ggdata %>% filter(V1 == "*"), aes(x = V2, y = V3)) + coord_fixed() +
+    geom_tile(data = ggdata %>% filter(V6==1), aes(x = V3, y = V2, fill=result))+
+  labs(x = "Alignment index", y = "Alignment index") +
+    theme(legend.position = "none")+
+    scale_fill_manual(values=c(FP="red",TP="blue"),limits=c("FP","TP"))
+  return(gg)
+}
+
+names(testdirs.filt)=c(
+  "Synthetic-1",
+  "Synthetic-2",
+  "Synthetic-3"
+)
+```
+
+
+```{r}
+gglists=lapply(1:length(testdirs.filt),function(i){
+  
+  caseid=names(testdirs.filt)[i]
+  path=testdirs.filt[i]
+  gglist=list()
+  gglist$cmalign=plot_rscape(paste0(path,"/cmalign/cmalign.sorted.cov"))+
+    ggtitle(label="",subtitle = "cmalign")
+  gglist$rnamrf=plot_rscape(paste0(path,"/rnamrf/rnamrf.sorted.cov"))+
+    ggtitle(label=caseid,subtitle="MRFalign")
+  return(gglist)
+})
+
+
+```
+
+
+```{r }
+# patch_rscape=
+#   (gglists[[1]]$rnamrf+ gglists[[1]]$cmalign)/
+#   (gglists[[2]]$rnamrf+ gglists[[2]]$cmalign)/
+#   (gglists[[3]]$rnamrf+ gglists[[3]]$cmalign)+
+#    plot_annotation(tag_levels = 'A') +
+#   plot_layout()
+  
+patch_rscape=gglists[[1]]$rnamrf+gglists[[1]]$cmalign+
+  gglists[[2]]$rnamrf+gglists[[2]]$cmalign+
+  gglists[[3]]$rnamrf+gglists[[3]]$cmalign+
+  plot_layout(byrow = FALSE,nrow=2,guides="collect") & theme_classic() 
+
+patch_rscape
+```
+
+
+
+
+
+
+
+
+
