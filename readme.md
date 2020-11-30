@@ -45,11 +45,21 @@ The script 'R/RUN_mrfaln.R' provides a wrapper to the RNAmrf, which can be execu
 
 The alignment quality can be benchmarked:
 
-```
+```bash
 ## In the main directory
 ./R/bench_pkaln_dir.R ./example
+
+## The benchmark compares the alignment rnamrf/example.rnamrf.a2m with reference MSA input/example.a2m. 
 
 ## output:
          col_all  col_loop  pair_all pair_pk pair_nonpk method  caseid
 rnamrf 0.8300427 0.7533383 0.8541667  0.8475  0.8608333 rnamrf example
+
+#col_all:      alignment accuracy of all columns (percentage of correctly aligned positions comparing test and reference MSA)
+#col_loop:     alignment accuracy of non-paired columns
+#pair_all:     alignment accuracy of base-pairs
+#pair_pk :     alignment accuracy of pseudoknots
+#pair_nonpk :  alignment accuracy of non-pseudoknot stem
 ```
+
+This shows that RNAmrf has an 0.83 alignment accuracy, both Pseudoknot and non-pseudoknot stems have an average alignment accuracy of 0.85.
