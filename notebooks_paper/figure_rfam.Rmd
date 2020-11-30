@@ -4,11 +4,10 @@ author: "TC"
 date: "11/28/2020"
 output:
   pdf_document: default
-  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,warning=FALSE,message=FALSE)
 library(RNAmrf)
 source(here::here("R/misc.R"))
 library(dplyr)
@@ -93,7 +92,7 @@ rslt.contact= score_rscape %>%
   left_join(mync)
   
   # dplyr::left_join(rslt.df.1,score_rscape)
-print(rslt.df.all,digits = 2)
+# print(rslt.df.all,digits = 2)
 ```
 
 
@@ -101,7 +100,7 @@ print(rslt.df.all,digits = 2)
 ```{r}
 mytable= rslt.df.all
 
-mytable
+# mytable
 ```
 
 
@@ -147,13 +146,13 @@ mytable.wide %>%
   ylab("Pseudoknot BP alignment accuracy (MRFalign)")
   # annotate("text", x=0.5,y=1,label="P-value 0.03",color="red",size =6)
 
-gg_pk
+# gg_pk
 ```
 
 
 ```{r}
 
-
+gg_all=
 mytable.wide %>% 
   ggplot(aes (x=all_cmalign,y=all_rnamrf,color=neff>40))+
   geom_point(aes(size=neff))+
@@ -161,7 +160,6 @@ mytable.wide %>%
                   aes(label = caseid))+
   xlab("All column alignment accuracy (cmalign)")+
   ylab("All column alignment accuracy (MRFalign)")+
-
     geom_abline()
 ```
 
@@ -170,7 +168,7 @@ mytable.wide %>%
 
 data.filt = mytable.wide %>%
   filter(F_rnamrf - F_cmalign > 0.1)
-
+gg_f=
 mytable.wide %>% 
   ggplot(aes (x=F_cmalign,y=F_rnamrf,color=neff>40))+
   geom_point(aes(size=neff))+
@@ -210,7 +208,7 @@ contact_wider %>%
                   aes(label = caseid))+
   xlab("Contact Prediction Sensitivity (cmalign)")+
   ylab("Contact Prediction Sensitivity (MRFalign)")
-gg_cont_sens
+# gg_cont_sens
 ```
 
 ```{r}
@@ -311,7 +309,7 @@ ggdata_boxplot %>%
 
 # gg2
 # gg1+gg2
-gg1+gg2+plot_layout(guides="collect")&theme_classic()&theme(axis.text.x=element_text(angle = 45,  hjust=1))
+# gg1+gg2+plot_layout(guides="collect")&theme_classic()&theme(axis.text.x=element_text(angle = 45,  hjust=1))
 ```
 
 
@@ -335,7 +333,7 @@ testdirs.filt=testdirs[basename(testdirs) %in% c("RF01725","RF02996")]
 
 names(testdirs.filt) =basename(testdirs.filt)
 
-testdirs.filt
+# testdirs.filt
 ```
 
 
@@ -383,7 +381,7 @@ gg_cont2=
 plot_rscape(here::here("data/RFAM_PK/RFAM/RF01725/cmalign/cmalign.sorted.cov"))+
    ggtitle("RF01725 (cmalign)",subtitle ="FP:0 TP:15 True:29 Found:15" )
 
-gg_cont1+gg_cont2
+# gg_cont1+gg_cont2
 ```
 
 ```{r}
@@ -399,7 +397,7 @@ gg_cont4=
 plot_rscape(here::here("data/RFAM_PK/RFAM/RF02996/cmalign/cmalign.sorted.cov"))+
    ggtitle("RF02996 (cmalign)",subtitle ="FP:4 TP:16 True:23 Found:20" )
 
-gg_cont3+gg_cont4
+# gg_cont3+gg_cont4
 ```
 
 
