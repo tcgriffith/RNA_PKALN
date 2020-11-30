@@ -163,12 +163,17 @@ tmp %>%
   geom_abline()
 ```
 
+```{r}
+table(benchs.mrfcm$caseid)
+```
+
 
 ```{r}
 
 gg1=
 benchs.mrfcm %>% 
-  filter(caseid != "tRNA") %>%
+  # filter(caseid != "tRNA") %>%
+  filter(!caseid %in% c("tRNA","5S_rRNA","5_8S_rRNA")) %>% 
   ggplot(aes(x=apsi,y=score_SPS,color=method))+
   geom_point(alpha=0.1)+
     scale_y_continuous(breaks=seq(0,1,0.1))+

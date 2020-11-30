@@ -2,6 +2,8 @@
 *.docx
 *.pdf
 *.tex
+*.log
+*_files/
 data/
 rdata
 bin

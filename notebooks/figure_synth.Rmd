@@ -2,10 +2,11 @@
 title: "Untitled"
 author: "TC"
 date: "11/27/2020"
-output: html_document
+output: bookdown::pdf_document2
 ---
 
 ```{r setup, include=FALSE}
+# bookdown::pdf_document2()
 knitr::opts_chunk$set(echo = TRUE)
 library(RNAmrf)
 source(here::here("R/misc.R"))
@@ -24,6 +25,8 @@ names(score_rscape)=c("caseid","method","method2","SEN","PPV","F")
 score_rscape=score_rscape[,-"method2"]
 
 score_rscape[,3:5]=score_rscape[,3:5]/100
+
+score_rscape %>% filter(method!="input")
 ```
 
 ```{r}
@@ -59,7 +62,7 @@ names(rslt.df.s)=c(
 rslt.df.all=rslt.df.s %>% 
   select(method,caseid, 1:5) %>% 
   left_join(score_trad) %>% 
-left_join(score_rscape) 
+left_join(score_rscape)
   
   # dplyr::left_join(rslt.df.1,score_rscape)
 print(rslt.df.all,digits = 2)
@@ -102,41 +105,14 @@ save(synth_tab_sel,file="~/GIT/thesis_tc/data/synth_tab_sel.rda")
 ```
 
 
+
+
+
 ## figure
 
 ```{r}
-
-
 library(ggplot2)
-
-
-gg_mrfcontact= function(mrf){
-  ggdata=mrf$mat_apc
-
-  RNAmrf::gg_mat(ggdata)+
-    
-  scale_fill_gradient2(name="DCA")+
-    labs(x="",y="")
-}
-read_mrflist = function(testdir) {
-  mrfs = list.files(
-    testdir,
-    pattern = "\\.mrf",
-    recursive = TRUE,
-    full.names = TRUE
-  )
-  
-  # mrfs
-  
-  mrfs_test = mrfs[1:3]
-  
-  mrflist = lapply(mrfs_test, RNAmrf::read_mrf)
-  
-  names(mrflist) = basename(dirname(mrfs_test))
-  return(mrflist)
-}
-
-
+library(patchwork)
 ```
 
 ```{r}
@@ -155,51 +131,80 @@ testdirs.filt
 
 
 ```{r}
-mrflist.list=lapply(testdirs.filt,read_mrflist)
+plot_rscape = function(cov.path) {
+  ggdata =
+    data.table::fread(cov.path,
+                      skip = 6) %>%
+    mutate(V6=ifelse(V5 < 0.05, 1,0),
+           result=NA,
+           result=ifelse(V5<0.05 & V1=="*", "TP",result),
+           result=ifelse(V5<0.05 & V1 !="*", "FP",result))
+    # mutate(V5=ifelse(V5==0, 2e-16,V5)) #%>% 
+    # mutate(V5 = ifelse(V5 > 10, 10, V5))
+  
+  gg =
+    ggplot(ggdata)  +
+    geom_tile(data = ggdata %>% filter(V1 == "*"), aes(x = V2, y = V3)) + coord_fixed() +
+    geom_tile(data = ggdata %>% filter(V6==1), aes(x = V3, y = V2, fill=result))+
+  labs(x = "Alignment index", y = "Alignment index") +
+    theme(legend.position = "none")+
+    scale_fill_manual(values=c(FP="red",TP="blue"),limits=c("FP","TP"))
+  return(gg)
+}
 
-
+names(testdirs.filt)=c(
+  "Synthetic-1",
+  "Synthetic-2",
+  "Synthetic-3"
+)
 ```
 
+
 ```{r}
-gglist.list= lapply(mrflist.list, function(mrflist){
-  gglist=lapply(mrflist, gg_mrfcontact)
+gglists=lapply(1:length(testdirs.filt),function(i){
   
-  gglist$cmalign+ggtitle("cmalign")
-  gglist$rnamrf+theme(legend.position="none") +ggtitle("MRFalign")
+  caseid=names(testdirs.filt)[i]
+  path=testdirs.filt[i]
+  gglist=list()
+  gglist$cmalign=plot_rscape(paste0(path,"/cmalign/cmalign.sorted.cov"))+
+    ggtitle(label="",subtitle = "cmalign")
+  gglist$rnamrf=plot_rscape(paste0(path,"/rnamrf/rnamrf.sorted.cov"))+
+    ggtitle(label=caseid,subtitle="MRFalign")
   return(gglist)
 })
 
+
 ```
+
+
+```{r }
+# patch_rscape=
+#   (gglists[[1]]$rnamrf+ gglists[[1]]$cmalign)/
+#   (gglists[[2]]$rnamrf+ gglists[[2]]$cmalign)/
+#   (gglists[[3]]$rnamrf+ gglists[[3]]$cmalign)+
+#    plot_annotation(tag_levels = 'A') +
+#   plot_layout()
+  
+patch_rscape=gglists[[1]]$rnamrf+gglists[[1]]$cmalign+
+  gglists[[2]]$rnamrf+gglists[[2]]$cmalign+
+  gglists[[3]]$rnamrf+gglists[[3]]$cmalign+
+  plot_layout(byrow = FALSE,nrow=2,guides="collect") & theme_classic() 
+
+patch_rscape
+```
+
+
 
 ```{r}
-
-library(patchwork)
-
-p1 =gglist.list$synth3$input+ylab("Synthetic-1")+ theme(legend.position="none")+ggtitle("Reference")
-p2 =gglist.list$synth3$rnamrf+theme(legend.position="none") +ggtitle("MRFalign")
-p3 =gglist.list$synth3$cmalign+ggtitle("cmalign")+theme(legend.position="none")
-
-p4 =gglist.list$synth5$input+ylab("Synthetic-2")+ theme(legend.position="none")#+ggtitle("Reference")
-p5 =gglist.list$synth5$rnamrf+theme(legend.position="none") #+ggtitle("MRFalign")
-p6 =gglist.list$synth5$cmalign#+ggtitle("cmalign")
-
-p7 =gglist.list$synth9$input+ylab("Synthetic-3")+ theme(legend.position="none")#+ggtitle("Reference")
-p8 =gglist.list$synth9$rnamrf+theme(legend.position="none")+
-  xlab("Sequence id")#+ggtitle("MRFalign")
-p9 =gglist.list$synth9$cmalign+theme(legend.position="none")#+ggtitle("cmalign")
-
-patch=
-(p1+p2+p3)/(p4+p5+p6)/(p7+p8+p9) +
-   plot_annotation(tag_levels = 'A')
+patch_rscape=patch_rscape
+save(patch_rscape,file="~/GIT/thesis_tc/data/patch_rscape.rda")
 ```
 
-```{r}
-patch
-```
 
-```{r}
-synth_contact=patch
-save(synth_contact,file="~/GIT/thesis_tc/data/synth_contact.rda")
-```
+
+
+
+
+
 
 

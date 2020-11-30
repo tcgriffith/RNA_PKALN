@@ -37,9 +37,11 @@ for subdir in cmalign rnamrf;do
     echo "//" >> $subdir/$caseid.$subdir.rmgap.sto
 
     ## benchmark by R-scape
-    R-scape --outdir $subdir --outname $subdir $subdir/$caseid.$subdir.rmgap.sto
+    R-scape -E 10000 --outdir $subdir --outname $subdir $subdir/$caseid.$subdir.rmgap.sto
 
 done
+
+R-scape -E 10000 --outdir input --outname input $caseid.sto 
 
 # if [ ! -f cmalign/$caseid.cmalign. ]; then
 #     esl-reformat afa cmalign/$caseid.cmalign.a2m > cmalign/$caseid.cmalign.afa

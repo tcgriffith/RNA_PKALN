@@ -7,53 +7,62 @@ output: bookdown::pdf_document2
 
 
 
+
+
 # RNAmrf, evolutional covariation aided RNA sequence alignment  
 
 
 ## Introduction
 
-Sequences of proteins, nucleotides(DNAs and RNAs) are essential in the modern biology research. Interestingly, sequences of these molecules have undergone considerable changes during evolution, while preserving the folded structures and biological functions. It has now become a main task to detect homology from diversed sequences, which is usually achieved by alignment methods. Today, alignment methods have been used in fold recognition, function annotation, building phylogenetic trees, finding new motifs or non-coding RNAs, predicting structural and functional features.
+Sequences of proteins, nucleotides(DNAs and RNAs) are essential in modern biology research. Interestingly, sequences of these molecules have undergone considerable changes during evolution, while preserving the folded structures and biological functions. It has now become a main task to detect homology from diverse sequences, which is usually achieved by alignment methods. Today, alignment methods have been used in fold recognition, function annotation, building phylogenetic trees, finding new motifs or non-coding RNAs, predicting structural and functional features. There are two closely related alignment problems: pairwise alignment and multiple sequence alignment. Pairwise alignment aims to align two sequences, which can be efficiently solved by dynamic programming methods. Further development of pairwise alignment include the use of additional information from structure constraints and predicted features. 
 
-There are two closely related alignment problems: pairwise alignment and multiple sequence alignment. Pairwise alignment aims to align two sequences, which can be efficiently solved by dynamic programming methods. Further development of pairwise alignment include the use of additional information from structure constraints and predicted features. 
-
-The multiple sequence alignment problem aims to build an alignment for multiple homologous sequences. Several strategies have been developed: First, pairwise-based alignment methods can be generalized to progressively produce Multiple-sequence alignment, which starts by aligning two sequences and further adds other sequences into alignment. The alignment quality of these methods are determined by the order of the added sequences. Second, researchers have developed consistency scores to evaluate an MSA, and the goal is to iteratively optimize for alignment consistency. However, it is still difficult to build alignment greater than 1000 sequences using these method. Until recently, sequences has become abundant, making it highly desirable to construct larger MSA with thousands and even millions of sequences. For example, the tRNA family has about 1.4 million full sequences. Alignment methods based on the probablistic framework has been developed, as represented by HMMblits and infernal. A simple yet effective strategy to construct larger MSA is to align new sequences to a pre-compiled, manually curated seed alignment. This strategy is closely related to our work presented here.
+The multiple sequence alignment problem aims to build an alignment for multiple homologous sequences. Several strategies have been developed: First, pairwise-based alignment methods can be generalized to progressively produce Multiple-sequence alignment, which starts by aligning two sequences and further adds other sequences into alignment. The order of the added sequences determines the alignment quality of these methods. Second, researchers have developed consistency scores to evaluate an MSA, and the goal is to iteratively optimize for alignment consistency. However, it is still difficult to build alignment greater than 1000 sequences using this method. Until recently, sequences have become abundant, making it highly desirable to construct larger MSA with thousands and even millions of sequences. For example, the tRNA family has about 1.4 million full sequences. Alignment methods based on the probabilistic framework has been developed, as represented by HMMblits and infernal. A simple yet effective strategy to construct larger MSA is to align new sequences to a pre-compiled, manually curated seed alignment. This strategy is closely related to our work presented here.
 
 
-In this work, we developed MRFalign, a new RNA sequence aligner based on the Markov Random Field(MRF) model. Compared with existing pseudoknot-alignment methods(locaRNA, MARNA), RNAmrf does not need to predict the secondary structures and perform pairwise alignment. Compared with covariance model, CM only allows for incorporating nested base-pairing interactions (pseudoknots are ignored), while MRF is more general, as it allows for the description of a fully connected covariation dependency.
+In this work, we developed RNAmrf, a new RNA sequence aligner based on the Markov Random Field(MRF) model. Compared with existing pseudoknot-alignment methods(locaRNA, MARNA), RNAmrf does not need to predict the secondary structures and perform the pairwise alignment. Compared with the covariance model, while MRF is more general, as it allows for the description of a fully connected covariation dependency.
 
-We showed that RNAmrf outperforms cmalign in a synthetic alignment test and real RNA alignment tasks including pseudoknotted structure.
-
+We showed that RNAmrf outperforms cmalign in a synthetic MSA alignment test and Rfam MSA alignment test using pseudoknotted structures.
 
 ## Methods
 
 ### Markov Random Field model for RNA alignment
 
-An RNA structure can be described by a probablistic graph model: nucleotides(A,U,G and C) are represented by nodes, interactions between nucleotides are represented by edges. The distribution of nucleotide types observed in a site is jointly determined by the site preference and coupling interactions.A markov random field (MRF) is introduced to disentangle direct and indirect coupling. It aims at inferring a statistical model $P(A_1,...,A_L)$ for the entire sequence space $A_1,...,A_L$. Given a RNA sequence ($A_1$,...$A_L$), the joint probability $P(A_1,...,A_L)$ in a Boltzmann distribution is described by
+A Markov random field model describes an RNA structure in a probablistic graph model: Nodes represent nucleotides(A, U, G and C), edges represent interactions between nodes. The MRF model consists of two types of energies: $h_{i}$ and $e_{i,j}$, where $h_{i}$ reflects the nucleotide preference on site i and $e_{i,j}$ is a pairwise nucleotide preference for edge (i, j). The markov random field model aims at inferring a statistical model $P(A_1,...,A_L)$ to evaluate the probability of any given sequence. The probability $P(A_1,..., A_L)$ for a specific sequence ($A_1$,...$A_L$) is given by the Boltzmann distribution:
 
 $$
 P(A_1,...,A_L)=\frac{1}{Z}exp\left \{ {\sum_{i<j}{e_{ij}(A_i,A_j)}}+\sum_{i}{h_i(A_i)} \right \}
 $$
 
-where i and j are sequence index of nucleotides $A_i$ and $A_j$. The model parameters are fitted to the MSA. Various approaches are designed to infer the model, include message-passing, mean-field approximation, and pseudolikelihood model. Researchers have used the coupling term $e_{ij}$ to infer physical contacts with success. 
+where i and j are the sequence index of nucleotides $A_i$ and $A_j$. and Z is the normalization factor. The probability of a sequence is determined by the sum of single-site and two-site energies. 
 
-From a thermodynamics perspective, the probability of observing a sequence $A_1,...,A_L$ under a MRF model is determined by its energy. Similarly, we can see the sequence-to-MRF alignment problem as to find the alignment with the highest probability. Additional gap energy terms are required In order to calculate the free energy of a given alignment, but are not included in the MRF model. We used the affine gap penalty to penalize the creation of gaps in an alignment.
+A MRF with known parameters for $h_{i}$ and $e_{i,j}$ thus can be used to score an alignment. The "energy" can be considered as a "score" for a sequence to be compatible with an RNA family. Unfortunately, finding the optimal alignment is hard as the possible alignment space scales as $N^L$, heuristic methods are often employed for seeking an approximate solution.
 
-Inferring the global optimal alignment in a sequence-to-MRF alignment is an NP problem. Inspired by the map_align method, we sought out to develop a heuristic alignment approach: First, an initial alignment is guessed by using the one-body field accounting for field conservation, using dynamic programming; then the alignment is iteratively refined in search for alignment with lowest energy. 
+RNAmrf uses an iterative dynamic programming algorithm similar to the map_align method for contact map alignment, with some adaptation for the purpose to produce the sequence-to-MRF alignment. A gap penalty is required to calculate the energy for alignment, as insertions and deletions are not modelled in the MRF model by nature. We tested the affine gap penalty with tRNA alignment test by grid search, a gap open penalty of -3 and gap extension of -0.3 is chosen.
+
+Let L be the length of an RNA, and N be the length of an MRF model. The goal is to map the L nucleotides to the N sites of the MRF model.The algorithm comprises two dynamic programming steps. In the first step, a score is computed for each nucleotide of the RNA with each site of the MRF model given by the one-body MRF energy $h_{i}$, forming an initial L*N similarity matrix. A initial alignment is then found by the Smith-waterman DP algorithm. At this point, only one-body energies are used, which exploits the site conservation. In the second step, the similarity matrix is updated based on the initial alignment accounting for both one-body and two-body MRF energies, then the updated similarity matrix is used to update the alignment. This process is repeated 30 times. In fact, we observed that the similarity score of the alignment usually converges in 10~15 iterations. The computation time of RNAmrf therefore scales with L*(N^2).
 
 ### Alignment Accuracy Assessment and Test sets
 
 The alignment accuracy is assessed by column alignment accuracy and base-pair alignment accuracy. The column accuracy is the percentage of correctly aligned bases (or base-pairs) in the MSA columns, comparing the test and reference MSA. This accuracy can be understood as sensitivity. Column accuracy is calculated for all reference columns and non-paired columns.
 The base-pair alignment accuracy is calculated as the percentage of correctly aligned base-pairs comparing test and reference MSA. The base-pairs are from the pre-defined secondary structure in the reference alignment.
 
-Additionally, the overall alignment quality is evaluated by the Sum-of-Pair Scores (SPS), and Structure Conservation Index (SCI). SPS reflects the average pairwise-alignment accuracy between two MSAs with a range between 0 and 1. SCI evaluates the consistency of an alignment. SCI will be high if sequences fold together equally well as if fold individually. SCI will be low if no concensus fold can be found.
+The overall alignment quality is evaluated by the Structure Conservation Index (SCI), which evaluates the consistency of an alignment. SCI will be high if sequences fold together equally well as if fold individually. SCI will be low if no consensus fold can be found.
 
-The re-aligned MSAs are further evaluated in the contact prediction task by predicting contacts using DCA analysis.
+The re-aligned MSAs are further evaluated in the contact prediction task by employing R-scape. R-scape predict base pairs by covariation signals. 
 
 #### Synthetic Alignment
 
-A synthetic alignment dataset is constructed to compare the performance of MRFalign to cmalign, the state-of-the-art RNA aligner, in an extreme setting: starting with a predefined secondary structure that contains two pseudoknotted stems, all four types of nucleotides plus gap are distributed with a frequency of 1/4 on un-paired sites. For the eight base pairs, they are randomly selected from the three canonical base pair types (AU, CG, and GU). Random insertions of length 0-4 bases are inserted in the non-paired region. Similarly, each non-paired site has a probability of 0.1 to be deleted. Three secondary structure with pseudoknots are designed by hand. For each SS, three hundred random sequences are generated for a given SS to generate a reference MSA.
+A synthetic alignment dataset was constructed to compare the performance of RNAmrf to cmalign, the state-of-the-art RNA aligner, in an extreme setting: 
 
-The secondary structure used to generate sequences are denoted below following a dot-bracket notation. Briefly, the second line denotes the reference index. Letter x stands for aligned positions and dot stands for the insertion of 0-4 bases. The third line denotes the secondary structure in dot-bracket annotation, where pairs are assigned by a pair of brackets or letter pairs in upper and lowercase(A and a).
+1. We defined three secondary structures, each contains two pseudoknotted stems with a total of eight base-pairs (4 base-pairs for each stem).
+2. All four types of nucleotides were randomly filled into un-paired sites with a probability of 0.25. 
+3. For the eight base pairs, they were randomly selected from the three canonical base-pair types (AU, CG, and GU).
+4. Random segments of length 0-4 bases were inserted in a selected non-paired region to imitate insertion mutations
+5. To imitate deletions, each non-paired site had a probability of 0.1 to be deleted. 
+ 
+For each SS, three hundred random sequences were produced. This three hundred sequences served as the seed alignment. The final MSAs have the following desired properties: first, there is not conserved site but only the secondary structures are conserved; second, there is no phylogenetic relations between sequences, thus progressive alignment methods won't work; third, the secondary structures contain pseudoknotted stems, which is known to be difficult to model by conventional methods.
+
+The secondary structure used to generate sequences are denoted below. The second line denotes the reference index. Letter x stands for aligned positions and dot stands for insertion. The third line denotes the secondary structure in dot-bracket annotation, where pairs are assigned by a pair of brackets or letter pairs in upper and lowercase(A and a).
 
 ```
 >Synthetic-1
@@ -69,33 +78,24 @@ xxxxxx....xxxxxxxxxxxxxxxxxxxxxx....xxxxxxxxxxxxxx
 .AAAA..............((((..aaaa................)))).
 ```
 
-For each reference MSA, a covariance model is built with cmbuild. Both synthetic reference MSA and the designed secondary structure are used as input. Then the covariance model is used to re-align the three hundred sequences. Similarly, a MRF model is trained on the synthetic MSA by GREMLIN. The MRF model is used to re-align the sequences with MRFalign.
+We built a covariance model for all reference seed MSAs with cmbuild. Both synthetic reference MSA and the designed secondary structure were used as input.  Similarly, we trained MRF models on the synthetic MSA with GREMLIN. The Covariance model and the Markov random field model were used to re-align the sequences.
 
 
 #### Rfam Pseudoknot Families
 
-A total of 37 seed alignment are retrieved from RFAM database. These seed alignments are selected from RNA families with pseudoknots. We only selected RNA families with length less than 200 due to long computation time for constructing the MRF model and alignment. The covariance models shipped with RFAM database was used to re-align the seed alignment. For MRF, the seed alignment is used to construct the MRF model by GREMLIN, then the MRF model is used to align the seed sequences.
-
-The Code to build the covariance model and train the MRF model is provided below:
-
-```
-cmbuild --hand example.cm MSA.fasta
-
-gremlin_cpp -alphabet rna -i MSA.afa -mrf_o example.mrf -o example.gremlinscore
-```
+We retrieved a total of 37 seed alignment from the RFAM database. These seed alignments were selected from RNA families with pseudoknots and have covariation support. We only selected RNA families with length less than 200 due to long computation time for constructing the MRF model and alignment. The covariance models shipped with the RFAM database were used to re-align the seed alignment. We used the seed alignment to construct the MRF models with GREMLIN, then the MRF models were used to align the seed sequences.
 
 
 ## Results
 
-### Synthetic Alignment Performance
+### Performance on Synthetic MSA
 
-Table \@ref(tab:tabsynth) shows the alignment performance of MRFalign and cmalign on three synthetic MSAs. Comparing the overall performance, MRFalign appears to have lower alignment quality as indicated by the consistent lower SPS and SCI scores compared with cmalign. However, MRFalign shows consistent accuracy in aligning base-pairs in the pseudoknot and non-pseudoknot stem. Cmalign has the highest alignment accuracy for the non-pseudoknotted stem (0.92~0.97) but fail to align the pseudoknots in Synthetic-1 and Synthetic-3 MSA with poor accuracy of 0.01 and 0.09, respectively. This is expected, as only the non-pseudoknot SS is incorporated in the CM model. 
+Table \@ref(tab:tabsynth) shows the alignment performance of RNAmrf and cmalign on three synthetic MSAs. Comparing the overall performance, RNAmrf appears to have lower alignment quality as indicated by the consistent lower SPS and SCI scores compared with cmalign. However, RNAmrf shows consistent accuracy in aligning base-pairs in the pseudoknot and non-pseudoknot stem. The cmalign method has the highest alignment accuracy for the non-pseudoknotted stem (0.92~0.97) but fails to align the pseudoknot pairs in Synthetic-1 and Synthetic-3 MSA, as implied by accuracies of 0.01 and 0.09, respectively. This is expected, as only the non-pseudoknot SS is incorporated in the CM model. 
 
 
-The last three columns in Table \@ref(tab:tabsynth) denotes the sensitivity, precision(positive predictve value, PPV) and F-score for contact prediction using R-scape. Both sensitivity and precision are near perfect for MRFalign in all three tests, while cmalign generated MSA have lower precision and sensitivity. This result suggests that MRFalign can improve the downstream contact prediction performance. Figure \@ref(fig:synthcontact) provides visualization of the DCA covariation scores calculated using MSAs from reference, MRFalign and cmalign in the three synthetic test. In the reference and MRFalign (Figure \@ref(fig:synthcontact) A, B, D, E, G and H), both normal and pseudoknot stems have high covariance scores (GREMLIN score > 6), showing consistency between MRFalign MSA and the seed MSA. However, using cmalign generated MSA, the pseudoknotted base pairs shows weak and smear covariance signals (Figure \@ref(fig:synthcontact) C, F and I). In the synthetic-2 test, both MRFalign and cmalign has an accuracy of 0.53 in aligning the pseudoknot region. In synthetic-1 and synthetic-3, the pseudoknot pairs in the MRFalign MSA shows clear covariance signal, but the covariance signals are difficult to distinguish in the CMalign MSA(Figure \@ref(fig:synthcontact) C and I).
+We predicted contacts from the generated MSAs and compared with the reference pairs. The last three columns in Table \@ref(tab:tabsynth) denotes the sensitivity, precision(positive predictive value, PPV) and F-score for contact prediction using R-scape. Both sensitivity and precision are near perfect for RNAmrf in all three tests, while cmalign generated MSA have lower precision and sensitivity.  Figure \@ref(fig:synthcontact) shows the predicted pairs using the three MSAs. In the RNAmrf (Figure \@ref(fig:synthcontact) A, C and E), all base pairs in both normal and pseudoknot stems were identified (E-value 0.05),  On the other hand, cmalign MSA has consistent low  Four and three pseudoknot pairs were not predicted in synthetic-1 and synthetic-3 by cmalign MSA; Four, two and one false predictions were made in the three cmalign MSA. (Figure \@ref(fig:synthcontact) B, D and  F). 
 
-The alignment result on the synthetic RNA suggest that MRFalign outperforms cmalign in aligning RNA sequences containing pseudoknotted structures. The improvement is further confirmed in the contact prediction task. 
-
+The alignment accuracy test and the contact prediction result on the synthetic RNA together suggest that RNAmrf outperforms cmalign in aligning RNA sequences containing pseudoknotted structures. The contact prediction results further
 
 ```{r tabsynth, echo=FALSE}
 load("~/GIT/thesis_tc/data/synth_tab_sel.rda")
@@ -121,18 +121,90 @@ kable(synth_tab_sel, booktabs = T,digits=2, label="tabsynth",
 ```
 
 
-```{r synthcontact, echo=FALSE, fig.cap="DCA covariance scores calculated from reference MSA, MRFalign-generated MSA and cmalign-generated MSA in the three synthetic MSA alignment test. DCA score is calculated by GREMLIN, Darker blue stands for higher covariation signal."}
+```{r synthcontact, echo=FALSE, fig.cap="DCA covariance scores calculated from reference MSA, RNAmrf-generated MSA and cmalign-generated MSA in the three synthetic MSA alignment test. DCA score is calculated by GREMLIN, Darker blue stands for higher covariation signal."}
 # load(here::here("data/synth_contact.rda"))
-load("~/GIT/thesis_tc/data/synth_contact.rda")
+# load("~/GIT/thesis_tc/data/synth_contact.rda")
+load("~/GIT/thesis_tc/data/patch_rscape.rda")
 library(patchwork)
-synth_contact 
+patch_rscape +plot_annotation(tag_levels = "A")
 ```
 
-### RFAM
+### Performance on Rfam seed MSAs
 
-Next, we tested MRFalign on Rfam families with pseudoknot structure.
+We tested RNAmrf on Rfam families with pseudoknot structure. The sequence lengths are between 31 and 196, average pairwise sequence identity ranges between 0.5 and 0.7, effective sequence size(Neff) between 3.2 and 192.
 
+Figure \@ref(fig:rfameval) shows the alignment performance and the contact prediction performance by RNAmrf and cmalign. Both RNAmrf and cmalign have alignment accuracy close to 1 in all categories. The difference can be observed by separating families by a Neff cutoff of 40 (13 greater than 40 and 24 less than 40). As shown in Figure \@ref(fig:rfameval) A, when the Neff of the seed is less than 40, RNAmrf has lower accuracy in all categories. when Neff is greater than 40, RNAmrf significant higher accuracy in all(P-value 0.014, Wilcoxon tests) and pseudoknot pairs(0.013) compared to cmalign. Figure \@ref(fig:rfameval) B shows the pseudoknot base-pair alignment accuracy comparing RNAmrf and cmalign. Four families with significant improvement on pseudoknot alignment are labelled, they are RF01725, RF02996, RF02924 and RF03046. 
+
+
+Next, We employed R-scape to search for base-pairs with significant covariation signal on the re-aligned MSAs.
+Figure \@ref(fig:rfameval) C shows the F-score, sensitivity and precision using RNAmrf MSA, cmalign MSA and reference MSA. In the Neff <= 40 group, both RNAmrf and cmalign have low F-scores compared with the reference, suggesting that low Neff in seed alignment affects both models. This is expected as both MRF model and CM model rely on sufficient sequence data. In the Neff > 40 group, RNAmrf has higher F-score and sensitivity than cmalign (P-value 0.04), close to reference (0.92). The precision is equally close to 1 for all three MSAs. Figure \@ref(fig:rfameval) D shows a pairwise comparison of sensitivity for RNAmrf and cmalign. Top three families with highest sensitivity improvement are labelled. Interestingly, RF01725 and RF02996 are in the top four families having the highest improvement on pseudoknot alignment (see Figure \@ref(fig:rfameval) B). Figure \@ref(fig:rfamcontact) confirms that in both families, the improved alignment in pseudoknot stems helps R-scape to identify the pseudoknot structure with strong covariation signals(labelled in Figure \@ref(fig:rfamcontact) A, C). The full RFAM benchmark for both alignment accuracy and contact prediction is given in table \@ref(tab:tabrfam).
+
+It is not surprising that cmalign is not greatly impacted by pseudoknotted structures in the alignment and contact prediction test for the 37 RFAM families, which is suggested by its average alignment accuracy above 0.95 in all tested categories. This is expected, because pseudoknotted stems may only take up a small portion of the overall secondary structure, so these pseudoknotted regions will be "passively" aligned once other regions are correctly aligned. In fact, in all cases where RNAmrf outperforms cmalign(in Synthethic-1, Synthetic-3, RF01725 and RF02996), there is always one side of the pseudoknot stems sitting on the terminal region, which has higher chance to be misaligned.
+
+### Computation Complexity and Availability
+
+RNAmrf uses the one-site energy to generate the initial alignment, and 20 to 30 rounds of iteration to update the alignment. During our test, an average length of 100 with 400 sequences can be completed in 3 minutes user time. As a comparison, the same alignment processed by cmalign took about 10 seconds. Both tests are completed on a laptop with Intel i7-8550U CPU at 1.80GHz and 16GB RAM. Unlike pairwise-alignment, progressive method based aligners that scale quadratically to the sequence number, the alignment time of RNAmrf scales linearly to the sequence number, making it suitable to construct large MSAs, On the other hand, the alignment time scales cubic to the sequence length, assuming the sequence length is close to the model, thus long RNA alignment (such as ribosomal RNAs) are not suitable at present.
+
+
+
+
+```{r rfameval, echo=FALSE, fig.cap="Alignment accuracy of RNAmrf and cmalign, and thecontact prediction performance using newly aligned seed MSA.",fig.height=9,out.width="90%"}
+load("~/GIT/thesis_tc/data/rfam_patch2.rda")
+# load("~/GIT/thesis_tc/data/rfam_patch4.rda")
+library(patchwork)
+library(ggplot2)
+
+  rfam_patch2&theme(legend.position = "bottom")
+```
+
+```{r rfamcontact, echo=FALSE,warning=FALSE, fig.cap="R-scape predicted  significant covariation pairs calculated from RNAmrf and cmalign aligned seed MSA of two RFAM families(A, B: RF01725; D, E: RF02996). The reference secondary structure is shown in the upper triangle. C, F shows the secondary structure and pseudoknot position of the two family. Secondary structure is drawn by R2R.",fig.height=9,out.width="90%"}
+# load(here::here("data/synth_contact.rda"))
+load("~/GIT/thesis_tc/data/rfam_patch3.rda")
+# load("~/GIT/thesis_tc/data/rfam_patch4.rda")
+library(patchwork)
+library(ggplot2)
+
+rfam_patch3+plot_annotation(tag_levels = "A")+plot_layout(widths = c(2,2)) &theme(legend.position="bottom")
+```
+
+```{r echo=FALSE}
+load("~/GIT/thesis_tc/data/rfam_tab_sel.rda")
+# save(rfam_tab_sel,file="~/GIT/thesis_tc/data/rfam_tab_sel.rda")
+
+# 
+# kable(synth_tab_sel, booktabs = T,digits=2, label="tabsynth",
+#       caption= "Alignment accuracy of cmalign and RNAmrf on the synthetic MSA") %>%
+#   kable_styling() %>%
+#   add_header_above(c(" ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Overall"=2,"Contact Pred"=3)) %>%
+#   pack_rows("Synthetic-1", 1, 2) %>%
+#   pack_rows("Synthetic-2", 3, 4) %>% 
+#   pack_rows("Synthetic-3", 5, 6)
+
+
+kable(rfam_tab_sel, booktabs = T,digits=2,longtable=TRUE,
+      caption= "Alignment accuracy of cmalign and RNAmrf on RFAM pseudoknot families",
+      label="tabrfam") %>%
+  # kable_styling() %>% 
+   # kable_styling(latex_options="scale_down")%>% 
+  add_header_above(c(" "," ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Contact Pred"=3," "," "," "," ")) %>%
+  pack_rows(index=table(rfam_tab_sel$caseid)) 
+```
 
 
 
 ## Discussion
+
+In this work, we have developed and tested RNAmrf, a method to align RNA sequences to a Markov Random Field model built from pre-compiled seed MSA. The hyperparameters of the model are inferred by a pseudo-likelihood inference of the MRF model to capture both single and pairwise interactions. 
+
+RNA sequence alignment is still a challenging task. This is because RNA molecules are known to have conserved secondary structure rather than preserving the nucleotide sequence. As a result, most standard alignment methods show a drastic decrease in alignment accuracy when the pairwise sequence identity drops below 80%, a so-called "twilight zone". By the way, the twilight zone for protein is 30%. Thus, a good RNA aligner needs to take the RNA secondary structure into consideration. The covariance model implemented in Infernal is by far one of the most accurate RNA aligners, which has been widely applied in the RFAM database. The MRF model is first applied in predicting physical contacts for both proteins and RNAs with success. Here we implemented a heuristic method to perform the sequence-to-MRF alignment.
+
+
+Both the MRF and CM model takes a probabilistic framework that learns the statistical parameters from data without relying on pre-defined energy parameters or sequence similarity matrix. Compared to CM, MRF has more flexibility as all nucleotides are fully connected, while cmalign relies on a pre-defined, non-pseudoknotted secondary structure to construct the model structure. The tree-like structure in CM ensures that sequence alignment can be completed in a linear time, while the loopy-graph construct in MRF has higher computation cost. A related task by covariance model is to search for homologous sequences to a seed alignment. Considering the high computation cost of RNAmrf, we defer this to future work.
+
+
+The applicability of RNAmrf is confirmed by real RNA data. we tested to re-align large seed alignments provided in the Rfam databases. We find that our method performs comparably well to cmalign in terms of overall alignment accuracy and base-pair alignment accuracy. The improvement is further confirmed by contact prediction tests using newly aligned MSA. The improvement of contact prediction performance of RNAmrf over cmalign suggests that alignment proposed by RNAmrf is actually preferred in several cases.
+
+
+## Availability 
+
+The RNAmrf is implemented in R with Rcpp. It can be installed from `https://github.com/tcgriffith/RNAmrf` The synthetic and RFAM benchmark dataset can be downloaded from  `https://github.com/tcgriffith/RNA_PKALN`, including codes to produce table and figures in this paper.
