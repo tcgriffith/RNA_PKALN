@@ -20,13 +20,16 @@ rng_seq=function(pairs=NULL,inserts=NULL){
   
   i=which(pairs>0)
   j=pairs[which(pairs>0)]
+  
+  i2=i[i<j]
+  j2=j[i<j]
   # message(i)
   
-  rng_bp=(sample(c("AU", "GC", "CG", "UA","GU","UG"),length(i),replace = TRUE))
+  rng_bp=(sample(c("AU", "GC", "CG", "UA"),length(i2),replace = TRUE))
   bp_1= gsub("^(.)(.)","\\1",rng_bp)
   bp_2= gsub("^(.)(.)","\\2",rng_bp)
-  myseq[i]=bp_1
-  myseq[j]=bp_2
+  myseq[i2]=bp_1
+  myseq[j2]=bp_2
   
   return(myseq)
 }
@@ -56,33 +59,6 @@ gen_seq = function(ss,targetdir) {
 
 ```{r}
 sslist=list()
-```
-
-
-```{r simulation 1}
-
-ss=rep(".",50)
-ss[2:5]="("
-ss[29:26]=")"
-ss[20:23]="A"
-ss[49:46]="a"
-
-inserts=c(7:9,35:37)
-
-ss[inserts]="-"
-
-seqss=seqinr::c2s(ss)
-pairs=RNAmrf::ss2pairs(seqss)$pair
-
-
-
-
-
-seqss
-pairs
-
-sslist$simulation_1=ss
-
 ```
 
 ```{r}
