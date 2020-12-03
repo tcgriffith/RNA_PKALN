@@ -18,4 +18,9 @@ bench_pkaln(mypkaln)
 
 writeLines("========")
 
-bench_pkaln_2(mypkaln)
+rslt=bench_pkaln_2(mypkaln) 
+
+pick= names(rslt)[!grepl("mcc",names(rslt)) & grepl("pk",names(rslt))] 
+
+knitr::kable(rslt[,pick],digits=2)
+
