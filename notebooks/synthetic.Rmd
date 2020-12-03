@@ -69,10 +69,14 @@ ss[29:26]=")"
 ss[20:23]="A"
 ss[49:46]="a"
 
-seqss=seqinr::c2s(ss)
-pairs=RNAmrf::ss2pairs(seqss)$pair
 
-inserts=c(7:10,34:37)
+inserts=c(9:12,34:37)
+ss[inserts]="-"
+ss2=ss
+
+
+seqss=seqinr::c2s(ss2)
+pairs=RNAmrf::ss2pairs(seqss)$pair
 
 seqss
 pairs
@@ -90,7 +94,7 @@ ss[49:46]=")"
 ss[9:12]="A"
 ss[39:42]="a"
 
-inserts=c(14:17,34:37)
+inserts=c(7,14:17,35:37,44)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
@@ -113,7 +117,7 @@ ss[37:34]=")"
 ss[9:12]="A"
 ss[48:45]="a"
 
-inserts=c(14:17,40:43)
+inserts=c(7,14:17,40:43)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
@@ -136,7 +140,7 @@ ss[28:31]=")"
 ss[14:17]="A"
 ss[48:45]="a"
 
-inserts=c(9:11,40:42)
+inserts=c(9:11,19,40:42,50)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
@@ -158,7 +162,7 @@ ss[20:23]="A"
 ss[49:46]="a"
 
 
-inserts=c(7:8,36:37)
+inserts=c(10:14,36:39)
 ss[inserts]="-"
 
 seqss=seqinr::c2s(ss)
