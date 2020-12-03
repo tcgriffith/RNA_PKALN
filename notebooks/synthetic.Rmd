@@ -37,6 +37,7 @@ rng_seq=function(pairs=NULL,inserts=NULL){
 gen_seq = function(ss,targetdir) {
 
   pairs=RNAmrf::ss2pairs(ss)$pair
+  inserts=which(ss=="-")
   
   seqtmp = lapply(1:300, function(i) {
     return(rng_seq(pairs = pairs, inserts))
