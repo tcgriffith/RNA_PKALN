@@ -32,7 +32,7 @@ rng_seq=function(pairs=NULL,inserts=NULL){
 }
 
 gen_seq = function(ss,targetdir) {
-  set.seed(123)
+
   pairs=RNAmrf::ss2pairs(ss)$pair
   
   seqtmp = lapply(1:300, function(i) {
@@ -67,10 +67,16 @@ ss[29:26]=")"
 ss[20:23]="A"
 ss[49:46]="a"
 
+inserts=c(7:9,35:37)
+
+ss[inserts]="-"
+
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
 
-inserts=c(7:10,34:37)
+
+
+
 
 seqss
 pairs
@@ -166,8 +172,37 @@ pairs
 sslist$simulation_4=ss
 ```
 
+
+```{r simulationtmp}
+
+ss=rep(".",50)
+ss[2:5]="("
+ss[29:26]=")"
+ss[20:23]="A"
+ss[49:46]="a"
+
+
+inserts=c(7:8,36:37)
+ss[inserts]="-"
+
+seqss=seqinr::c2s(ss)
+pairs=RNAmrf::ss2pairs(seqss)$pair
+
+
+
+
+
+seqss
+pairs
+
+sslist$simulation_8=ss
+
+```
+
+
 ## generate
 ```{r}
+  set.seed(123)
 
 lapply(1:length(sslist), function(i){
   caseid=names(sslist)[i]
