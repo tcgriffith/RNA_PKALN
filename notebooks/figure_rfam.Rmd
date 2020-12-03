@@ -61,26 +61,26 @@ filepkaln=here::here("data/RFAM_PK/RFAM.rds")
 pkaln.all=readRDS(filepkaln)
 
 rslt.all = lapply(pkaln.all,function(pkaln){
-  try(bench_pkaln(pkaln))
+  try(bench_pkaln_2(pkaln))
 })
 
 rslt.df.s = do.call(rbind,rslt.all)
-names(rslt.df.s)=c(
-  "all",
-  "non-pair",
-  "all-bp",
-  "pk",
-  "non-pk",
-  "method",
-  "caseid"
-)
+# names(rslt.df.s)=c(
+#   "all",
+#   "non-pair",
+#   "all-bp",
+#   "pk",
+#   "non-pk",
+#   "method",
+#   "caseid"
+# )
 
 # rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
 
 rslt.df.all=rslt.df.s %>% 
-  select(method,caseid, 1:5) %>% 
+  # select(method,caseid, 1:5) %>% 
 left_join(score_rscape) %>% 
-  left_join(score_trad) %>%
+  # left_join(score_trad) %>%
   left_join(myapsi) %>% 
   left_join(myneff) %>% 
   left_join(mync)  
@@ -91,7 +91,7 @@ rslt.contact= score_rscape %>%
   left_join(mync)
   
   # dplyr::left_join(rslt.df.1,score_rscape)
-print(rslt.df.all,digits = 2)
+# print(rslt.df.all,digits = 2)
 ```
 
 
@@ -101,21 +101,29 @@ library(dplyr)
 ```
 
 ```{r}
-mytable= rslt.df.all
+mytable= rslt.df.all %>% 
+  select(method,caseid, contains("f1"),SEN,PPV,`F`,apsi,neff,len)
 
-mytable
+
+names(mytable)[3:7]= c(
+  "All",
+  "Loop",
+  "Base-pair",
+  "PK",
+  "non-PK"
+)
+
 ```
 
-```{r}
-plot(mytable$apsi,mytable$neff)
-```
 
 
 ```{r}
-kable(mytable, booktabs = T,digits=2,longtable=TRUE) %>%
+mytable %>% 
+  select(-caseid) %>% 
+kable( booktabs = T,digits=2,longtable=TRUE) %>%
   # kable_styling() %>% 
    kable_styling(latex_options="scale_down")%>% 
-  add_header_above(c(" "," ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Contact Pred"=3," "," "," "," ")) %>%
+  add_header_above(c(" ", "Alignment Accuracy (F1)" = 5, "Contact Pred"=3," "," "," ")) %>%
   pack_rows(index=table(mytable$caseid)) 
 ```
 
@@ -139,55 +147,15 @@ library(ggrepel)
 ```{r}
 mytable.wide=
 mytable %>% 
-  pivot_wider(id_cols=c(caseid,len,neff),names_from=method,values_from=3:11)
+  pivot_wider(id_cols=c(caseid,len,neff),names_from=method,values_from=3:10)
 ```
 
 
-```{r}
-trad_wider=
-score_trad %>%
-      left_join(myneff) %>% 
-  left_join(mync) %>% 
-  pivot_wider(id_cols=c(caseid,len,neff),names_from=method,values_from=SCI)# %>% 
-trad_wider %>% 
-  ggplot(aes (x=input,y=cmalign))+
-  
-  geom_point(aes(size=neff,color=neff>40))+
-  # geom_point()+
-  geom_abline()
-
-trad_wider %>% 
-  ggplot(aes (x=input,y=rnamrf))+
-  
-  geom_point(aes(size=neff,color=neff>40))+
-  # geom_point()+
-  geom_abline()
-
-
-trad_wider %>% 
-  ggplot(aes (x=cmalign,y=rnamrf))+
-  
-  geom_point(aes(size=neff,color=neff>40))+
-  # geom_point()+
-  geom_abline()
-
-```
-
-
-
-```{r}
-
-with(trad_wider ,wilcox.test(cmalign,rnamrf,paired=TRUE))
-
-with(trad_wider ,wilcox.test(cmalign,input,paired=TRUE))
-with(trad_wider ,wilcox.test(rnamrf,input,paired=TRUE))
-
-```
 
 ```{r}
 mytable.wide %>% 
   # filter(neff>40) %>% 
-  ggplot(aes (x=all_cmalign,y=all_rnamrf,size=neff))+
+  ggplot(aes (x=All_cmalign,y=All_rnamrf,size=neff))+
   
   geom_point(aes(size=neff,color=neff>40))+
   # geom_point()+
@@ -200,34 +168,44 @@ mytable.wide %>%
 ```{r}
 # wilcox.test(x,y, paired=TRUE)
 
-with(mytable.wide %>% filter(neff > 40) ,wilcox.test(all_cmalign,all_rnamrf,paired=TRUE))
+with(mytable.wide %>% filter(neff > 40) ,wilcox.test(All_cmalign,All_rnamrf,paired=TRUE))
 
 
 # with(mytable.wide %>% filter(neff > 40) ,wilcox.test(all_cmalign,all_rnamrf,paired=TRUE))
 ```
 
+
+
 ```{r}
 
-
+myggdata=
 mytable %>% 
-  ggplot(aes(x=neff,y=pk,color=method)) +
-  geom_point()+
-  stat_smooth()
+  group_by(caseid) %>% 
+  mutate(groupmax=method[which.max(PK)],
+         diff=max(PK)-min(PK)) 
+gg_pk2=
+myggdata %>% 
+  ggplot(aes(x=neff,y=PK,color=method)) +
+  geom_point(size=3)+
+  geom_line(aes(group=caseid,color=groupmax))+
+  geom_label_repel(data=myggdata %>% filter(diff > 0.25, method == "rnamrf"), aes(label=caseid))+
+  # stat_smooth()+
+  scale_x_log10()
 ```
 
 
 ```{r}
 
-pval=with(mytable.wide,wilcox.test(pk_rnamrf,pk_cmalign,paired=TRUE))
+pval=with(mytable.wide,wilcox.test(PK_rnamrf,PK_cmalign,paired=TRUE))
 
 pval$p.value
 
 data.filt = mytable.wide %>%
-  filter(pk_rnamrf - pk_cmalign > 0.2)
+  filter(PK_rnamrf - PK_cmalign > 0.25)
 
 gg_pk=
 mytable.wide %>%
-  ggplot(aes (x = pk_cmalign, y = pk_rnamrf, )) +
+  ggplot(aes (x = PK_cmalign, y = PK_rnamrf, )) +
   geom_point(aes(color = neff>40,size=neff)) +
   geom_abline() +
     scale_color_discrete(name="",label=c("neff <= 40","neff > 40"))+
@@ -243,11 +221,12 @@ gg_pk
 
 ```{r}
 # wilcox.test(x,y, paired=TRUE)
-with(mytable.wide %>% filter(neff > 40),wilcox.test(pk_rnamrf,pk_cmalign,paired=TRUE,alternative = "greater"))
+with(mytable.wide %>% filter(neff > 40),wilcox.test(PK_rnamrf,PK_cmalign,paired=TRUE,alternative = "greater"))
 
-with(mytable.wide %>% filter(neff > 40),wilcox.test(all_rnamrf,all_cmalign,paired=TRUE,alternative = "greater"))
-with(mytable.wide %>% filter(neff > 40),wilcox.test(`non-pair_rnamrf`,`non-pair_cmalign`,paired=TRUE,alternative = "greater"))
+with(mytable.wide %>% filter(neff > 40),wilcox.test(All_rnamrf,All_cmalign,paired=TRUE,alternative = "greater"))
+with(mytable.wide %>% filter(neff > 40),wilcox.test(`Loop_rnamrf`,`Loop_cmalign`,paired=TRUE,alternative = "greater"))
 
+with(mytable.wide %>% filter(neff > 40),wilcox.test(`non-PK_rnamrf`,`non-PK_cmalign`,paired=TRUE,alternative = "greater"))
 # mytable.wide$`non-pair_cmalign`
 ```
 
@@ -257,7 +236,7 @@ with(mytable.wide %>% filter(neff > 40),wilcox.test(`non-pair_rnamrf`,`non-pair_
 
 
 mytable.wide %>% 
-  ggplot(aes (x=all_cmalign,y=all_rnamrf,color=neff>40))+
+  ggplot(aes (x=All_cmalign,y=All_rnamrf,color=neff>40))+
   geom_point(aes(size=neff))+
   geom_label_repel(data = data.filt,
                   aes(label = caseid))+
@@ -269,20 +248,28 @@ mytable.wide %>%
     geom_abline()
 ```
 
+```{r}
+mytable.wide$F_cmalign
+```
+
 
 ```{r}
 
 data.filt = mytable.wide %>%
-  filter(F_rnamrf - F_cmalign > 0.1)
+  group_by(caseid) %>% 
+  summarise(F_diff=F_rnamrf-F_cmalign) %>%
+  ungroup() %>% 
+  top_n(5,wt=F_diff)
+  # filter(F_rnamrf - F_cmalign > 0.1)
 
 
 mytable.wide %>% 
   ggplot(aes (x=F_cmalign,y=F_rnamrf,color=neff>40))+
   geom_point(aes(size=neff))+
-  geom_label_repel(data = data.filt,
+  geom_label_repel(data = mytable.wide %>% filter(caseid %in% data.filt$caseid ),
                   aes(label = caseid))+
-  xlab("Pseudoknot BP alignment accuracy (cmalign)")+
-  ylab("Pseudoknot BP alignment accuracy (MRFalign)")+
+  xlab("Contact Prediction F1-score (cmalign)")+
+  ylab("Contact Prediction F1-score (MRFalign)")+
   # annotate("text", x=0.5,y=1,label="P-value 0.03",color="red",size =6)+
 
   
@@ -327,7 +314,7 @@ gg_cont_sens
 ```
 
 ```{r}
-with(mytable.wide %>% filter(neff > 40),wilcox.test(F_rnamrf,F_cmalign,paired=TRUE,alternative="greater"))
+with(mytable.wide %>% filter(neff > 40),wilcox.test(SEN_rnamrf,SEN_cmalign,paired=TRUE,alternative="greater"))
 ```
 
 ```{r}
@@ -365,7 +352,7 @@ ggdata_boxplot_contact %>%
   # filter(mygroup == "Contact Prediction") %>% 
   ggplot(aes(x=metric,y=value,fill=method))+
   geom_boxplot()+
-  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("MRFalign","cmalign","Reference"))+
+  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("RNAmrf","cmalign","Reference"))+
   # scale_fill_manual(values=mycolors,limits=mylevels)+
   theme(axis.text.x=element_text(angle = 45,  hjust=1))+
   xlab("")+ggtitle("Contact Prediction")+facet_grid(.~neffcut)
@@ -379,31 +366,29 @@ ggdata_boxplot =
 
 mytable %>% 
   # filter(neff>40) %>%
-  pivot_longer(cols=3:11,names_to="metric") %>% 
+  pivot_longer(cols=3:8,names_to="metric") %>% 
   mutate(metric=factor(
     metric,
     levels=c(
-  "all",
-  "non-pair",
-  "all-bp",
-  "non-pk",
-  "pk",
+  "All",
+  "Loop",
+  "Base-Pair",
+  "non-PK",
+  "PK",
   "SEN",
   "PPV",
-  "F",
-  "SCI"
+  "F"
   ),labels=c(
   "all",
-  "non-pair",
-  "all-bp",
+  "Loop",
+  "Base-Pair",
   "non-Pseudoknot-bp",
   "Pseudoknot-bp",
   "Sensitivity",
   "Precision",
-  "F-measure",
-  "SCI")
+  "F1-score")
   )) %>%
-  mutate(mygroup = ifelse(metric %in% c("Sensitivity","Precision","F-measure"),"Contact Prediction","Alignment Accuracy")) %>% 
+  mutate(mygroup = ifelse(metric %in% c("Sensitivity","Precision","F1-score"),"Contact Prediction","Alignment Accuracy")) %>% 
   filter(metric !="SCI")
 
 # ggplotColours(3)
@@ -418,7 +403,7 @@ ggdata_boxplot %>%
   filter(mygroup == "Alignment Accuracy") %>%
   ggplot(aes(x=metric,y=value,fill=method))+
   geom_boxplot()+
-  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("MRFalign","cmalign","Reference"))+
+  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("RNAmrf","cmalign","Reference"))+
   
   labs(x="",y="")+ggtitle("Alignment Accuracy")+facet_grid(.~neffcut)
 #+
@@ -456,16 +441,10 @@ rslt.contact %>%
 ```
 
 
-```{r}
-
-
-# (gg1+gg2)/
-  
-```
 
 
 ```{r fig.height=9}
-rfam_patch2=gg2+gg_pk+gg1+gg_cont_sens+plot_layout(guides="collect",byrow = FALSE) +plot_annotation(tag_levels = "A")& theme_classic() & theme(axis.text.x=element_text(angle=45,hjust = 1))
+rfam_patch2=gg2+gg_pk2+gg1+gg_cont_sens+plot_layout(guides="collect",byrow = FALSE) +plot_annotation(tag_levels = "A")& theme_classic() & theme(axis.text.x=element_text(angle=45,hjust = 1))
 
 rfam_patch2
 ```
@@ -534,13 +513,13 @@ plot_rscape = function(cov.path) {
 ```{r}
 
 gg_cont1=
-plot_rscape(here::here("data/RFAM_PK/RFAM/RF01725/rnamrf/rnamrf.sorted.cov"))+ ggtitle("RF01725 (MRFalign)",subtitle ="FP:0 TP:20 True:29 Found:20" )+
+plot_rscape(here::here("data/RFAM_PK/RFAM/RF01725/rnamrf/rnamrf.sorted.cov"))+ ggtitle("RNAmrf",subtitle ="FP:0 TP:20 True:29 Found:20" )+
     annotate("rect",xmin=80,xmax=94,ymin=40,ymax=55,alpha=0.1,color="red")
 
 
 gg_cont2=
 plot_rscape(here::here("data/RFAM_PK/RFAM/RF01725/cmalign/cmalign.sorted.cov"))+
-   ggtitle("RF01725 (cmalign)",subtitle ="FP:0 TP:15 True:29 Found:15" )
+   ggtitle("cmalign",subtitle ="FP:0 TP:15 True:29 Found:15" )
 
 gg_cont1+gg_cont2
 ```
@@ -548,7 +527,7 @@ gg_cont1+gg_cont2
 ```{r}
 gg_cont3=
 plot_rscape(here::here("data/RFAM_PK/RFAM/RF02996/rnamrf/rnamrf.sorted.cov"))+
-   ggtitle("RF02996 (MRFalign)",subtitle ="FP:7 TP:22 True:23 Found:29" )+
+   ggtitle("RNAmrf",subtitle ="FP:7 TP:22 True:23 Found:29" )+
   theme(legend.position = "none")+
     annotate("rect",
              xmin=62,xmax=70,ymin=35,ymax=45,alpha=0.1,color="red")
@@ -556,9 +535,32 @@ plot_rscape(here::here("data/RFAM_PK/RFAM/RF02996/rnamrf/rnamrf.sorted.cov"))+
 
 gg_cont4=
 plot_rscape(here::here("data/RFAM_PK/RFAM/RF02996/cmalign/cmalign.sorted.cov"))+
-   ggtitle("RF02996 (cmalign)",subtitle ="FP:4 TP:16 True:23 Found:20" )
+   ggtitle("cmalign",subtitle ="FP:4 TP:16 True:23 Found:20" )
 
 gg_cont3+gg_cont4
+```
+
+
+```{r}
+
+
+library(R4RNA)
+
+ss1 = R4RNA::readVienna(here::here("data/RFAM_PK/RFAM/RF01725/seq.ss"))
+ss1_col = colourByUnknottedGroups(ss1, c("blue","red"),get=TRUE)
+
+ss2 = R4RNA::readVienna(here::here("data/RFAM_PK/RFAM/RF02996/seq.ss"))
+ss2_col = colourByUnknottedGroups(ss2, c("blue","red"),get=TRUE)
+
+
+library(patchwork)
+
+patch_ss=
+  wrap_elements(~plotHelix(ss1_col)) +ggtitle("RF01725")+
+  wrap_elements(~plotHelix(ss2_col)) +ggtitle("RF02996")
+
+patch_ss
+  
 ```
 
 
@@ -566,8 +568,13 @@ gg_cont3+gg_cont4
 # gg_cont1+gg_cont2+patchwork::wrap_elements()
 
 rfam_patch3=
-  gg_cont1+gg_cont2+gg_cont3+gg_cont4+
-  plot_layout(byrow = FALSE,nrow=2,guides="collect") & theme_classic() 
+  wrap_elements(~plotHelix(ss1_col),ignore_tag=TRUE) +
+  ggtitle("RF01725")+
+  gg_cont1+gg_cont2+
+  wrap_elements(~plotHelix(ss2_col),ignore_tag=TRUE)+
+  ggtitle("RF02996")+
+  gg_cont3+gg_cont4+
+  plot_layout(guides="collect") & theme_classic() 
 
 # patch_rscape
 
