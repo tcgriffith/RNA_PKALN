@@ -90,12 +90,12 @@ sslist$simulation_1=ss
 ss=rep(".",50)
 ss[2:5]="("
 ss[20:23]=")"
-ss[30:33]="("
+ss[31:28]="("
 ss[49:46]=")"
-ss[9:12]="A"
-ss[39:42]="a"
+ss[11:14]="A"
+ss[37:40]="a"
 
-inserts=c(7,14:17,35:37,44)
+inserts=c(8:9,17:18,44:43, 35:34)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
@@ -118,7 +118,7 @@ ss[37:34]=")"
 ss[9:12]="A"
 ss[48:45]="a"
 
-inserts=c(7,14:17,40:43)
+inserts=c(14:16,40:42)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
@@ -141,7 +141,7 @@ ss[28:31]=")"
 ss[14:17]="A"
 ss[48:45]="a"
 
-inserts=c(9:11,19,40:42,50)
+inserts=c(8:11,39:42)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
