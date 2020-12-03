@@ -15,3 +15,7 @@ testdir=args[1]
 mypkaln=read_pkaln_dir(testdir)
 
 bench_pkaln(mypkaln)
+
+writeLines("========")
+
+bench_pkaln_2(mypkaln)
