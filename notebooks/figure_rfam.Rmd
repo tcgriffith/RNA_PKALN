@@ -201,19 +201,20 @@ pval=with(mytable.wide,wilcox.test(PK_rnamrf,PK_cmalign,paired=TRUE))
 pval$p.value
 
 data.filt = mytable.wide %>%
-  filter(PK_rnamrf - PK_cmalign > 0.25)
+  filter(PK_rnamrf - PK_cmalign > 0.27)
 
 gg_pk=
 mytable.wide %>%
-  ggplot(aes (x = PK_cmalign, y = PK_rnamrf, )) +
-  geom_point(aes(color = neff>40,size=neff)) +
+  ggplot(aes (x = PK_cmalign, y = PK_rnamrf,color = neff>40 )) +
+  geom_point(, size=3) +
   geom_abline() +
     scale_color_discrete(name="",label=c("neff <= 40","neff > 40"))+
   # geom_point(data = data.filt, aes(size = neff),color="red") +
-  geom_text_repel(data = data.filt,
+  geom_label_repel(data = data.filt,
                   aes(label = caseid))+
-  xlab("Pseudoknot BP alignment accuracy (cmalign)")+
-  ylab("Pseudoknot BP alignment accuracy (MRFalign)")
+  xlab("F1 score for Pseudoknot alignment (cmalign MSA)")+
+  ylab("F1 score for Pseudoknot alignment (RNAmrf MSA)")+
+  lims(x=c(0,1),y=c(0,1))
   # annotate("text", x=0.5,y=1,label="P-value 0.03",color="red",size =6)
 
 gg_pk
@@ -296,20 +297,22 @@ rslt.contact %>%
 
 ```{r}
 data.filt = contact_wider %>%
-  filter(SEN_rnamrf - SEN_cmalign > 0.1)
+  filter(caseid %in% c("RF01725","RF02996"))
+  # filter(SEN_rnamrf - SEN_cmalign > 0.15)
+  
 
 gg_cont_sens=
 contact_wider %>% 
   # filter(neff>50) %>% 
-  ggplot(aes (x = SEN_cmalign, y = SEN_rnamrf, )) +
-  geom_point(aes(color = neff>40,size=neff)) +
+  ggplot(aes (x = SEN_cmalign, y = SEN_rnamrf,color = neff>40 )) +
+  geom_point(size=3) +
   geom_abline() +
     scale_color_discrete(name="",label=c("neff <= 40","neff > 40"))+
   # geom_point(data = data.filt, aes(size = neff),color="red") +
-  geom_text_repel(data = data.filt,
+  geom_label_repel(data = data.filt,
                   aes(label = caseid))+
-  xlab("Contact Prediction Sensitivity (cmalign)")+
-  ylab("Contact Prediction Sensitivity (MRFalign)")
+  xlab("Contact Prediction Sensitivity (cmalign MSA)")+
+  ylab("Contact Prediction Sensitivity (RNAmrf MSA)")
 gg_cont_sens
 ```
 
@@ -444,7 +447,7 @@ rslt.contact %>%
 
 
 ```{r fig.height=9}
-rfam_patch2=gg2+gg_pk2+gg1+gg_cont_sens+plot_layout(guides="collect",byrow = FALSE) +plot_annotation(tag_levels = "A")& theme_classic() & theme(axis.text.x=element_text(angle=45,hjust = 1))
+rfam_patch2=gg2+gg_pk+gg1+gg_cont_sens+plot_layout(guides="collect",byrow = FALSE) +plot_annotation(tag_levels = "A")& theme_classic() & theme(axis.text.x=element_text(angle=45,hjust = 1))
 
 rfam_patch2
 ```
@@ -574,7 +577,7 @@ rfam_patch3=
   wrap_elements(~plotHelix(ss2_col),ignore_tag=TRUE)+
   ggtitle("RF02996")+
   gg_cont3+gg_cont4+
-  plot_layout(guides="collect") & theme_classic() 
+  plot_layout(guides="collect") + plot_annotation(tag_levels="A") & theme_classic() &theme(legend.position="right") 
 
 # patch_rscape
 
