@@ -43,25 +43,25 @@ filepkaln=here::here("data/synthetic/synthetic.rds")
 pkaln.all=readRDS(filepkaln)
 
 rslt.all = lapply(pkaln.all,function(pkaln){
-  try(bench_pkaln(pkaln))
+  try(bench_pkaln_2(pkaln))
 })
 
 rslt.df.s = do.call(rbind,rslt.all)
-names(rslt.df.s)=c(
-  "all",
-  "non-pair",
-  "all-bp",
-  "pseudoknot",
-  "non-pseudoknot",
-  "method",
-  "caseid"
-)
+# names(rslt.df.s)=c(
+#   "all",
+#   "non-pair",
+#   "all-bp",
+#   "pseudoknot",
+#   "non-pseudoknot",
+#   "method",
+#   "caseid"
+# )
 
 # rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
 
 rslt.df.all=rslt.df.s %>% 
-  select(method,caseid, 1:5) %>% 
-  left_join(score_trad) %>% 
+ select(method,caseid,contains("pk") & !contains("mcc")) %>% 
+  # left_join(score_trad) %>% 
 left_join(score_rscape)
   
   # dplyr::left_join(rslt.df.1,score_rscape)
@@ -83,19 +83,22 @@ library(dplyr)
 ```{r}
 synth_tab_sel=
 synth_tab %>% 
-  filter(caseid %in% c("synth3","synth5","synth9")) %>% 
-  # group_by(caseid,method) %>%
-  select(-caseid)
+  filter(caseid %in% c("synth3","synth5","synth10"))
+
+# names(synth_tab_sel)[3:11]= rep(c("SEN","PREC","F1"))
+synth_tab_sel
+
 ```
 
 
 ```{r}
-kable(synth_tab_sel, booktabs = T,digits=2) %>%
+synth_tab_sel %>% 
+  select(-caseid) %>% 
+kable( booktabs = T,digits=2,
+       col.names=c("method",rep(c("SEN","PPV","F1"),3))) %>%
   kable_styling() %>%
-  add_header_above(c(" ", "Column Accuracy" = 2, "BP Accuracy" = 3,"Overall"=2,"Contact Pred"=3)) %>%
-  pack_rows("Synthetic-1", 1, 2) %>%
-  pack_rows("Synthetic-2", 3, 4) %>% 
-  pack_rows("Synthetic-3", 5, 6)
+  add_header_above(c(" ", "Pseudoknot BP" = 3,"non-Pseudoknot BP"=3,"Contact Pred"=3)) %>%
+    pack_rows(index=table(synth_tab_sel$caseid)) 
 ```
 
 

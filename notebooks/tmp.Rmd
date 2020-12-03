@@ -14,5 +14,50 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+filepkaln=here::here("data/synthetic/synthetic.rds")
+
+pkaln.all=readRDS(filepkaln)
+
+
+
+source(here::here("R/misc.R"))
+
+
 ```
+
+```{r}
+
+bench_pkaln_2 = function(pkaln) {
+  rslt.l = lapply((pkaln$seqidx.aln.list), function(seqidx.test) {
+    bench_dfref_2(seqidx.test, pkaln$seqidx.ref, pkaln$dfref)
+  })
+  
+  rslt.df = as.data.frame(do.call(rbind, rslt.l))
+
+  rslt.df$method = names(pkaln$seqidx.aln.list)
+  rslt.df$caseid=pkaln$caseid
+  rslt.df
+  return(rslt.df)
+}
+
+```
+
+```{r}
+
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln_2(pkaln))
+})
+
+rslt.df.s = do.call(rbind,rslt.all)
+
+# print(rslt.df.s,digits = 2)
+
+```
+
+```{r}
+library(dplyr)
+rownames(rslt.df.s)=NULL
+rslt.df.s %>% select(method,caseid,contains("pk") & !contains("mcc"))
+```
+
 

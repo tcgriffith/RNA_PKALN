@@ -6,57 +6,23 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(RNAmrf)
-source(here::here("R/misc.R"))
+# source(here::here("R/misc.R"))
 ```
 
-## generate synthetic seqs
-
-- Rules:
-    - 25nt
-    - pk
-
-1:4 ~ 15:12
-6:9 ~ 22:19
+## funcs
 
 ```{r}
-# SS
-pairs=rep(0,50)
-
-pairs[2:5]=29:26
-pairs[20:23]=49:46
-pairs
-
-ss=rep(".",50)
-ss[2:5]="("
-ss[29:26]=")"
-ss[20:23]="A"
-ss[49:46]="a"
-
-seqss=seqinr::c2s(ss)
-seqss
-```
-
-
-```{r}
-
-set.seed(123)
-rng_seq=function(pairs=NULL,len=30){
-  # myseq=character(25)
-  myseq=sample(c("A","U","C","G","-"),len,replace = TRUE, prob=c(1,1,1,1,0.5))
-  
-  # myseq[11:12]=sample(c("a","u","c","g","."),2,replace = TRUE, prob=c(1,1,1,1,1))
-  # myseq[18:21]="-"
-  # myseq[18:21]=sample(c("a","u","c","g","."),4,replace = TRUE, prob=c(1,1,1,1,3))
-  myseq[7:10]=sample(c("a","u","c","g","."),4,replace = TRUE, prob=c(1,1,1,1,3))
-  myseq[33:36]=sample(c("a","u","c","g","."),4,replace = TRUE, prob=c(1,1,1,1,3))  
-    # myseq[23:24]=sample(c("a","u","c","g","."),2,replace = TRUE, prob=c(1,1,1,1,3))  
-  
+rng_seq=function(pairs=NULL,inserts=NULL){
+    len=length(pairs)
+  myseq=sample(c("A","U","C","G","-"),len,replace = TRUE, prob=c(1,1,1,1,0.4/0.6))
+  myseq[inserts]=sample(c("a","u","c","g","."),length(inserts),replace = TRUE, prob=c(1,1,1,1,3))
   ## add pairs
+  
   i=which(pairs>0)
   j=pairs[which(pairs>0)]
   # message(i)
   
-  rng_bp=(sample(c("AU", "GC", "CG", "UA"),length(i),replace = TRUE))
+  rng_bp=(sample(c("AU", "GC", "CG", "UA","GU","UG"),length(i),replace = TRUE))
   bp_1= gsub("^(.)(.)","\\1",rng_bp)
   bp_2= gsub("^(.)(.)","\\2",rng_bp)
   myseq[i]=bp_1
@@ -65,85 +31,154 @@ rng_seq=function(pairs=NULL,len=30){
   return(myseq)
 }
 
-seq1=rng_seq(pairs=pairs,len=25)
+gen_seq = function(ss,targetdir) {
+  set.seed(123)
+  pairs=RNAmrf::ss2pairs(ss)$pair
+  
+  seqtmp = lapply(1:300, function(i) {
+    return(rng_seq(pairs = pairs, inserts))
+  })
+  
+  seqnames = paste0("seq", 1:300)
+  
+  ## output
+  dir.create(targetdir, recursive = TRUE)
+  writeLines(seqinr::c2s(ss),con=paste0(targetdir,"/seq1000_gaps.ss"))
+  seqinr::write.fasta(seqtmp,
+                      names = seqnames,
+                      file.out = paste0(targetdir,"/seq1000_gaps.a2m"))
+}
+
+```
 
 
-seqtmp=lapply(1:300,function(i){
- return(rng_seq(pairs=pairs,len=50)) 
-})
+## generate synthetic seqs
 
-seqnames=paste0("seq",1:300)
+```{r}
+sslist=list()
+```
 
-dir.create(here::here("data/synth10/"),recursive=TRUE)
 
-seqtmp[[1]]
+```{r simulation 1}
 
-seqinr::write.fasta(seqtmp,names=seqnames,file.out=here::here("data/synth10/seq1000_gaps.a2m"))
+ss=rep(".",50)
+ss[2:5]="("
+ss[29:26]=")"
+ss[20:23]="A"
+ss[49:46]="a"
 
-wd=here::here("data/synth10")
+seqss=seqinr::c2s(ss)
+pairs=RNAmrf::ss2pairs(seqss)$pair
 
-Sys.setenv(mywd=wd)
-Sys.setenv(seqss=seqss)
+inserts=c(7:10,34:37)
+
+seqss
+pairs
+
+sslist$simulation_1=ss
+
+```
+
+```{r}
+
+ss=rep(".",50)
+ss[2:5]="("
+ss[29:26]=")"
+ss[20:23]="A"
+ss[49:46]="a"
+
+seqss=seqinr::c2s(ss)
+pairs=RNAmrf::ss2pairs(seqss)$pair
+
+inserts=c(7:10,34:37)
+
+seqss
+pairs
+
+sslist$simulation_1=ss
+```
+
+```{r}
+
+ss=rep(".",50)
+ss[2:5]="("
+ss[20:23]=")"
+ss[30:34]="("
+ss[49:46]=")"
+ss[9:12]="A"
+ss[39:42]="a"
+
+inserts=c(14:17,34:37)
+ss[inserts]="-"
+seqss=seqinr::c2s(ss)
+pairs=RNAmrf::ss2pairs(seqss)$pair
+
+
+seqss
+pairs
+
+sslist$simulation_2=ss
 ```
 
 
 ```{r}
 
-```
+ss=rep(".",50)
+ss[2:5]="("
+ss[20:23]=")"
+ss[27:30]="("
+ss[37:34]=")"
+ss[9:12]="A"
+ss[48:45]="a"
 
-```{bash}
-## create afa
+inserts=c(14:17,40:43)
+ss[inserts]="-"
+seqss=seqinr::c2s(ss)
+pairs=RNAmrf::ss2pairs(seqss)$pair
 
-cd $mywd
 
-caseid=$(basename $mywd)
+seqss
+pairs
 
-#sed 's/-//g' seq1000_gaps.fasta > seq1000_gaps.unaligned.fasta
-
-esl-reformat stockholm seq1000_gaps.a2m > seq1000_gaps.sto.tmp
-
-head -n -1 seq1000_gaps.sto.tmp > seq1000_gaps.sto
-echo "#=GC SS_cons $seqss" >> seq1000_gaps.sto
-echo "//" >> seq1000_gaps.sto
-#esl-reformat stockholm seq1000_gaps.fasta > seq1000_gaps.fasta
-
-cp seq1000_gaps.sto $caseid.sto
-
-cmbuild --hand $caseid.cm $caseid.sto
-
+sslist$simulation_3=ss
 ```
 
 
+```{r}
 
-```{bash}
-## create ref in a2m format
-## require esl-reformat from infernal
+ss=rep(".",50)
+ss[2:5]="("
+ss[33:36]=")"
+ss[21:24]="("
+ss[28:31]=")"
+ss[14:17]="A"
+ss[48:45]="a"
 
-cd $mywd
-esl-reformat a2m seq1000_gaps.fasta > seq1000_gaps.a2m
-
-esl-reformat stockholm seq1000_gaps.a2m > seq1000_gaps.sto.tmp
-
-head -n -1 seq1000_gaps.sto.tmp > seq1000_gaps.sto
-echo "#=GC SS_cons $seqss" >> seq1000_gaps.sto
-echo "//" >> seq1000_gaps.sto
+inserts=c(9:11,40:42)
+ss[inserts]="-"
+seqss=seqinr::c2s(ss)
+pairs=RNAmrf::ss2pairs(seqss)$pair
 
 
+seqss
+pairs
 
+sslist$simulation_4=ss
 ```
 
+## generate
+```{r}
 
-### mrf from gremlincpp
+lapply(1:length(sslist), function(i){
+  caseid=names(sslist)[i]
+  
+  targetdir=here::here(paste0("data/simulation/",caseid))
+  gen_seq(sslist[[i]],targetdir)
+  # print(targetdir)
+})
 
 
 
-```{bash}
-
-echo $mywd
-
-cd $mywd
-# require gremlin_cpp on path
-gremlin_cpp -alphabet rna -i seq1000_gaps.fasta -o seq1000_gaps.fasta.gremlincpp -gap_cutoff 1.0 -mrf_o seq1000_gaps.mrf -gap_cutoff 1.0 > seq1000_gaps.fasta.gremlin.log
 
 ```
 
