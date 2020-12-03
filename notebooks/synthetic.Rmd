@@ -95,7 +95,7 @@ ss[49:46]=")"
 ss[12:15]="A"
 ss[36:39]="a"
 
-inserts=c(7:10,44:41)
+inserts=c(7:8,17:18,44:43, 33:34)
 ss[inserts]="-"
 seqss=seqinr::c2s(ss)
 pairs=RNAmrf::ss2pairs(seqss)$pair
