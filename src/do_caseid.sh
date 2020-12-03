@@ -15,6 +15,24 @@ cd $casedir
 
 ## prep input files
 
+
+## For simulation
+if [ -f seq1000_gaps.a2m ]; then
+
+    seqss=$(cat seq1000_gaps.ss)
+
+    esl-reformat stockholm seq1000_gaps.a2m > seq1000_gaps.sto.tmp
+
+    head -n -1 seq1000_gaps.sto.tmp > seq1000_gaps.sto
+    echo "#=GC SS_cons $seqss" >> seq1000_gaps.sto
+    echo "//" >> seq1000_gaps.sto
+
+    cp seq1000_gaps.sto $caseid.sto
+    cmbuild --hand $caseid.cm $caseid.sto
+
+fi
+
+
 if [ ! -f input/$caseid.unaligned.fasta ]; then
 
     mkdir -p input

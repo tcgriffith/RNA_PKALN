@@ -1,0 +1,3 @@
+for i in synthetic/*;do ../../src/do_compalignp.sh $i;done > compalignp.scores
+
+ls */*/*.sorted.cov|xargs grep "GTp" |awk '{print $1 " " $11 " "$12  " "$13}' |sed 's/.sorted.cov:#//' |sed 's/\]//' |sed 's+/+ +g' > ../rscape.scores
