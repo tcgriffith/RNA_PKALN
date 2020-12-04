@@ -2,7 +2,7 @@
 args = commandArgs(trailingOnly=TRUE)
 
 
-ss2mrf = function(ss) {
+ss2mrf = function(ss, rmgap=FALSE) {
   j_pair = structure(
     c(
       -1.30412,
@@ -25,12 +25,29 @@ ss2mrf = function(ss) {
                                                         " "))
   
   df.pair.tmp = df.pair[df.pair$pair > df.pair$id, ]
+
+
   
   line_v = sprintf("W[%d][%d] %s",
                    df.pair.tmp$id - 1,
                    df.pair.tmp$pair - 1,
                    paste0(j_pair, collapse = " "))
   
+  if(rmgap){
+    df.pair.tmp = df.pair[df.pair$ss != "-", ]
+
+    
+
+    line_h = sprintf("V[%d] %s", df.pair.tmp$id - 1, paste0(h_single, collapse =
+                                                        " "))
+    df.pair.tmp2 = df.pair[df.pair$pair > df.pair$id & df.pair$ss != "-" , ]
+
+    line_v = sprintf("W[%d][%d] %s",
+                   df.pair.tmp2$id - 1,
+                   df.pair.tmp2$pair - 1,
+                   paste0(j_pair, collapse = " "))
+  }
+
   mrflines = c(line_h, line_v)
   
   return(mrflines)
@@ -38,12 +55,13 @@ ss2mrf = function(ss) {
 
 #### main
 
-# ss.file=args[1]
-fsto=args[1]
+fss=args[1]
+ss=readLines(fss)
 
-dfref=RNAmrf:::read_dfref(fsto)
+mrflines=ss2mrf(ss)
 
-mrflines=ss2mrf(dfref$ss)
+if(any(grepl("rmgap",args))){
+  mrflines=ss2mrf(ss,rmgap=TRUE)
+}
 
-# f=readLines(ss.file)
 writeLines(mrflines)

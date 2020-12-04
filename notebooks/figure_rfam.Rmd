@@ -566,18 +566,49 @@ patch_ss
   
 ```
 
+```{r}
+plotArc
+```
 
 ```{r}
+
+```
+
+```{r}
+
+library(png)
+library(grid)
+library(patchwork)
+
+ss1 = readPNG("~/GIT/thesis_tc/figure/ss1.png")
+ss2 = readPNG("~/GIT/thesis_tc/figure/ss2.png")
+
+# grid.raster(img)
+grob_ss1=rasterGrob(ss1)
+grob_ss2=rasterGrob(ss2)
+```
+
+
+
+```{r fig.height=9}
 # gg_cont1+gg_cont2+patchwork::wrap_elements()
+# 
+# rfam_patch3=
+#   wrap_elements(~plotHelix(ss1_col),ignore_tag=TRUE)+
+#   wrap_elements(~plotHelix(ss2_col),ignore_tag=TRUE)
 
 rfam_patch3=
-  wrap_elements(~plotHelix(ss1_col),ignore_tag=TRUE) +
-  ggtitle("RF01725")+
-  gg_cont1+gg_cont2+
-  wrap_elements(~plotHelix(ss2_col),ignore_tag=TRUE)+
-  ggtitle("RF02996")+
+  wrap_elements(grob_ss1,ignore_tag=TRUE)+ggtitle("RF01725")+
+  # wrap_elements(~plotHelix(ss1_col),ignore_tag=TRUE) +
+  gg_cont1+
+  gg_cont2+
+  wrap_elements(grob_ss2,ignore_tag=TRUE)+ggtitle("RF02996")+
+
+  # wrap_elements(~plotHelix(ss2_col),ignore_tag=TRUE)+
   gg_cont3+gg_cont4+
-  plot_layout(guides="collect") + plot_annotation(tag_levels="A") & theme_classic() &theme(legend.position="right") 
+
+  # wrap_elements(~plotHelix(ss1_col),ignore_tag=TRUE)+
+  plot_layout(guides="collect",byrow=FALSE,ncol=2,heights=c(1,2,2)) + plot_annotation(tag_levels="A") & theme_classic() &theme(legend.position="right")
 
 # patch_rscape
 
@@ -588,6 +619,6 @@ rfam_patch3
 
 ```{r}
 
-save(rfam_patch3,file="~/GIT/thesis_tc/data/rfam_patch3.rda")
+save(rfam_patch3,ss1_col,ss2_col,file="~/GIT/thesis_tc/data/rfam_patch3.rda")
 ```
 

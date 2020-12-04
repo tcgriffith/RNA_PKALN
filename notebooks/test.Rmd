@@ -1,0 +1,30 @@
+---
+title: "Untitled"
+author: "TC"
+date: "12/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("../R/misc.R")
+```
+
+## R Markdown
+
+
+```{r}
+testdir=here::here("data/simulation/simulation/simulation_1/")
+
+
+```
+
+
+```{r}
+mypkaln=read_pkaln_dir(testdir,debug=TRUE)
+
+bench_pkaln(mypkaln)
+```
+
+
+

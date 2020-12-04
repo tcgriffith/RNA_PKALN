@@ -1,4 +1,4 @@
-read_pkaln_dir = function(testdir) {
+read_pkaln_dir = function(testdir, debug=FALSE) {
   caseid = basename(testdir)
   
   pkaln=list()
@@ -6,37 +6,43 @@ read_pkaln_dir = function(testdir) {
   dirlist = list.dirs(testdir, recursive = FALSE)
   dirlist = dirlist[!grepl("input", dirlist)]
   
+  if (debug){
+    print(dirlist)
+  }
+  ## reference
   seqs.ref = seqinr::read.fasta(file.path(testdir, "input", paste0(caseid, ".a2m")), forceDNAtolower =
                                   FALSE)
   pkaln$seqidx.ref = RNAmrf:::msa_a2m2seqidx_all(seqs.ref)
-  
+  inputsto = paste0(testdir,"/",caseid,".sto")
   seqidx.aln.list = lapply(dirlist, function(dir) {
     bn = basename(dir)
     seqs.aln = seqinr::read.fasta(file.path(dir, paste0(caseid, ".", bn, ".a2m")), forceDNAtolower =
                                     FALSE)
-    RNAmrf:::msa_a2m2seqidx_all(seqs.aln)
+    seqidx = RNAmrf:::msa_a2m2seqidx_all(seqs.aln)
+    
+    mrffile = file.path(dir, paste0(caseid, ".", bn, ".mrf"))
+    
+    
+    ## convert mrf reference column to reference in the MSA
+    if (file.exists(mrffile)){
+      dfref=RNAmrf:::read_dfref(inputsto,mrffile)
+      tmpref=matrix(0,nrow=nrow(seqidx),ncol=nrow(dfref))
+      tmpref[,dfref$id_ref[dfref$id_mrf>0 & dfref$id_ref >0]]=
+      seqidx[,dfref$id_mrf[dfref$id_mrf>0 & dfref$id_ref >0]]
+      seqidx = tmpref
+    }
+    
+    return(seqidx)
+    
   })
   
-  dfref=RNAmrf:::read_dfref(paste0(testdir,"/",caseid,".sto"),
-                                  file.path(testdir, "input", paste0(caseid, ".afa.mrf"))) 
+  dfref_simple=RNAmrf:::read_dfref(inputsto)
   names(seqidx.aln.list) = basename(dirlist)
-  ## fix rnamrf idx to idx_ref
-  # if ("rnamrf" %in% names(seqidx.aln.list))
-  {
-    tmp = seqidx.aln.list$rnamrf
-    # dfref=dfref
-    tmpref=matrix(0,nrow=nrow(tmp),ncol=nrow(dfref))
-    tmpref[,dfref$id_ref[dfref$id_mrf>0 & dfref$id_ref >0]]=tmp[,dfref$id_mrf[dfref$id_mrf>0 & dfref$id_ref >0]]
-    seqidx.aln.list$rnamrf=tmpref
-  }
 
-  
-  
   pkaln$seqidx.aln.list=seqidx.aln.list
   
-
   pkaln$caseid=caseid
-  pkaln$dfref=dfref
+  pkaln$dfref=dfref_simple
   return(pkaln)
 }
 

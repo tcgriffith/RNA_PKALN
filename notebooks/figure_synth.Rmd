@@ -111,6 +111,9 @@ save(synth_tab_sel,file="~/GIT/thesis_tc/data/synth_tab_sel.rda")
 
 
 
+```{r}
+RNAmrf:::msa_a2m2seqidx
+```
 
 
 ## figure
@@ -186,6 +189,7 @@ gglists=lapply(1:length(testdirs.filt),function(i){
 
 
 library(R4RNA)
+library(ggplot2)
 
 ss1 = R4RNA::readVienna(here::here("data/simulation/simulation/simulation_1/seq1000_gaps.ss"))
 ss1_col = colourByUnknottedGroups(ss1, c("blue","red"),get=TRUE)
@@ -202,26 +206,31 @@ ss4_col = colourByUnknottedGroups(ss4, c("blue","red"),get=TRUE)
 
 
 
-# library(png)
-# library(grid)
+library(png)
+library(grid)
 library(patchwork)
-# pk_h = readPNG("~/GIT/thesis_tc/figure/pk_H.png")
-# pk_hhh = readPNG("~/GIT/thesis_tc/figure/pk_HHH.png")
-# pk_hlout = readPNG("~/GIT/thesis_tc/figure/pk_HLout.png")
-# pk_ll = readPNG("~/GIT/thesis_tc/figure/pk_LL.png")
-# 
-# # grid.raster(img)
-# gpk_h=rasterGrob(pk_h)
-# gpk_hhh=rasterGrob(pk_hhh)
-# gpk_hlout=rasterGrob(pk_hlout)
-# gpk_ll=rasterGrob(pk_ll)
+pk_h = readPNG("~/GIT/thesis_tc/figure/pk_H.png")
+pk_hhh = readPNG("~/GIT/thesis_tc/figure/pk_HHH.png")
+pk_hlout = readPNG("~/GIT/thesis_tc/figure/pk_HLout.png")
+pk_ll = readPNG("~/GIT/thesis_tc/figure/pk_LL.png")
+
+# grid.raster(img)
+gpk_h=rasterGrob(pk_h)
+gpk_hhh=rasterGrob(pk_hhh)
+gpk_hlout=rasterGrob(pk_hlout)
+gpk_ll=rasterGrob(pk_ll)
 
 
 patch_ss=
   wrap_elements(~plotHelix(ss1_col)) +ggtitle("Simulation-1 (PKtype: H)")+
+  gpk_h+
   wrap_elements(~plotHelix(ss2_col)) +ggtitle("Simulation-2 (PKtype: HHH)")+
+  gpk_hhh+
   wrap_elements(~plotHelix(ss3_col)) +ggtitle("Simulation-3 (PKtype: Hlout)")+
-  wrap_elements(~plotHelix(ss4_col)) +ggtitle("Simulation-4 (PKtype: LL)")
+  gpk_hlout+
+  wrap_elements(~plotHelix(ss4_col)) +ggtitle("Simulation-4 (PKtype: LL)")+
+    gpk_ll+
+  plot_layout(ncol=2)
 
 patch_ss
   
