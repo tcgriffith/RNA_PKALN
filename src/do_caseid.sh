@@ -99,23 +99,6 @@ else
 fi
 
 
-
-
-## run RNAmrf align
-
-# if [ ! -f input/$caseid.rnamrf.a2m ]; then
-
-#     mkdir -p rnamrf
-
-#     time $DIR_PROJROOT/R/RUN_mrfaln.R input/$caseid.afa.mrf input/$caseid.unaligned.fasta  rnamrf/$caseid.rnamrf.a2m
-#     esl-reformat  afa rnamrf/$caseid.rnamrf.a2m > rnamrf/$caseid.rnamrf.afa
-
-# else
-#     echo "# GREMLIN mrf ok"
-# fi
-
-## run RNAmrf align with custom mrf
-
 if [ -d input/mrfs/ ]; then
 
     for filemrf in input/mrfs/*.mrf; do

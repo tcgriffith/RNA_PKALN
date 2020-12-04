@@ -237,7 +237,30 @@ patch_ss
 ```
 
 
-```{r }
+```{r}
+
+```
+
+```{r}
+
+library(png)
+library(grid)
+library(patchwork)
+
+ss1 = readPNG("~/GIT/thesis_tc/figure/simss1.png")
+ss2 = readPNG("~/GIT/thesis_tc/figure/simuss2.png")
+ss3 = readPNG("~/GIT/thesis_tc/figure/simuss3.png")
+ss4 = readPNG("~/GIT/thesis_tc/figure/simuss4.png")
+# grid.raster(img)
+grob_ss1=rasterGrob(ss1)
+grob_ss2=rasterGrob(ss2)
+grob_ss3=rasterGrob(ss3)
+grob_ss4=rasterGrob(ss4)
+
+wrap_elements(grob_ss1)
+```
+
+```{r fig.width=15}
 # patch_rscape=
 #   (gglists[[1]]$rnamrf+ gglists[[1]]$cmalign)/
 #   (gglists[[2]]$rnamrf+ gglists[[2]]$cmalign)/
@@ -245,11 +268,16 @@ patch_ss
 #    plot_annotation(tag_levels = 'A') +
 #   plot_layout()
   
-patch_rscape=gglists[[1]]$rnamrf+gglists[[1]]$cmalign+
+patch_rscape=
+  wrap_elements(grob_ss1,ignore_tag=TRUE)+
+  gglists[[1]]$rnamrf+gglists[[1]]$cmalign+
+  wrap_elements(grob_ss2,ignore_tag=TRUE)+
   gglists[[2]]$rnamrf+gglists[[2]]$cmalign+
+  wrap_elements(grob_ss3,ignore_tag=TRUE)+
   gglists[[3]]$rnamrf+gglists[[3]]$cmalign+
-  gglists[[4]]$rnamrf+gglists[[4]]$cmalign+
-  plot_layout(byrow = FALSE,nrow=2,guides="collect") & theme_classic() 
+  wrap_elements(grob_ss4,ignore_tag=TRUE)+
+  gglists[[4]]$rnamrf+gglists[[4]]$cmalign +
+  plot_layout(byrow = FALSE,nrow=3,guides="collect",heights=c(1,3,3)) & theme_classic() & theme(legend.position="bottom") 
 
 patch_rscape
 ```

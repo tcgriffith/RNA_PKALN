@@ -206,7 +206,7 @@ data.filt = mytable.wide %>%
 gg_pk=
 mytable.wide %>%
   ggplot(aes (x = PK_cmalign, y = PK_rnamrf,color = neff>40 )) +
-  geom_point(, size=3) +
+  geom_point(size=3) +
   geom_abline() +
     scale_color_discrete(name="",label=c("neff <= 40","neff > 40"))+
   # geom_point(data = data.filt, aes(size = neff),color="red") +
@@ -566,13 +566,7 @@ patch_ss
   
 ```
 
-```{r}
-plotArc
-```
 
-```{r}
-
-```
 
 ```{r}
 
@@ -608,7 +602,7 @@ rfam_patch3=
   gg_cont3+gg_cont4+
 
   # wrap_elements(~plotHelix(ss1_col),ignore_tag=TRUE)+
-  plot_layout(guides="collect",byrow=FALSE,ncol=2,heights=c(1,2,2)) + plot_annotation(tag_levels="A") & theme_classic() &theme(legend.position="right")
+  plot_layout(guides="collect",byrow=FALSE,ncol=2,heights=c(1,3,3)) + plot_annotation(tag_levels="A") & theme_classic() &theme(legend.position="right")
 
 # patch_rscape
 
