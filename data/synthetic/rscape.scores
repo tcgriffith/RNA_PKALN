@@ -1,9 +1,0 @@
-synth3 cmalign cmalign.sorted.cov:# 50.00 50.00 50.00
-synth3 input input.sorted.cov:# 100.00 100.00 100.00
-synth3 rnamrf rnamrf.sorted.cov:# 100.00 100.00 100.00
-synth5 cmalign cmalign.sorted.cov:# 100.00 80.00 88.89
-synth5 input input.sorted.cov:# 100.00 100.00 100.00
-synth5 rnamrf rnamrf.sorted.cov:# 100.00 88.89 94.12
-synth9 cmalign cmalign.sorted.cov:# 62.50 83.33 71.43
-synth9 input input.sorted.cov:# 100.00 100.00 100.00
-synth9 rnamrf rnamrf.sorted.cov:# 100.00 100.00 100.00
