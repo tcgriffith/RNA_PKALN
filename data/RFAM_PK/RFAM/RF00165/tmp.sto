@@ -1,0 +1,35 @@
+# STOCKHOLM 1.0
+#=GF AC   RF00165
+#=GF ID   Corona_pk3
+#=GF DE   Coronavirus 3' UTR pseudoknot
+#=GF AU   Griffiths-Jones SR; 0000-0001-6043-807X
+#=GF AU   Nawrocki E; 0000-0002-2497-3427
+#=GF SE   Griffiths-Jones SR
+#=GF SS   Published; PMID:10482585
+#=GF GA   35.60
+#=GF TC   35.60
+#=GF NC   35.10
+#=GF TP   Cis-reg;
+#=GF BM   cmbuild -F CM SEED
+#=GF CB   cmcalibrate --mpi CM
+#=GF SM   cmsearch --cpu 4 --verbose --nohmmonly -T 30.00 -Z 765380.351698 CM SEQDB
+#=GF CL   CL00117
+#=GF DR   SO; 0000205; three_prime_UTR;
+#=GF DR   GO; 0019079; viral genome replication;
+#=GF RN   [1]
+#=GF RM   10482585
+#=GF RT   A phylogenetically conserved hairpin-type 3' untranslated region
+#=GF RT   pseudoknot functions in coronavirus RNA replication.
+#=GF RA   Williams GD, Chang RY, Brian DA
+#=GF RL   J Virol 1999;73:8349-8355.
+#=GF CC   Coronaviruses are plus-strand RNA viruses with ~30kb genomes. The 3' UTR
+#=GF CC   region of coronavirus genomes contains a conserved ~55nt pseudoknot
+#=GF CC   structure which has been shown to be necessary for viral genome
+#=GF CC   replication [1]. The mechanism of cis-regulation is unclear, but this
+#=GF CC   element is postulated to function in the plus-strand. The seed alignment
+#=GF CC   was expanded in 2020 by Eric Nawrocki.
+#=GF WK   Coronavirus_3'_UTR_pseudoknot
+#=GF SQ   52
+#=GC SS_cons            ::::::AAAAAA::::::::::::.:::<<.<.<<<<.<<_..aaaaaa.____...>>>>>>>.>>:::::
+#=GC RF                 CUACUCUUGuACAGAAUGGuAauC.caGUa.u.aaUA.acA..GUaCAA.GaAG...guUAuua.uAUAuuA
+//

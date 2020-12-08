@@ -1,0 +1,37 @@
+# STOCKHOLM 1.0
+#=GF AC   RF00507
+#=GF ID   Corona_FSE
+#=GF DE   Coronavirus frameshifting stimulation element
+#=GF AU   Moxon SJ; 0000-0003-4644-1816
+#=GF AU   Nawrocki E; 0000-0002-2497-3427
+#=GF SE   PMID:15680415
+#=GF SS   Published; PMID:15680415
+#=GF GA   63.60
+#=GF TC   63.80
+#=GF NC   63.30
+#=GF TP   Cis-reg; frameshift_element;
+#=GF BM   cmbuild -F CM SEED
+#=GF CB   cmcalibrate --mpi CM
+#=GF SM   cmsearch --cpu 4 --verbose --nohmmonly -T 30.00 -Z 742849.287494 CM SEQDB
+#=GF DR   SO; 0000233; mature_transcript;
+#=GF DR   GO; 0075523; viral translational frameshifting;
+#=GF RN   [1]
+#=GF RM   15680415
+#=GF RT   Programmed ribosomal frameshifting in decoding the SARS-CoV genome.
+#=GF RA   Baranov PV, Henderson CM, Anderson CB, Gesteland RF, Atkins JF, Howard MT
+#=GF RL   Virology 2005;332:498-510.
+#=GF CC   This family represents a conserved stem-loop found in Coronaviruses which
+#=GF CC   can promote ribosomal frameshifting. This family interacts with a
+#=GF CC   downstream region to form a pseudoknot structure, the region varies
+#=GF CC   according to the virus but pseudoknot formation is known to stimulate
+#=GF CC   frameshifting. In the classical situation a sequence 32nt downstream of
+#=GF CC   the stem is complementary to part of the loop. In other Coronaviruses
+#=GF CC   however, there is another stem loop structure around 150nt downstream that
+#=GF CC   can interact with this family to form kissing stem loops and stimulate
+#=GF CC   frameshifting [1]. Revised in 2020 to expand the seed alignment.
+#=GF WK   Coronavirus_frameshifting_stimulation_element
+#=GF SQ   56
+#=GC SS_cons                         :::::::<<<<<<<<--...<<AAAAA>>->>>>>>>>--<<-<<<<-<<<____>>>>>->>->>::::::aaaaa::::::::
+#=GC RF                              GAGUacGGGGuuCuAGU...ccuGCcCggCUaGaaCCCUGcgccacuGGuccugagaCagAugucgUuuuaAGgGCuUUUGAuaU
+#=GC RNA_structural_elements         -------[-----------Stem-1-------------][----------Stem-3---------][J3/2]-------------
+//

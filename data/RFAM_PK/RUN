@@ -1,0 +1,2 @@
+ls */*.neff|xargs grep "NEFF" |sed 's+/+ +' |awk '{print $1" " $4}' > ../neff.txt
+ls */*cm|xargs grep "CLEN" |sed 's+/+ +'|awk '{print $1 " "$3}' > ../CLEN.txt

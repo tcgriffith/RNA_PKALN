@@ -1,0 +1,30 @@
+# STOCKHOLM 1.0
+#=GF AC   RF01745
+#=GF ID   manA
+#=GF DE   manA RNA
+#=GF AU   Weinberg Z; 0000-0002-6681-3624
+#=GF SE   Published; PMID:20230605;
+#=GF SS   Published; PMID:20230605;
+#=GF GA   55.20
+#=GF TC   55.20
+#=GF NC   50.90
+#=GF TP   Cis-reg;
+#=GF BM   cmbuild -F CM SEED
+#=GF CB   cmcalibrate --mpi CM
+#=GF SM   cmsearch --cpu 4 --verbose --nohmmonly -T 30.00 -Z 742849.287494 CM SEQDB
+#=GF DR   SO; 0005836; regulatory_region;
+#=GF RN   [1]
+#=GF RM   20230605
+#=GF RT   Comparative genomics reveals 104 candidate structured RNAs from bacteria,
+#=GF RT   archaea and their metagenomes.
+#=GF RA   Weinberg Z, Wang JX, Bogue J, Yang J, Corbino K, Moy RH, Breaker RR
+#=GF RL   Genome Biol. 2010;11:R31.
+#=GF CC   manA RNA has been located in 5'UTR regions of genes of mannose or fructose
+#=GF CC   metabolism. Has been proposed as a cis-regulatory element and as a
+#=GF CC   riboswitch candidate for his complex secondary structure.
+#=GF WK   ManA_RNA_motif
+#=GF **   seedtax: Bacteria; Viruses; unclassified sequences
+#=GF SQ   165
+#=GC SS_cons               <<<<<<.......____...................>>>>>>--...[[[[[,,.<<--------..--.<<<<<<..______._.......>>>>>>---->>.,.,((.((((..,...........................<<<._BBBB_>>>,<<<<<<..........____.............._>>>>>>.,,<<<<<...__bbbb...>>>>>..))))..)),,,.<<<<<<<-----......-<<<<._.__AAA.A_.................>>>>...---->>>>>>>,.<<<<<___,aaaa___,_>>>>>]]]]].:::::
+#=GC RF                    uguugg.......GAcg...................ccaacauu...GGGaGUG.aCuGAAUAAA..UU.ccccgc..auAu.u.........gcggggUAAgGu.g.Aug.agac..A...........................ggg.GUgGUGccc.cucccc..........gaaa..............gggggag.AAccgcc...uaACcA...ggcgg..gucu..caGGu.agcgacgua.........uucgc.U..acUg.uA.................gcga...ugcCcgucgcuU.GugGGUAa.acAguAA.UCCcaCCuCCC.aCCuu
+//

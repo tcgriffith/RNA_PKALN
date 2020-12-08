@@ -1,0 +1,30 @@
+# STOCKHOLM 1.0
+#=GF AC   RF01725
+#=GF ID   SAM-I-IV-variant
+#=GF DE   SAM-I/IV variant riboswitch
+#=GF AU   Weinberg Z; 0000-0002-6681-3624
+#=GF SE   Published; PMID:20230605;
+#=GF SS   Published; PMID:20230605;
+#=GF GA   38.00
+#=GF TC   38.00
+#=GF NC   37.80
+#=GF TP   Cis-reg; riboswitch;
+#=GF BM   cmbuild -F CM SEED
+#=GF CB   cmcalibrate --mpi CM
+#=GF SM   cmsearch --cpu 4 --verbose --nohmmonly -T 29.35 -Z 549862.597050 CM SEQDB
+#=GF CL   CL00012
+#=GF DR   SO; 0000035; riboswitch;
+#=GF DR   GO; 0010468; regulation of gene expression;
+#=GF DR   GO; 0046500; S-adenosylmethionine metabolic process;
+#=GF RN   [1]
+#=GF RM   20230605
+#=GF RT   Comparative genomics reveals 104 candidate structured RNAs from bacteria,
+#=GF RT   archaea and their metagenomes.
+#=GF RA   Weinberg Z, Wang JX, Bogue J, Yang J, Corbino K, Moy RH, Breaker RR
+#=GF RL   Genome Biol. 2010;11:R31.
+#=GF WK   SAM_riboswitch_(S_box_leader)
+#=GF **   seedtax: Bacteria; unclassified sequences
+#=GF SQ   437
+#=GC SS_cons                   :::::(((((,,,,<-<<<<<........____............>>>>.>><<<-.-<<.<.<<<.....AAAAAA........>>>-..>>>->>>,...........................,,,,.................................)))))-<<<<...........____............................>>>>::...:::::aaaaaa:::
+#=GC RF                        aaaaagCAUcAAGAGugGgcc........uuaa............ggcC.cCgcCA.ACC.u.ggc.....aaauca........gccA..aGGUGgcu...........................aaaa.................................gAUGcGgccg...........aaaa............................cggcAA...caaaaugguuaaau
+//

@@ -1,0 +1,5 @@
+# removing 100 out of 192 positions with >= 50% gaps!
+# SEQ -GCCA-----GAGAAG--G-A---A--GG-GC-ACCA-------------CCAG--GA-GCAA-GGAGGC---A--A-------GGG--G-CA-G------------CCACAG-GG-AGC--AA---------------------------------------------------AAAA-----C-G-C-GA
+# CUT -GCCA-------GAAG--G-A---A--G--G--ACCA-------------CCAG---A-G--A-GGAGG----A--A-------GGG--G-CA-G------------CCACAG-GG-AGC---A---------------------------------------------------AAAA-----C-G-C-GA
+# NC 92
+# NEFF 92.5522

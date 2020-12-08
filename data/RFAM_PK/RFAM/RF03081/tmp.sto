@@ -1,0 +1,30 @@
+# STOCKHOLM 1.0
+#=GF AC   RF03081
+#=GF ID   DUF805
+#=GF DE   DUF805 RNA
+#=GF AU   Weinberg Z; 0000-0002-6681-3624
+#=GF SE   Weinberg Z
+#=GF SS   Published; PMID:28977401;
+#=GF GA   51.10
+#=GF TC   51.10
+#=GF NC   50.60
+#=GF TP   Cis-reg;
+#=GF BM   cmbuild -F CM SEED
+#=GF CB   cmcalibrate --mpi CM
+#=GF SM   cmsearch --cpu 4 --verbose --nohmmonly -T 27.97 -Z 742849.287494 --mxsize
+#=GF SM   128 CM SEQDB
+#=GF CL   CL00115
+#=GF DR   SO; 0005836; regulatory_region;
+#=GF RN   [1]
+#=GF RM   28977401
+#=GF RT   Detection of 224 candidate structured RNAs by comparative analysis of
+#=GF RT   specific subsets of intergenic regions.
+#=GF RA   Weinberg Z, Lunse CE, Corbino KA, Ames TD, Nelson JW, Roth A, Perkins KR,
+#=GF RA   Sherlock ME, Breaker RR
+#=GF RL   Nucleic Acids Res. 2017;45:10811-10823.
+#=GF CC   Bacteroidetes, Aeromonadales. Lineage (Bacteroidetes)
+#=GF WK   DUF805_RNA_motif
+#=GF SQ   46
+#=GC SS_cons              :::::<<<<________.__>>>>----...-------<<<____AA._____>>>:::::::::.aa::::::
+#=GC RF                   aaAaaGUGGAGaCCAGA.aACCACUuaA...AAAACGGGGcGaaACC.GAAAAgCCAuAuGAGUA.GGAaAAaa
+//

@@ -1,0 +1,31 @@
+# STOCKHOLM 1.0
+#=GF AC   RF02924
+#=GF ID   skipping-rope
+#=GF DE   skipping-rope RNA
+#=GF AU   Argasinska J; 0000-0003-2678-2824
+#=GF AU   Weinberg Z; 0000-0002-6681-3624
+#=GF SE   Weinberg Z
+#=GF SS   Published; PMID:28977401;
+#=GF GA   36.70
+#=GF TC   36.70
+#=GF NC   36.50
+#=GF TP   Gene; sRNA;
+#=GF BM   cmbuild -F CM SEED
+#=GF CB   cmcalibrate --mpi CM
+#=GF SM   cmsearch --cpu 4 --verbose --nohmmonly -T 25.15 -Z 742849.287494 --mxsize
+#=GF SM   128 CM SEQDB
+#=GF DR   SO; 0005836; regulatory_region;
+#=GF RN   [1]
+#=GF RM   28977401
+#=GF RT   Detection of 224 candidate structured RNAs by comparative analysis of
+#=GF RT   specific subsets of intergenic regions.
+#=GF RA   Weinberg Z, Lunse CE, Corbino KA, Ames TD, Nelson JW, Roth A, Perkins KR,
+#=GF RA   Sherlock ME, Breaker RR
+#=GF RL   Nucleic Acids Res. 2017;45:10811-10823.
+#=GF CC   Firmicutes, Fusobacteria, AlphaProteobacteria, Spirochaetes. Downstream
+#=GF CC   gene
+#=GF WK   Skipping-rope_RNA_motif
+#=GF SQ   1426
+#=GC SS_cons                (((((.((..(,,,,<.<<<<___.....................................................__....____.AAAAA_.>>>>>,<......<<<<<<.................................._____.......................................................................................................>>>>>>...............................................................----->..,,,,<<.<<<.......................___aaaaa_.>>>>>...))).)))))
+#=GC RF                     aauau.uu..GAG..G.uuGGAAA................................................................aGGCag.CCaaCaC......aCccuu..................................aaauu.......................................................................................................aaggGu...............................................................uacAAG..AGAUGc.gGG.......................aaacGCCGc.CCcgC...Caa.auauu
+//

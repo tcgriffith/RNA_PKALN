@@ -1,0 +1,5 @@
+# removing 203 out of 360 positions with >= 50% gaps!
+# SEQ AA-CCCCGCCC--G-------CAC---ACCAAA-GC-GGG--C-A-GGGGCCCGG-GGAGAGAC-GA-CG-AA-GCCC--GGAGCAG-G--GAAGAAAA-AA---AGAAAGGAGA---------------------------CCGCCCCAGC---GCGG-GCGGCC-----GAAA---------------GGC-G-A-AGGCA-CCC----------------GGAGAG----------------------------------------------------------GGGAGGCAAGGC-----------GAAA-------------------G-CCAAAGC-G-A----GAG-A-GGCA
+# CUT -A-CCCCGCCC--G-------CAC---ACC-AA-----------------------------------------------GGAGCAG-G--GAAG------A---AGAAAGGAGA---------------------------CCGC-CCAGC---GCGG-GCGGCC-----GAAA----------------G--G-A-AGGCA-CCC----------------GGAGAG----------------------------------------------------------G-GAGGCAAGGC-----------GAAA-------------------G--CAAAG--G-A----GAG-A-GGCA
+# NC 157
+# NEFF 122.911
