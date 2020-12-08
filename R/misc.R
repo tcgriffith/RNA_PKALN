@@ -70,9 +70,40 @@ bench_pkaln_2 = function(pkaln) {
   rslt.df
 }
 
+## overall
+bench_pkaln_all = function(pkaln) {
+  tmp = lapply((pkaln$seqidx.aln.list), function(seqidx.test) {
+    bench_dfref_all(seqidx.test, pkaln$seqidx.ref, pkaln$dfref)
+  })
+  
+  rslt.df = as.data.frame(do.call(rbind, tmp))
+  
+  rslt.df$method = names(pkaln$seqidx.aln.list)
+  rslt.df$caseid=pkaln$caseid
+  rslt.df
+}
+
+bench_pkaln_2 = function(pkaln) {
+  rslt.l = lapply((pkaln$seqidx.aln.list), function(seqidx.test) {
+    bench_dfref_2(seqidx.test, pkaln$seqidx.ref, pkaln$dfref)
+  })
+  
+  rslt.df = as.data.frame(do.call(rbind, rslt.l))
+  
+  rslt.df$method = names(pkaln$seqidx.aln.list)
+  rslt.df$caseid=pkaln$caseid
+  rslt.df
+}
+
+
+
 ##
 
-bench_pair_spfm = function(seqidx.test, seqidx.ref, pair, debug = FALSE) {
+bench_pair_spfm = function(seqidx.test,
+                           seqidx.ref,
+                           pair, 
+                           debug = FALSE,
+                           raw = FALSE) {
   idx_A = which(pair > 0)
   idx_B = pair[which(pair > 0)]
   
@@ -100,14 +131,26 @@ bench_pair_spfm = function(seqidx.test, seqidx.ref, pair, debug = FALSE) {
     mcc = mcc,
     f1 = f1
   )
-  return(rslts)
+  rslts_raw = c(
+    TP=TP,
+    TPFP=TPFP,
+    TPFN=TPFN
+  )
+  if (raw){
+    return(rslts_raw)
+  }
+  else{
+    return(rslts)
+  }
+
 }
 
 
 bench_by_range_spfm = function(seqidx.test,
                                seqidx.ref,
                                range = NULL,
-                               debug = FALSE) {
+                               debug = FALSE,
+                               raw = FALSE) {
   if (is.null(range))
     range = 1:ncol(seqidx.ref)
   
@@ -132,7 +175,17 @@ bench_by_range_spfm = function(seqidx.test,
     mcc = mcc,
     f1 = f1
   )
-  return(rslts)
+  rslts_raw = c(
+    TP=TP,
+    TPFP=TPFP,
+    TPFN=TPFN
+  )
+  if (raw){
+    return(rslts_raw)
+  }
+  else{
+    return(rslts)
+  }
 }
 
 bench_dfref_2= function(seqidx.test, seqidx.ref, dfref){
@@ -157,4 +210,25 @@ bench_dfref_2= function(seqidx.test, seqidx.ref, dfref){
   return(unlist(rslt))
 }
 
+bench_dfref_all = function(seqidx.test, seqidx.ref, dfref){
+  idx_select = RNAmrf:::get_idx_select(dfref)
+  
+  rslt=list()
+  
+  pair_all=dfref$id_ref_pair
+  pair_pk=pair_all
+  pair_pk[!dfref$ss %in% c("A", "a", "B", "b", "C", "c", "D", "d")]=0
+  
+  pair_nonpk=pair_all
+  pair_nonpk[dfref$ss %in% c("A", "a", "B", "b", "C", "c", "D", "d")]=0
+  
+  
+  rslt$col_all=bench_by_range_spfm(seqidx.test,seqidx.ref, idx_select$col_all,raw=TRUE)
+  rslt$col_loop=bench_by_range_spfm(seqidx.test,seqidx.ref,idx_select$col_loop,raw=TRUE)
+  rslt$pair_all=bench_pair_spfm(seqidx.test,seqidx.ref, pair_all,raw=TRUE)
+  rslt$pair_pk=bench_pair_spfm(seqidx.test,seqidx.ref, pair_pk,raw=TRUE)
+  rslt$pair_nonpk=bench_pair_spfm(seqidx.test,seqidx.ref, pair_nonpk,raw=TRUE)
+  
+  return(unlist(rslt))
+}
 

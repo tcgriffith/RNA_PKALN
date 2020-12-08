@@ -62,7 +62,7 @@ rslt.df.s = do.call(rbind,rslt.all)
 # rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
 
 rslt.df.all=rslt.df.s %>% 
- select(method,caseid,contains("pk") & !contains("mcc")) %>% 
+ select(method,caseid,contains("pair") & !contains("mcc")) %>% 
   # left_join(score_trad) %>% 
 left_join(score_rscape)
   
@@ -84,7 +84,9 @@ synth_tab
 ```{r}
 synth_tab_sel=
 synth_tab %>% 
-  filter(caseid %in% c("simulation_1","simulation_2","simulation_3","simulation_4"))
+  filter(!grepl("ssmrf",method)) %>% 
+  filter(caseid %in% c("simulation_1","simulation_2","simulation_3","simulation_4")) %>% 
+  select(method,caseid, contains("pair_pk"),contains("pair_nonpk"),contains("pair_all"),SEN,PPV,`F`)
 
 # names(synth_tab_sel)[3:11]= rep(c("SEN","PREC","F1"))
 synth_tab_sel
@@ -96,9 +98,13 @@ synth_tab_sel
 synth_tab_sel %>% 
   select(-caseid) %>% 
 kable( booktabs = T,digits=2,
-       col.names=c("method",rep(c("SEN","PPV","F1"),3))) %>%
+       col.names=c("method",rep(c("SEN","PPV","F1"),4))) %>%
   kable_styling() %>%
-  add_header_above(c(" ", "Pseudoknot alignment" = 3,"non-Pseudoknot alignment"=3,"Contact Prediction"=3)) %>%
+  add_footnote(
+    c("PK: Pseudoknot.",
+      "SEN: Sensitivity. PPV: Precision. F1: F1-score")
+  ) %>% 
+  add_header_above(c(" ", "PK alignment" = 3,"non-PK alignment"=3,"PK+non-PK"=3,"Contact Prediction"=3)) %>%
     pack_rows(index=table(synth_tab_sel$caseid)) %>% 
   column_spec(4,bold=T)
 ```
@@ -106,14 +112,10 @@ kable( booktabs = T,digits=2,
 
 
 ```{r}
-save(synth_tab_sel,file="~/GIT/thesis_tc/data/synth_tab_sel.rda")
+# save(synth_tab_sel,file="~/GIT/thesis_tc/data/synth_tab_sel.rda")
 ```
 
 
-
-```{r}
-RNAmrf:::msa_a2m2seqidx
-```
 
 
 ## figure
@@ -178,7 +180,7 @@ gglists=lapply(1:length(testdirs.filt),function(i){
   gglist$cmalign=plot_rscape(paste0(path,"/cmalign/cmalign.sorted.cov"))+
     ggtitle(label="",subtitle = "cmalign")
   gglist$rnamrf=plot_rscape(paste0(path,"/rnamrf/rnamrf.sorted.cov"))+
-    ggtitle(label=caseid,subtitle="RNAmrf")
+    ggtitle(label="",subtitle="RNAmrf")
   return(gglist)
 })
 
@@ -237,9 +239,6 @@ patch_ss
 ```
 
 
-```{r}
-
-```
 
 ```{r}
 
@@ -260,7 +259,7 @@ grob_ss4=rasterGrob(ss4)
 wrap_elements(grob_ss1)
 ```
 
-```{r fig.width=15}
+```{r fig.height=8,fig.width=5}
 # patch_rscape=
 #   (gglists[[1]]$rnamrf+ gglists[[1]]$cmalign)/
 #   (gglists[[2]]$rnamrf+ gglists[[2]]$cmalign)/
@@ -269,15 +268,16 @@ wrap_elements(grob_ss1)
 #   plot_layout()
   
 patch_rscape=
-  wrap_elements(grob_ss1,ignore_tag=TRUE)+
+  wrap_elements(grob_ss1,ignore_tag=TRUE)+ggtitle("Simulation-1",subtitle="H")+
   gglists[[1]]$rnamrf+gglists[[1]]$cmalign+
-  wrap_elements(grob_ss2,ignore_tag=TRUE)+
+  wrap_elements(grob_ss2,ignore_tag=TRUE)+ggtitle("Simulation-2",subtitle="HHH")+
   gglists[[2]]$rnamrf+gglists[[2]]$cmalign+
-  wrap_elements(grob_ss3,ignore_tag=TRUE)+
+  wrap_elements(grob_ss3,ignore_tag=TRUE)+ggtitle("Simulation-3",subtitle="HLout")+
   gglists[[3]]$rnamrf+gglists[[3]]$cmalign+
-  wrap_elements(grob_ss4,ignore_tag=TRUE)+
+  wrap_elements(grob_ss4,ignore_tag=TRUE)+ggtitle("Simulation-4",subtitle="LL")+
   gglists[[4]]$rnamrf+gglists[[4]]$cmalign +
-  plot_layout(byrow = FALSE,nrow=3,guides="collect",heights=c(1,3,3)) & theme_classic() & theme(legend.position="bottom") 
+  
+  plot_layout(ncol=3,guides="collect", widths=c(1,1,1)) & theme_classic() & theme(legend.position="bottom") 
 
 patch_rscape
 ```
@@ -286,6 +286,10 @@ patch_rscape
 ```{r}
 patch_rscape=patch_rscape
 save(patch_rscape,file="~/GIT/thesis_tc/data/patch_rscape.rda")
+```
+
+```{r}
+patch_ss
 ```
 
 

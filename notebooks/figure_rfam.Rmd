@@ -129,7 +129,7 @@ kable( booktabs = T,digits=2,longtable=TRUE) %>%
 
 
 
-```{r}
+```{r eval=FALSE}
 rfam_tab_sel=mytable
 
 save(rfam_tab_sel,file="~/GIT/thesis_tc/data/rfam_tab_sel.rda")
@@ -207,13 +207,14 @@ gg_pk=
 mytable.wide %>%
   ggplot(aes (x = PK_cmalign, y = PK_rnamrf,color = neff>40 )) +
   geom_point(size=3) +
+  geom_point(data = data.filt,size=6)+
   geom_abline() +
     scale_color_discrete(name="",label=c("neff <= 40","neff > 40"))+
   # geom_point(data = data.filt, aes(size = neff),color="red") +
   geom_label_repel(data = data.filt,
-                  aes(label = caseid))+
-  xlab("F1 score for Pseudoknot alignment (cmalign MSA)")+
-  ylab("F1 score for Pseudoknot alignment (RNAmrf MSA)")+
+                  aes(label = caseid),size=3)+
+  xlab("F1-score for Pseudoknot alignment (cmalign MSA)")+
+  ylab("F1-score for Pseudoknot alignment (RNAmrf MSA)")+
   lims(x=c(0,1),y=c(0,1))
   # annotate("text", x=0.5,y=1,label="P-value 0.03",color="red",size =6)
 
@@ -317,6 +318,31 @@ gg_cont_sens
 ```
 
 ```{r}
+
+data.filt = contact_wider %>%
+  filter(caseid %in% c("RF01725","RF02996"))
+  # filter(SEN_rnamrf - SEN_cmalign > 0.15)
+  
+
+gg_cont_f1=
+contact_wider %>% 
+  # filter(neff>50) %>% 
+  ggplot(aes (x = F_cmalign, y = F_rnamrf,color = neff>40 )) +
+  geom_point(size=3) +
+  geom_point(data = data.filt, size=6)+
+  geom_abline() +
+    scale_color_discrete(name="",label=c("neff <= 40","neff > 40"))+
+  # geom_point(data = data.filt, aes(size = neff),color="red") +
+  geom_label_repel(data = data.filt,
+                  aes(label = caseid),size=3)+
+  xlab("Contact Prediction F1-score (cmalign MSA)")+
+  ylab("Contact Prediction F1-score (RNAmrf MSA)")
+
+gg_cont_f1
+```
+
+
+```{r}
 with(mytable.wide %>% filter(neff > 40),wilcox.test(SEN_rnamrf,SEN_cmalign,paired=TRUE,alternative="greater"))
 ```
 
@@ -327,8 +353,12 @@ ggplotColours <- function(n = 6, h = c(0, 360) + 15){
   hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
 }
 
-mycolors = ggplotColours(3)
-mylevels=c("rnamrf","cmalign","input")
+# red green blue
+mycolors = ggplotColours(3) 
+mycolors = mycolors[c(2,1,3)]
+
+mylevels=c("cmalign","rnamrf","input")
+mylabels=c("cmalign","RNAmrf","Reference")
 
 ggdata_boxplot_contact =  rslt.contact %>% 
   pivot_longer(cols=3:5,names_to="metric") %>% 
@@ -337,13 +367,15 @@ ggdata_boxplot_contact =  rslt.contact %>%
   )) %>% 
   mutate(metric=factor(
     metric,
-    levels=c("F",
+    levels=c(
   "SEN",
-  "PPV"
+  "PPV",
+  "F"
   ),labels=c(
-    "F-score",
+    
   "Sensitivity",
-  "Precision"
+  "Precision",
+  "F1-score"
   )
   )) 
 
@@ -355,7 +387,7 @@ ggdata_boxplot_contact %>%
   # filter(mygroup == "Contact Prediction") %>% 
   ggplot(aes(x=metric,y=value,fill=method))+
   geom_boxplot()+
-  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("RNAmrf","cmalign","Reference"))+
+  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=mylabels)+
   # scale_fill_manual(values=mycolors,limits=mylevels)+
   theme(axis.text.x=element_text(angle = 45,  hjust=1))+
   xlab("")+ggtitle("Contact Prediction")+facet_grid(.~neffcut)
@@ -369,24 +401,24 @@ ggdata_boxplot =
 
 mytable %>% 
   # filter(neff>40) %>%
-  pivot_longer(cols=3:8,names_to="metric") %>% 
+  pivot_longer(cols=3:10,names_to="metric") %>% 
   mutate(metric=factor(
     metric,
     levels=c(
-  "All",
-  "Loop",
-  "Base-Pair",
-  "non-PK",
+      "non-PK",
   "PK",
+  "Loop",
+  "All",
+  "Base-pair",
   "SEN",
   "PPV",
   "F"
   ),labels=c(
-  "all",
-  "Loop",
-  "Base-Pair",
   "non-Pseudoknot-bp",
   "Pseudoknot-bp",
+  "Loop",
+  "all",
+  "Base-Pair",
   "Sensitivity",
   "Precision",
   "F1-score")
@@ -398,7 +430,7 @@ mytable %>%
 
 gg2=
 ggdata_boxplot %>% 
-
+  filter (metric != "Base-Pair") %>% 
   mutate(neffcut=ifelse(neff>40,"neff > 40","neff <= 40 ")) %>% 
   mutate(method=factor(method,
     levels=mylevels
@@ -406,7 +438,7 @@ ggdata_boxplot %>%
   filter(mygroup == "Alignment Accuracy") %>%
   ggplot(aes(x=metric,y=value,fill=method))+
   geom_boxplot()+
-  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=c("RNAmrf","cmalign","Reference"))+
+  scale_fill_manual(name="MSA",values=mycolors,limits=mylevels,labels=mylabels)+
   
   labs(x="",y="")+ggtitle("Alignment Accuracy")+facet_grid(.~neffcut)
 #+
@@ -447,13 +479,13 @@ rslt.contact %>%
 
 
 ```{r fig.height=9}
-rfam_patch2=gg2+gg_pk+gg1+gg_cont_sens+plot_layout(guides="collect",byrow = FALSE) +plot_annotation(tag_levels = "A")& theme_classic() & theme(axis.text.x=element_text(angle=45,hjust = 1))
+rfam_patch2=gg2+gg_pk+gg1+gg_cont_f1+plot_layout(guides="collect",byrow = FALSE) +plot_annotation(tag_levels = "A")& theme_classic() & theme(axis.text.x=element_text(angle=45,hjust = 1))
 
 rfam_patch2
 ```
 
 
-```{r}
+```{r eval=FALSE}
 
 save(rfam_patch2,file="~/GIT/thesis_tc/data/rfam_patch2.rda")
 ```
@@ -611,7 +643,7 @@ rfam_patch3
 ```
 
 
-```{r}
+```{r eval=FALSE}
 
 save(rfam_patch3,ss1_col,ss2_col,file="~/GIT/thesis_tc/data/rfam_patch3.rda")
 ```

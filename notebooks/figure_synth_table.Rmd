@@ -1,0 +1,166 @@
+---
+title: "Untitled"
+author: "TC"
+date: "12/7/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+# bookdown::pdf_document2()
+knitr::opts_chunk$set(echo = TRUE)
+library(RNAmrf)
+source(here::here("R/misc.R"))
+library(dplyr)
+
+library(kableExtra)
+```
+
+## R Markdown
+
+```{r}
+# filerscape=here::here("data/simulation/simulation.default_rscape.scores")
+# 
+# score_rscape= data.table::fread(filerscape)
+# 
+# names(score_rscape)=c("caseid","method","method2","SEN","PPV","F")
+# 
+# score_rscape=score_rscape[,-"method2"]
+# 
+# score_rscape[,3:5]=score_rscape[,3:5]/100
+# 
+# score_rscape %>% filter(method!="input")
+
+
+filerscape_raw=here::here("data/simulation/simulation.default_rscape.scores")
+
+score_rscape_raw= data.table::fread(filerscape_raw)
+names(score_rscape_raw)=c("caseid","method","method2","FP","TP","TPFN","TPFP")
+score_rscape_raw=score_rscape_raw[,-"method2"]
+# score_rscape_raw[,3:5]=score_rscape_raw[,3:5]/100
+
+score_rscape_case = 
+score_rscape_raw %>% filter(method!="input") %>% 
+  # group_by(method) %>% 
+  mutate(SEN=(TP)/(TPFN),
+            PPV=(TP)/(TPFP),
+            F1=2*(SEN*PPV)/(SEN+PPV))  %>% 
+  select(method,caseid, SEN,PPV,F1)
+
+score_rscape_total=
+score_rscape_raw %>% filter(method!="input") %>% 
+  group_by(method) %>% 
+  summarise(SEN=sum(TP)/sum(TPFN),
+            PPV=sum(TP)/sum(TPFP),
+            F1=2*(SEN*PPV)/(SEN+PPV)) %>% 
+  mutate(caseid="total")
+
+score_rscape= rbind(score_rscape_case,score_rscape_total)
+
+```
+
+```{r}
+# filecomp=here::here("data/synthetic/compalignp.scores")
+
+# score_trad= data.table::fread(filecomp)
+# names(score_trad)=c("method","caseid","SPS","SCI")
+```
+
+
+```{r}
+filepkaln=here::here("data/simulation/simulation.rds")
+
+pkaln.all=readRDS(filepkaln)
+
+rslt.all = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln_2(pkaln))
+})
+
+rslt.df.case = do.call(rbind,rslt.all)
+
+
+# rslt.df.1=dplyr::left_join(rslt.df.s,score_trad)
+# 
+rslt.df.case=rslt.df.case %>%
+ select(method,caseid,contains("pair") & !contains("mcc"))# %>%
+#   # left_join(score_trad) %>% 
+# left_join(score_rscape)
+#   
+#   # dplyr::left_join(rslt.df.1,score_rscape)
+# print(rslt.df.all,digits = 2)
+```
+
+
+```{r}
+
+rslt.all.raw = lapply(pkaln.all,function(pkaln){
+  try(bench_pkaln_all(pkaln))
+})
+
+rslt.all.raw = do.call(rbind,rslt.all.raw)
+
+rslt.all.raw=rslt.all.raw %>%
+ select(method,caseid,contains("pk")) %>% 
+  group_by(method) %>% 
+  summarise(pair_pk.sens=sum(pair_pk.TP)/sum(pair_pk.TPFN),
+            pair_pk.prec=sum(pair_pk.TP)/sum(pair_pk.TPFP),
+            pair_pk.f1=2*(pair_pk.sens*pair_pk.prec)/(pair_pk.sens+pair_pk.prec),
+            pair_nonpk.sens=sum(pair_nonpk.TP)/sum(pair_nonpk.TPFN),
+            pair_nonpk.prec=sum(pair_nonpk.TP)/sum(pair_nonpk.TPFP),
+            pair_nonpk.f1=2*(pair_nonpk.sens*pair_nonpk.prec)/(pair_nonpk.sens+pair_nonpk.prec),
+            pair_all.sens=sum(pair_nonpk.TP+pair_pk.TP)/sum(pair_nonpk.TPFN+pair_pk.TPFN),
+            pair_all.prec=sum(pair_nonpk.TP+pair_pk.TP)/sum(pair_nonpk.TPFP+pair_pk.TPFP),
+            pair_all.f1=2*(pair_all.sens*pair_all.prec)/(pair_all.sens+pair_all.prec),
+            ) %>% 
+  mutate(caseid="total") 
+
+rslt.all.raw.all = rbind(rslt.df.case,rslt.all.raw) %>% 
+  filter(!grepl("ssmrf",method))
+
+#   # left_join(score_trad) %>% 
+# left_join(score_rscape)
+
+rslt.final = left_join(rslt.all.raw.all,score_rscape) %>% 
+    select(method,caseid, contains("pair_pk"),contains("pair_nonpk"),contains("pair_all"),SEN,PPV,F1)
+
+```
+
+
+```{r}
+synth_tab=rslt.final  
+
+synth_tab
+```
+
+
+
+```{r}
+synth_tab_sel=
+synth_tab
+
+# names(synth_tab_sel)[3:11]= rep(c("SEN","PREC","F1"))
+synth_tab_sel
+
+```
+
+
+
+```{r}
+synth_tab_sel %>% 
+  select(-caseid) %>% 
+kable( booktabs = T,digits=2,
+       col.names=c("method",rep(c("SEN","PPV","F1"),4))) %>%
+  kable_styling() %>%
+  add_footnote(
+    c("PK: Pseudoknot.",
+      "SEN: Sensitivity. PPV: Precision. F1: F1-score")
+  ) %>% 
+  add_header_above(c(" ", "PK alignment" = 3,"non-PK alignment"=3,"PK+non-PK"=3,"Contact Prediction"=3)) %>%
+    pack_rows(index=table(synth_tab_sel$caseid)) %>% 
+  column_spec(4,bold=T)
+```
+
+```{r}
+save(synth_tab_sel,file="~/GIT/thesis_tc/data/synth_tab_sel.rda")
+```
+
