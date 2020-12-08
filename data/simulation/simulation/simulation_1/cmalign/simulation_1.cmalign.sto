@@ -1,0 +1,606 @@
+# STOCKHOLM 1.0
+#=GF AU Infernal 1.1.2
+
+seq1           CGAAUAG-c.....u-UGA-CACUCAGU..................AUUCAUCUc........cc--ACCCACUGA--
+#=GR seq1   PP *****86.5.....5.444.45777778..................****98769........74..333333333..
+seq2           UCGGCGUAca...gc-ACUCUAAAUCAA..................GCCGAUAGgg.......gc----AGAUUA---
+#=GR seq2   PP 6666665599...95.344445555555..................6666554466.......42....222222...
+seq3           UUACUUGGg....cu-CCACUUUCCUCG..................AGUACUCCcaa.....cga---UUGCAGGAC-
+#=GR seq3   PP 999998779....85.444556666667..................99998766999.....753...223333333.
+seq4           ACCGAGCA......uGC-CUAUCUGUCU..................UCGGGUGGcu......cau--AUGUAGACA--
+#=GR seq4   PP *****987......854.4567888888..................****9876**......964..333333333..
+seq5           GAAUCGAU......uGAUU-ACAGAGCA..................GAUUUUUUau......ugg---A-AGCUCUA-
+#=GR seq5   PP *****976......85554.56777778..................****9876*9......643...2.2233333.
+seq6           GUCUCGUGg....uu-GCGCCCCCACAG..................GAGAUAACa........ac--GCCGGGUGG--
+#=GR seq6   PP *****9889....95.445566777778..................****98769........64..333333333..
+seq7           -CUAUGAGug...cu-CUCGCAUUCAGC..................AUAGCCA-ccg....agaa------CGAAUU-
+#=GR seq7   PP .777776689...84.444455555555..................7777665.697....5422......222222.
+seq8           GUUCGUCUa....uu-GGACUCAUCAAA..................CGAAAGUAcuu....uccc--ACA-GUGAUA-
+#=GR seq8   PP 999998769....85.445566777777..................99998766999....9864..222.233333.
+seq9           -AGGCUAUcc...au-UAUCUACUCUAG..................GCCUGGAAuau....cugg-----GAGAGA--
+#=GR seq9   PP .****987*9...95.555677888888..................****9876*98....6432.....222222..
+seq10          ACCUGACUg.....u-AUCCGAAGUCGU..................CAGGCACCgua.....ugu--ACU-UCGACC-
+#=GR seq10  PP 999998779.....5.555667777778..................99999876999.....863..323.333333.
+seq11          UACGUAAGc.....g-UACCGUAGUUGC..................ACGUCAGGc........ag--CUCACGCAAG-
+#=GR seq11  PP *****987*.....6.555667888888..................****9877*........75..3344445555.
+seq12          UAAUGUG-u.....c-AA-A-GCUUCUC..................CAUUGGAUg........gg-AACUUAGAAC--
+#=GR seq12  PP 9999975.5.....4.43.3.3555556..................999988769........86.3333343444..
+seq13          CAGUCCCCg.....c-CGGUUACACAAC..................GACUCGUAua.......ug---UUGUUGUGU-
+#=GR seq13  PP *****987*.....5.556678888889..................****9876*8.......54...333444444.
+seq14          AACGCGGC......u-AAUG-UACUCGU..................GCGUCCCGag......aua--CAUG-UCGAG-
+#=GR seq14  PP *****865......6.4444.4666667..................****9887**......864..3333.33333.
+seq15          -UUCGAUAg.....a--GAGCCUGGCCU..................CGAACUC-ggg....agga------UCCAGC-
+#=GR seq15  PP .88887667.....4..34445655556..................8888765.597....5432......222222.
+seq16          AAAUUUGCuu..cca-UUGUCAUCGAGA..................AAUUCGUGgc.......gc---GGAGUCGAG-
+#=GR seq16  PP *****97798..885.444556666667..................****9876*8.......53...233344444.
+seq17          UUCUGACCg....aa-GGUUUGGGCUCC..................CAGACAAUuc......auu--GCAUAGCCG--
+#=GR seq17  PP *99998879....95.455566777778..................999998779*......864..223333333..
+seq18          UCAACGAGg....acUUCCGCUAUUGCG..................GUUGGUGUg.........a-CAGCAAUCAAUC
+#=GR seq18  PP *****9889....995566677888888..................****9877*.........6.556678999999
+seq19          UCACCUA-a.....a--GU-GAGCCU-C..................GGUGUACGcua.....gcg--A-CCAGGCU--
+#=GR seq19  PP 9999975.4.....3..33.334444.4..................99998876998.....642..2.2222333..
+seq20          -AAUCAGCg....ucGA-AUGGCAGGCU..................GAUUGCU-ggau...ccuu------UCUGCU-
+#=GR seq20  PP .77776658....9533.4444555555..................7777765.5*97...5432......222222.
+seq21          UCAAUCGGg.....g-GGAUUUCUUUCU..................AUUGGAAAgua....ucgu--AUG-CAAAGA-
+#=GR seq21  PP ***9*8879.....5.566678888889..................99999876***....*864..323.333333.
+seq22          CAUCCUGCga...gc-ACCCAGCACUUU..................GGAUUGCUg.........c-GAGGAAGUC---
+#=GR seq22  PP *****98799...95.555667777778..................****98769.........5.333333333...
+seq23          -UUAAUUUac...gc-AAGGUAACGUGA..................UUAAUU-Gcgu.....aau----CUCGUU---
+#=GR seq23  PP .666655569...84.444444555545..................666654.4686.....432....222222...
+seq24          CGGCGGUA......aUUC-CCCCCUCUC..................CGCCCGUUc........uc--C-UCUGAGG--
+#=GR seq24  PP *****987......8554.567888888..................****98768........53..3.3333333..
+seq25          UUGCCCUA......aGAUCGACGCUGAG..................GGCACGUU..........aAUG-UGAGCAGCU
+#=GR seq25  PP *****998......*6677889999999..................****9865..........8555.6689*****
+seq26          CCUAUGAGc.....a-CGUCCCCCCAUA..................AUAGCCGUug......gug--ACU--UGGGA-
+#=GR seq26  PP *****988*.....5.556677888889..................****9877*9......752..222..22222.
+seq27          GUGGCCGC......aGAGA-GAAAAUUA..................GCCAAUUGg.........g-GGCGUA-UUU--
+#=GR seq27  PP *****976......86665.56777778..................****97658.........5.333222.222..
+seq28          UAGCGCUU......a-CCUGG-AACUGA..................CGCUGUUGga......uac----AGACAGUG-
+#=GR seq28  PP 99999765......5.44444.555556..................9999877698......642....33344444.
+seq29          -UGGAAAGgc...cg-UAGCCUCAGUCU..................UCCACU-Accu.....acc--GGCCUGAU---
+#=GR seq29  PP .666655579...84.444444555554..................666654.47*9.....753..22222222...
+seq30          GAUCCAUG......g-AGGG-AUCAGUC..................GGAUUAUAaca....uacg--GCUG-CUGAA-
+#=GR seq30  PP *****865......5.5544.5666668..................****9876***....*853..3333.33333.
+seq31          UCGGCACGg.....gG-AACUCUAGGGG..................GCCGCUCGug......acc--A-GAACCUAU-
+#=GR seq31  PP *****9879.....64.44556777778..................****9876**......853..2.33334444.
+seq32          UGGCUAAA......cUUAU-GUAGUUUA..................AGCCUGCGa........ag--GCUCAAAACU-
+#=GR seq32  PP *****987......85554.56777778..................****9877*........74..3444555555.
+seq33          AUACCAUUg.....gGAAUGGACGAAGG..................GGUAACAAauc....ucua---CCGU-UCGA-
+#=GR seq33  PP ****98879.....95556677888778..................9***9876***....9643...2322.3333.
+seq34          AGCUCGU-au...uaUA-UUUUCUAAUU..................GAGCUGCCcgc....aagg---CCGUUUAGC-
+#=GR seq34  PP 5555555.58...8633.3344444445..................55555444688....8753...233334444.
+seq35          --ACCCC-a.....aG-CAUGUGGUA-G..................GGUAGACAc........gg--AG--AGACCAC
+#=GR seq35  PP ..55544.4.....53.333334444.4..................555554435........42..22..2233333
+seq36          GGGCGUAUc....gaCUGCGACAUAAUU..................CGCCUACGcg.......gu---UCUGUUAUC-
+#=GR seq36  PP *****9879....995566677888888..................****9877*8.......53...333445555.
+seq37          -GCAUACU......cUA-UGACGUCACU..................AUGCCCUUuua....acgg----CGGUGAG--
+#=GR seq37  PP .9999876......744.5567888888..................99999876**9....7543....2222222..
+seq38          AGUUCACGg.....aGUUCGGAUGAACA..................GAACACGCag......ccc---UCACUUCAC-
+#=GR seq38  PP *****9879.....95556667777778..................99999876**......853...333344444.
+seq39          -GUCACUG......cAUGUACCCUAGGU..................UGACUUCCcuc.....gag--AGCUAGA----
+#=GR seq39  PP .****988......*5666778888889..................****9876*98.....643..2222222....
+seq40          AUCCUUUAu.....c-UGCGUGUCGAUU..................AGGAAAGGuca.....cgu----AGGUCGAU-
+#=GR seq40  PP *****988*.....5.566677888888..................****9877**8.....643....33334444.
+seq41          CAAGAUCG......a-CGC-UACCUUAC..................UCUUAAAUga.......uu--C-GCCCAAGG-
+#=GR seq41  PP *****865......5.444.56888878..................****9887*8.......64..2.23344444.
+seq42          UGAGAGGC......aU-CUGAGUCGGAG..................UCUCGUUUgga.....uaa--AG--UCCGAG-
+#=GR seq42  PP *****876......74.44566777778..................****9876**8.....742..22..233333.
+seq43          GCAUUAAC......uAUG-AUAACGUCG..................AAUGGCAUug.......cu----UAAACGUC-
+#=GR seq43  PP *****876......8554.556777778..................****987696.......43....33344444.
+seq44          -UUUUCUGug..uac-GAUCGUCUCAA-..................GAAAACUUc........cc--G-UGAGAA---
+#=GR seq44  PP .555555569..974.33334444444...................555545546........63..3.223333...
+seq45          -UACUAUUg....auUUUUAGUGCUGUU..................AGUAUCG-ca......aaa--GUACAGCA---
+#=GR seq45  PP .77776657....974444555555555..................6666554.58......743..22222222...
+seq46          UCAACGA-u.....a-AC-C-AGUCACU..................GUUGUACUu.........a-AGUUUAAUGACA
+#=GR seq46  PP *****85.5.....4.43.3.4666667..................****9987*.........5.566778999999
+seq47          GGAAAACA......a-CGU-GAAAUUCU..................UUUCUCUAu........cc-GGUUUA-GAAC-
+#=GR seq47  PP *****865......5.444.45666668..................****9876*........84.444444.4444.
+seq48          CUGUUAUC......gGA-AU-GCAGCAU..................AACAUUCGcgu.....ccc---CAC-UGCUU-
+#=GR seq48  PP **999875......644.33.4555557..................99999876**8.....642...222.33333.
+seq49          AAUCAUCAu.....aAUGCCGAGAUAUC..................UGAUGUACugg....gccg--A-GCAUAUCC-
+#=GR seq49  PP *****988*.....95667788999999..................****9876***....*853..3.33445555.
+seq50          UUCCUGCG......aA-GCUGAUAUAUU..................AGGAUAACc.........u-AC-UA-UAUG--
+#=GR seq50  PP *****986......74.45567888889..................****98657.........4.32.22.2333..
+seq51          AGUAUGUGa....ucAUGCUAACCUGAU..................AUACGCAUg........gg--GCUCGCAGGC-
+#=GR seq51  PP *****998*....*95667788999999..................****9887*........74..3344555555.
+seq52          -CUAUUAUa.....g-GUCAAAGGAAUU..................AUAGGGGGacc.....acg----CAUUCCG--
+#=GR seq52  PP .****987*.....5.566778999989..................****9876*97.....643....2222222..
+seq53          -CGAACGAc.....cAACGCAUGGA---caguucga.auaaugagcUUCGCUC-c.........a----------G--
+#=GR seq53  PP .77776657.....74444444444...44444444.4444444444444322.2.........2..........1..
+seq54          GAGCGCGGu.....aCAUCGACCAUGGA..................CGCUUUAGucu....cuag----ACGCAUGU-
+#=GR seq54  PP 999998769.....84556677777778..................99998766999....7542....22333333.
+seq55          GUCGGUU-cg...aa--GAUGAUUGAUG..................CCGACCUUgg.......gc--GGUG-UCAAC-
+#=GR seq55  PP 5555554.69...73..33444444445..................5555555579.......64..3333.33333.
+seq56          -CGUGAGGg.....gAACGACGGGAGUU..................CACGGU-Ccua....cguu-----CACUCCA-
+#=GR seq56  PP .55555557.....84444444555544..................555554.4698....6532.....2333333.
+seq57          GUCUCAA-g.....u-GG-C-UUUGGGG..................GAGAGCAGu........ca--ACAA-CCCAU-
+#=GR seq57  PP *****75.4.....4.33.3.3555556..................****98769........64..3333.33333.
+seq58          AGGUCUCG......cAUA-CUACUCCAC..................GACCCGGAc........gc--GGU-GGAGU--
+#=GR seq58  PP *****987......8444.567888889..................****97658........53..322.23333..
+seq59          GGGAGGAU......aA-CCAUGCCAUCG..................CUCCAAUC..........uAGAUUAUCAUGGU
+#=GR seq59  PP *****976......74.44566777778..................****9876..........*66778899*****
+seq60          CCUAGCGA......gAACUUCUGCGAGA..................CUAGACGUau.......aa---UCAGCUCGC-
+#=GR seq60  PP *****987......*5667778988889..................****9887*8.......54...333444444.
+seq61          -GAGCUAA......aAG-UUCAUGGAGA..................GCUCGCGAauuc...ccug-----UCCCAU--
+#=GR seq61  PP .9999876......744.4556777778..................99999876**97...6432.....222222..
+seq62          UCCAAGAGa.....u-GUUGGGGGUAUA..................UUGGUAACuu......cuu---UCAGGUACC-
+#=GR seq62  PP *****988*.....6.455677888889..................****9876**......854...334445555.
+seq63          GGGGAAGG......u-CU-GUUGGUCCG..................UCCCUACGa.........c-GGU-AAGACCU-
+#=GR seq63  PP *****764......5.33.456777778..................****98769.........5.333.3444444.
+seq64          CUGUUCGAg.....u-AAAGUAAUCAUG..................AACAACUCcg......aug--G-CAUUGAUU-
+#=GR seq64  PP *****987*.....5.556677888889..................****9876**......853..3.33344444.
+seq65          AGCAUCCG......gCAGCGUCGAUGAU..................AUGCCGUUg........cu--CU-GACAUCG-
+#=GR seq65  PP 88888776......95566677777777..................888876657........53..22.2233333.
+seq66          CGUGCAAG......c-AUU-AUGUAUAA..................GCACCCCUgg......ggc--CGGCAUACA--
+#=GR seq66  PP *****865......5.444.56888888..................****9887**......864..233333333..
+seq67          -CAACACGug...auGUACAUUGUUGUG..................GUUGGUCGuga.....agu----UG-CAACG-
+#=GR seq67  PP .****98787...663334444555555..................66665544664.....322....11.22222.
+seq68          UGCAGAUCc.....u-AUGAUCCGAAAA..................CUGCCUCGa........ag--CAU-UUCGU--
+#=GR seq68  PP *****987*.....5.556677888889..................****97658........53..322.22333..
+seq69          AUACAACAgu...ca-CGGACAAUAUAA..................UGUAAGGGcu......gaa-UGUUUAUAUA--
+#=GR seq69  PP 9999987798...84.445566777777..................9999876699......984.3333333333..
+seq70          CCGAUAAC......cGUCUUGUUCCUUU..................AUCGUCAAuu.......ca---CAGAGGAC--
+#=GR seq70  PP *****987......*5566677888889..................****987697.......43...33333333..
+seq71          GCGGAGACc....gu-CUUUCACACCUU..................UCCGAACCga......ugu----GAGGGUGG-
+#=GR seq71  PP *****9879....95.455667777778..................****9877*8......643....33344444.
+seq72          -UGCCCACca..aua-GAUUAGGACGUG..................GGCAC-CGcgc.....ucc----AGCGUCU--
+#=GR seq72  PP .555555569..963.333333444444..................55555.44798.....643....2222222..
+seq73          UCCGUGA-g.....a-A-CG-UGCUUAG..................ACGGGCGUu........cc-A-GUGAAAGCC-
+#=GR seq73  PP *****86.4.....4.4.33.4666667..................****9877*........85.3.334445555.
+seq74          GAUUUUGGca...ga-CAAGAGCUUCGC..................AAAUGGCUca.......au---UGAUGAAGC-
+#=GR seq74  PP *999997798...85.444556666667..................9999987797.......53...344455555.
+seq75          -CGCGGCU......c-UGAGAUUUAUUC..................CGCGCCUAca.......au---CAUAUAA---
+#=GR seq75  PP .9999876......7.345566777778..................9999876596.......43...2222233...
+seq76          -UAUCGUGcau.gcc-GGACCGUAUUCC..................GAUAAGC-ga......cua---UC-AUACA--
+#=GR seq76  PP .7777665788.763.333333443334..................7777655.68......643...22.22333..
+seq77          -AAUAAUCg.....c-UUCGGCCACGAU..................UAUUGAGCcuca...guag---CUCGUU----
+#=GR seq77  PP .88887779.....5.556667777777..................88888765**98...6532...222222....
+seq78          -CGGGGAGca...gu-AUUAAGAGGGCA..................CCCGAAAAgca.....cgg----UCCCUC---
+#=GR seq78  PP .****98799...85.445566666667..................****9876*86.....432....222222...
+seq79          CGCAGGCUa.....a-CGGUAUGGGUCA..................CUGCAUCCc........ua---UCCACCC---
+#=GR seq79  PP *****987*.....5.566778888889..................****97657........53...2323233...
+seq80          ACUGGAG-a.....u-G-CUG-AUCAGA..................CCAGGGAAac......guc--CUG-CUGAUA-
+#=GR seq80  PP 9999975.4.....4.3.334.444446..................9999887699......864..222.233333.
+seq81          AACCUCAAc....cg-GGAAGGUUGGCC..................AGGUGGGGag......cug--CUUCGGCCAC-
+#=GR seq81  PP 999998779....85.444556666667..................9999887699......974..3334445555.
+seq82          -AAAUAAAc....cu-CUAUCUCCGUAU..................AUUUAUG-cac....ccuc---UUCG-GAG--
+#=GR seq82  PP .77777668....95.445556666666..................7777765.6*9....7543...2222.222..
+seq83          UAUCACC-u.....u-CCC-CAGCAUGU..................UGAUCUUAcua.....cuc---CCGCCAUGC-
+#=GR seq83  PP *****76.4.....5.444.46777778..................****8776***.....864...233344444.
+seq84          CGGGUCGA......gCC-GUAAGCGUGA..................ACCCAGGGgau....acua--GCGCA-CGCG-
+#=GR seq84  PP 99999876......744.4567888888..................99999876999....9864..22333.3333.
+seq85          GCUUCC-Gc.....g-C-CG-UUUCAAC..................GAAGGAUGgg.......ug--CGG-UUGAAG-
+#=GR seq85  PP 888886.45.....4.3.33.3444445..................8888776587.......43..222.233333.
+seq86          CGAGUCU-c.....a-U--GA-ACUCGC..................ACUCAGCAcg......uau----CUGGAGUG-
+#=GR seq86  PP 9988864.4.....3.2..23.333335..................8888876697......532....23334444.
+seq87          -UAACACCa....caGU-GUUGCCUUAG..................GUUAUCGCuug....cgug------GAAGGG-
+#=GR seq87  PP .****987*....9644.4566888888..................****9876*97....6432......222222.
+seq88          CCCAUCCA......aUUCCAGACCGUGU..................AUGGUGUGau.......gc-AGAUA-ACGGG-
+#=GR seq88  PP *****987......95566777888888..................****9876**.......85.33333.34444.
+seq89          GAAACACA......uCC-UCUUCGUAGU..................GUUUAUGUg........uu--CAAUACGA---
+#=GR seq89  PP *****976......844.4566777778..................****97668........64..22222222...
+seq90          AGCUCGUC......gGAU-GUUUGUCCG..................GAGCGCUCcg.......cc-AG-UAUGGACG-
+#=GR seq90  PP *****987......8554.456777778..................****9876**.......85.33.33444444.
+seq91          -GUAUGAA......u-CCAG-UUGUUUG..................AUACUCGAaaug...gcac----CAA-ACA--
+#=GR seq91  PP .****976......6.4444.5666667..................****9877**98...6432....222.222..
+seq92          -CGCGGUUu.....cUAGCCCAAUGACC..................CGCGGCC-aua....ggaa-----ACUCAUC-
+#=GR seq92  PP .77776668.....95666666666666..................7777765.5*9....7642.....2223333.
+seq93          AUGAAAGA......cAUGGUGAGCUACG..................UUCAAUCGac.......ug--GUUCAUAGCU-
+#=GR seq93  PP 77777665......84555566666666..................7777655477.......53..2333334444.
+seq94          -GGCAAUAc.....aGACUCUGUAGCUU..................UGCCCC-Gga......cga---GC-GCUAG--
+#=GR seq94  PP .66665557.....95555544555544..................666654.468......643...22.22333..
+seq95          -CACCUUC......g-UUUU-AACACUU..................GGUGGACCauc....ugag-----GAGUGC--
+#=GR seq95  PP .****875......6.4444.5666667..................****9887**8....6532.....222222..
+seq96          AUAUCGCCgu..cug-CUCACAGAUUUG..................GAUAGGCGg.........u-GCCCAGGAAUCA
+#=GR seq96  PP *****98799..994.555667888888..................****9887*.........5.5667789*****
+seq97          -GCAUCUAa....uuAAAUCUAUCUAUG..................AUGCCAC-cuu.....aag---CACAGAUG--
+#=GR seq97  PP .66666657....984444455555555..................6666554.599.....643...23333333..
+seq98          -GAAGUAAc....aaGUCAUGUGAAAAA..................CUUCUUA-aca....gcug-----CGUUUCC-
+#=GR seq98  PP .88887768....985555666777776..................8888765.5*8....7542.....2222222.
+seq99          CUCUAUC-cc...gg-C-AAGAGUUCUU..................UAGAGUAUgg.......cg--GGUU-GAACU-
+#=GR seq99  PP 5555555.69...73.3.3444555555..................5555555579.......64..3333.33333.
+seq100         AAUGAAAUa.....c-CGCUCUAUUCAA..................UCAUACAAug.......uc-UCUU-GGAAUU-
+#=GR seq100 PP *****987*.....5.566678888889..................****9877**.......85.3333.445555.
+seq101         CUUUGCGU......aGUGUCGUCACGAC..................CAAACUGAuu......aug--CUCC-ACGUG-
+#=GR seq101 PP *****877......*5667778888889..................****9776**......853..3333.34444.
+seq102         -AUCCGUCc.....uGACCUGUAGAAAU..................GGAUUUGUucuu...guag--CUU--CUU---
+#=GR seq102 PP .****988*.....*5666777888889..................****9876**98...7532..222..222...
+seq103         AUCUCGCAu.....aGCUCAACCUAUAU..................GAGAAAAGuc.......cu-GCGUG-AUAGU-
+#=GR seq103 PP *****988*.....95556677888888..................****9877**.......85.33343.34444.
+seq104         CGAACU-Cuu...ucGCACCA-ACUACG..................GUUCGGGGcgu.....uau----CGAUAGUC-
+#=GR seq104 PP 555554.469...86333444.444444..................555554447*8.....653....23333333.
+seq105         AAUCUCGAa.....c-UCUCCGACCGCG..................AGAUACUAuc.......cg---UAGAGCGGA-
+#=GR seq105 PP 999998779.....5.455566777777..................9999987697.......54...333344444.
+seq106         -GUCUAGC......aGC-CAGAGUCGAA..................AGACAAGAuauca.aucca---GCGACU----
+#=GR seq106 PP .****876......744.5567888889..................****9876****9.87532...222222....
+seq107         ACCUAGAU......aCU-UGGUCACUGC..................UAGGGUAGcg.......uu---CUGACAGUG-
+#=GR seq107 PP *****976......844.4556777778..................****9876*8.......54...333444444.
+seq108         CGAAACCC......uGAU-GAGAAACCC..................UUUCAGCAug.......uu---CCC-GUUUC-
+#=GR seq108 PP 99999876......8444.445666667..................9999876586.......42...222.23333.
+seq109         -GAGAUUC......cUAGUUUGAUUGCA..................UCUCCAGUcac.....gaa---GCAAUCA---
+#=GR seq109 PP .8888777......95666667777777..................88887766*98.....643...2223233...
+seq110         UAACUCCAg.....c-UUCUGGAACUGC..................AGUUGAAUg........ga--UUUCAGUUG--
+#=GR seq110 PP *****987*.....6.444556666668..................999998769........64..334443444..
+seq111         -AAAAAUCcu...gu-GUUACGGAGUUA..................UUUUGAUUggu....cccu--AUU-ACUCA--
+#=GR seq111 PP .655555569...95.445566777778..................****9887***....9753..222.22333..
+seq112         UAUCGGGA......c-AUG-UUCAGUGG..................CGAUUGAGcg......uca--CAGGACUGA--
+#=GR seq112 PP 99999865......6.433.45666667..................9999877699......864..222222333..
+seq113         -UUGCGGC......gUACCCUUCCCCGC..................GCAACUCGuauc...aaug-----CUGGGG--
+#=GR seq113 PP .8888876......95566677777777..................88887665**98...6432.....222222..
+seq114         CGUUCCGU......cGAUUCACCCAGGG..................GAACUCAUc........cu--CAUU-CUGGC-
+#=GR seq114 PP *****977......*5666778888889..................****98779........74..3332.33333.
+seq115         -ACCUGUAgac.cgg-CAGUGACAUAGC..................AGGUCCCUgca.....aau----AAAUGUA--
+#=GR seq115 PP .7778776798.874.334445555555..................77777665*97.....543....2222222..
+seq116         -AAUGACCac..cggGUCAGGGCUCAGU..................CAUUGAC-gg......ucg--GUAGAGCA---
+#=GR seq116 PP .666665568..8763333333444444..................6666655.59......753..32222233...
+seq117         UAUAAGGCa.....c-GAAUAAGGGGCU..................UUAUGACCga.......gu--C-CUACCCCG-
+#=GR seq117 PP *****987*.....6.445677888889..................****9877*8.......53..3.33344444.
+seq118         CUCCCGCU......c-UCG-CUGUACCU..................GGGAAAGGca.......cg--CCGAAGUACU-
+#=GR seq118 PP *****865......5.443.46777778..................****9877**.......75..3344455555.
+seq119         UCCGGAAUu.....aGACGUUAUUUCUC..................CCGGUUCCug......aag-CCUCA-AGAAA-
+#=GR seq119 PP 999998779.....95566677888888..................9999977699......985.33333.34444.
+seq120         UGAGCGUU......gCGC-AAGUGCCGG..................GCUCCUCCuu.......cg--C-GG-CGGCC-
+#=GR seq120 PP *****976......8444.445555557..................****976697.......43..2.22.23333.
+seq121         -UCGGACCau...uaGUGCAGCCGAAAA..................CCGACGCGc.........a-CA----------
+#=GR seq121 PP .****87687...764444555555556..................777766546.........4.22..........
+seq122         CCAUUGCG......cAC-GGUCUUUUAG..................AAUGAAGAau.......ac-AGGU-UUAAAU-
+#=GR seq122 PP *****986......844.4567888888..................****9876**.......85.3333.344444.
+seq123         -UCCCGGU......aGAA-CAAACACAG..................GGGACGAGagaa..cuuag-------CGUGU-
+#=GR seq123 PP .****976......8555.456777778..................****9876**98..75422.......22222.
+seq124         UUUAUCUA......c-GGA-CUGCUACA..................AUAAGUUUaa......ggg--GUUGCCUAGC-
+#=GR seq124 PP *****875......6.344.45777778..................****9876**......*74..4444555555.
+seq125         UCGGUGUGg.....c-CUCUUGGAUCAA..................ACCGUCCCgcu.....agu---UAAAUGAUC-
+#=GR seq125 PP 999999889.....5.455667888888..................99999876999.....754...334444444.
+seq126         CAAUUGGAg.....a-GUUCGCCACCCG..................AAUUUGUCcg.......ac--GGG-CGGUGC-
+#=GR seq126 PP *****9879.....6.445566777778..................****9876*8.......64..223.333333.
+seq127         -CACCGUAg....agACGAAAAGGUGGC..................GGUGUUC-aug.....aaa----GCACC----
+#=GR seq127 PP .66666657....974444455555555..................6666554.576.....432....22222....
+seq128         -CUAUAUCg.....cGGGAAUGCGGGAU..................AUAGC-UUaca....uggg----UAUCCGCC-
+#=GR seq128 PP .55555556.....94444444444444..................55555.557**....8653....33333333.
+seq129         CUGCUUGUg.....cGUGAUACCCAUGU..................AGCAAAUCgug.....ccu--GCGCAUGGA--
+#=GR seq129 PP 999998769.....95566677777778..................99999876999.....964..223333333..
+seq130         UCACAGCCu.....uGACUCGUCGCAUA..................UGUGUAUAa........gg---UCCUGCGC--
+#=GR seq130 PP *****988*.....*5666778888889..................****98658........53...33333333..
+seq131         UAACUGAAu.....a-GUUGCUUAUAAU..................AGUUCUGGg.........c-AGGCA-UAUAU-
+#=GR seq131 PP *****988*.....6.556677888889..................****97769.........6.33333.34444.
+seq132         CAGAGAUAc....ca-GAUAUAAGCAUC..................CUCUCGCCcc......agg---UCGAUGCUG-
+#=GR seq132 PP *****9879....96.445566777778..................****9876**......753...334444444.
+seq133         UUCUACAGaa...ca-UCGUUACCGAUU..................UAGACCGUag......gug--G-CCGUCGGG-
+#=GR seq133 PP *****98799...95.556677888888..................****9877**......853..3.33344444.
+seq134         AAUCGAUAg....ca-UUACCCUGAUGC..................CGAUACCGg........uc-UG-CUAUCAU--
+#=GR seq134 PP *****9879....96.444456666667..................****98769........74.33.3333444..
+seq135         -UGCAGUUu.....u-CUAGCUCUAUAC..................UGCAUAG-cga.....uau----CGAUAGC--
+#=GR seq135 PP .88887768.....6.455666777777..................8888765.597.....543....3322222..
+seq136         GUGAAGAAga...uc-UAUAGAAUGUCU..................UUCAGUGAgg......cua-AAUUA-ACAUU-
+#=GR seq136 PP 9999998798...85.445566777777..................9999876699......984.34343.34444.
+seq137         -CCUAUUAc....auCAGUGCUCUGCUU..................UAGGAACUcgugg.uugaa---UGCAGA----
+#=GR seq137 PP .****9889....995566677888888..................****9887****9.86532...222222....
+seq138         CUGCGCUCg.....u-UCCGGGUACGCC..................CGCAUGAUc.........c-GGGGCG-UAA--
+#=GR seq138 PP *****987*.....5.556667777778..................****98769.........5.333333.333..
+seq139         GAGUUGGA......uCCC-CGAUAUCUG..................AACUACGUaa......ugc---UGAAGAUAU-
+#=GR seq139 PP *****976......8444.566777778..................****9887**......753...344445555.
+seq140         -UGGACCGc.....u-CGGUACAUUCCU..................UCCAGAACggu....gcgu----GUGGAAA--
+#=GR seq140 PP .****988*.....5.556677888889..................****9876**9....7532....2222333..
+seq141         -UUCUCGUc.....cGU-CCUGUAUAUG..................AGAAGGC-cu......gag--G-G-AUAUAU-
+#=GR seq141 PP .66665557.....644.4444555555..................6666554.69......743..2.2.233333.
+seq142         UAGGAUUAa.....cGACCCGUGGAGGC..................UCCUCAUGgag....cggu--GU-CGCUCCU-
+#=GR seq142 PP 777777658.....74444555555555..................66666554666....6542..22.2222222.
+seq143         -CUGCUACu....ggCGGUAACGGUCUA..................GCAGAAGUca......ugg----GCACCGU--
+#=GR seq143 PP .88887668....984455556666666..................88887665*8......643....2222333..
+seq144         -AAGACCA......uUUCCGUCGACUCG..................UCUUGCA-agg.....ggg----AU-GUCGU-
+#=GR seq144 PP .8888777......95666677777777..................8888766.597.....543....22.22222.
+seq145         GUCCCAAGu....gc-GUUGACCAUUCC..................GGGAAUGAc........ac---UCAGGAAUG-
+#=GR seq145 PP *****987*....95.556677888888..................****97658........53...233444444.
+seq146         AACUGUCC......cAUC-CUAACUUGC..................CAGUCCUGcg......uga--C-GAAAAGUG-
+#=GR seq146 PP *****986......8554.567887778..................****9877**......853..2.33344444.
+seq147         -CAGAAUAcu...caUUCGCUUACUUGU..................UCUGC-GUcau....gcaa----C--AAGUG-
+#=GR seq147 PP .555555569...973444444444444..................55555.55797....6432....2..22222.
+seq148         -CGUAUUC......aAA-GA-GACGUUA..................UACGAGCUcc......aag----UCGUCC---
+#=GR seq148 PP .9999876......644.44.4555557..................9999987697......532....222233...
+seq149         -GUUAUCUg.....uUAGUGGUAUAUAA..................UAACAAUGaag....ugca----UGUAUAU--
+#=GR seq149 PP .88887668.....95666777777777..................88887665**9....7532....2222222..
+seq150         UGAACUCGa....au-GCCUCCGGAGCC..................GUUCCCUUag......gug----UACCUCCU-
+#=GR seq150 PP *****9879....95.555667888888..................****9877*8......643....23333333.
+seq151         UAGAUGAG......a-UCG-GCGAGUUU..................AUCUUGAAa........gc-ACCCUAUACUCU
+#=GR seq151 PP *****875......6.444.46777778..................****9876*........*5.5566789*****
+seq152         -UACGCUUa.....a-UCGUUCAACUCA..................CGUAGAGAuca.....cua-----GAGUUC--
+#=GR seq152 PP .****987*.....5.555667888888..................****9876*86.....542.....222222..
+seq153         -ACAAGCAag..gccCAACAAUGUGCUC..................UUGUUCGUcu.......cg--AUUCACAU---
+#=GR seq153 PP .888877688..8873444455555555..................8888766598.......53..33333233...
+seq154         AAGCCCGGa.....u-UAAACGCGGGCU..................GGCUAUC-cg.......ga---UGCGUC----
+#=GR seq154 PP *****8769.....5.334455666667..................8888765.46.......42...222222....
+seq155         CCAUUGCCc....ucAAGAUAGGUAACU..................AAUGUUCCggc.....ggu--AUC-GUUACA-
+#=GR seq155 PP 888888768....884555566777667..................88888765888.....753..222.233333.
+seq156         AGCUCUAGg.....a-GCGUUCAAUCGA..................GAGCAAUAu........gc--GAUGAGAUU--
+#=GR seq156 PP *****988*.....6.455667887778..................****98769........63..334444444..
+seq157         CUUACUG-u.....u-GG-CC-UCGAUU..................GUAAUUGGcc......ccc-AGCC-UAUCGC-
+#=GR seq157 PP 9999975.5.....4.33.33.444446..................9999877699......985.3333.334444.
+seq158         -UCCAUUGa....aaCACUGUGGCAAUA..................UGGACGC-aga.....cca---UUAU-GCCU-
+#=GR seq158 PP .55555556....*84555555555555..................5555544.6*9.....643...3333.3333.
+seq159         GUCUAUAG......gUA-UGAGCAGGAA..................UAGAAGUUgc......aag---UCGCCCUGG-
+#=GR seq159 PP *****976......844.4567888888..................****9877**......854...333444444.
+seq160         AGUCAACCu....cuGAU-CCGAGUUCU..................UGACGGUUaa.......ua--GU-GCAAACU-
+#=GR seq160 PP *****9879....96444.455666667..................****9877*8.......53..33.3344444.
+seq161         CCAAACAAu....cg-UAGUAUCGUAAC..................UUUGUCAUuc.......ua--C-GGUUUACG-
+#=GR seq161 PP *****988*....*5.556678888889..................****9887*8.......63..2.33344444.
+seq162         -AGAAGGCu.....c-CUCUUUGAGGUA..................UUCUGCUGcuac..acgag----GCCUCA---
+#=GR seq162 PP .****987*.....5.556678999889..................****9877***9..86532....222222...
+seq163         UUGUAUCU......cGACGUAGUCUUCC..................UACACGCUcg......ucu--AACCA-AGAC-
+#=GR seq163 PP 99999877......95556667777778..................9999887699......864..22222.3333.
+seq164         AAGCAGUCuu...aa-UCGCAAUGUCCU..................UGCUGGCCca.......ua-ACUUG--ACAA-
+#=GR seq164 PP *****98799...94.455566777777..................****9876*8.......63.33333..3333.
+seq165         UACUCGCU......gAUCCAUGGAGAUU..................GAGUUUACaaa....ugcu--CAC-UUCUCU-
+#=GR seq165 PP 99999987......95556677888888..................99998766999....9864..222.233333.
+seq166         GCGAGGUUa....ca-CGACUUCGGGAU..................CUCGACAAaac....aaau--GCUA-UCCCA-
+#=GR seq166 PP 999998879....95.455566777778..................99998876999....9853..3333.33333.
+seq167         AAAAUACU......g-UGCUAUUCAAGA..................AUUUAGUUaaa.....gaa--G-AGAUUGAC-
+#=GR seq167 PP *****875......7.455667888888..................****9877***.....853..3.33444444.
+seq168         CCCAGGCAu.....c-CGUGUGGAGACG..................CUGGAAGCaag....guaa--C-GAAUCUCC-
+#=GR seq168 PP 999999879.....5.556677888888..................99999876999....9853..3.33444444.
+seq169         UGGGGGCG......aGA-AU-UACCUGA..................CCCCUACAu........aa--AAUCAGGUU--
+#=GR seq169 PP *****876......744.34.4555557..................****98779........74..333333333..
+seq170         AUUUUUUGa.....u-CACGGGAAAUGA..................AAAACA-Cg........cu-GCUUUA-UUU--
+#=GR seq170 PP *****9879.....5.444444555544..................555554.46........74.333333.333..
+seq171         CGAAGAAAc.....a-CAGGCCAAAAGA..................CUUCACCAgc.......ac---AUAACUUUG-
+#=GR seq171 PP *****987*.....6.444566777778..................****9887*7.......53...334445555.
+seq172         -UAGAUUA......c-C-CUC-AGAAAA..................UCUACAUCac.......ac---UCCUUCU---
+#=GR seq172 PP .9999865......5.3.333.444446..................9999876596.......53...2222222...
+seq173         UGUCCCU-g.....g-CG-AGCGCUG-C..................GGACUUUAau......gcu--CCUUAGCGA--
+#=GR seq173 PP 8888865.4.....4.33.3334444.5..................8888876588......853..333333333..
+seq174         CGCAGCCAu.....a-AUGCUCUGCUGC..................CUGCUGAAa........aa-UGUUUAGCAG--
+#=GR seq174 PP *****9879.....6.444556666668..................****9876*........95.4444444444..
+seq175         GGCGUUAC......gUUG-GCGGGAAUU..................ACGCUUGGauc....cuaa----AAGUUCCG-
+#=GR seq175 PP 99999876......7444.455666667..................99998765999....8642....22233333.
+seq176         ACUUGAGAu.....cGUGUAGGCAACCA..................CAAGAAGAugc.....gcg--GCG-CGUUGU-
+#=GR seq176 PP 999998779.....95555666777777..................99999876999.....853..333.334444.
+seq177         -UGGCUGC......uCUC-CUAUAGUUG..................GCCAAACUgcccc.aucca-----CACUAA--
+#=GR seq177 PP .****976......8554.456777778..................****9887****9.86432.....222222..
+seq178         -UUCGGGAgu...cc-AAAUGUGUAUAC..................CGAAGU-Gaa......cuc----AA-AUACC-
+#=GR seq178 PP .666655569...84.445555666655..................666654.467......543....22.22222.
+seq179         AUCAAUAGg....uu-GGUGGCGGACAA..................UUGAGUUAga......ccg--C-ACAGUCCU-
+#=GR seq179 PP *****987*....95.556677888888..................****9876**......853..3.33344444.
+seq180         -ACGGUUAaa...ucUAGUAGUCAUUAA..................CCGUCCU-ugc.....gca----CA-AAUGC-
+#=GR seq180 PP .777776679...985556666666666..................7777665.597.....543....22.23333.
+seq181         GCUAGUUCgg...cg-AAAGUAACAUUU..................CUAGGCCUacc....gaug--GCUC-AUGUC-
+#=GR seq181 PP 9999988799...94.555667777778..................99999877999....9853..3333.33333.
+seq182         GCUUCGGGcu...cc-AUCAUCCGCACG..................GAAGUGCUc........ua-AGUU-AUGCGC-
+#=GR seq182 PP 9999998798...84.445566666667..................999998779........84.3333.444444.
+seq183         GUCUGUAUc....ca-CGUAUUAGGCGC..................CAGAGGUGuu......ugg--AC-UUGCCUC-
+#=GR seq183 PP 999998769....85.455566666667..................9999887699......853..33.3344444.
+seq184         CGUUCCAC......gCC-GGUCAUUAGG..................GAACAACAac......ucc--U-GUCUAAUU-
+#=GR seq184 PP *****876......744.4567777778..................****9887**......863..2.33344444.
+seq185         -GACGGUAg.....gUUCGGAUAUCUAC..................CGUCGUU-gu.......gg---CG-AUAA---
+#=GR seq185 PP .77776668.....95555566666666..................7777654.67.......43...22.2222...
+seq186         GUGGCGCGug...ga-GAUCAACCGCGG..................GCCAAACAuaa.....gua---GCC-GCGGA-
+#=GR seq186 PP 9999998798...85.444566777777..................99999876998.....753...222.23333.
+seq187         -CUCAGAAu....ug-UAAUUGAAUGCA..................UGAGCGGCac.......gc---UGCAUU----
+#=GR seq187 PP .****988*....95.455567777778..................****976596.......43...322222....
+seq188         CCAUAAUCg....aaACGCAAUAUUUCC..................UAUGCAAGg........aa-AG-UACAAAUG-
+#=GR seq188 PP 888887668....874445556666666..................888876658........63.22.23334444.
+seq189         AUCACAAAu.....a-GCUCGCAAGGUU..................GUGAGUUUgugg...uguc---C-GGCCUUA-
+#=GR seq189 PP *****9879.....5.455667777778..................****9876****...8653...2.2233333.
+seq190         ACAGACC-u.....g-CGU-ACUCUCUC..................UCUGAAUUgc.......aa---UUUCGAGAU-
+#=GR seq190 PP *****86.5.....5.444.45666668..................****9887*8.......53...333444444.
+seq191         -CUAAACUg.....u-UCGACUACUUAU..................UUAGAACAca......gac--C-UUAGUAU--
+#=GR seq191 PP .99998769.....5.555566777777..................8888776599......743..2.3333333..
+seq192         AGUCACUGuc...ag-AAAGCCACGCCA..................UGACCGAGgug.....agu---CCGAGCGUG-
+#=GR seq192 PP 9889987688...74.444455666666..................88888765888.....753...233334444.
+seq193         ACCGGUCU......aCUGUCGAGCAAGC..................CCGGCGAAgg.......ug---UUAGUUGCA-
+#=GR seq193 PP *****987......*5666778888889..................****9876*8.......64...333344444.
+seq194         CCAAAAAA......g-ACA-AUGGUGAA..................UUUGUGUGc........cu--GCG-GCACCC-
+#=GR seq194 PP *****865......5.544.56888888..................****98769........64..322.333333.
+seq195         AAAUUCAGg.....g-CCCACGAGGACG..................AAUUCGAGgaa....acga--C-GGUGUCCU-
+#=GR seq195 PP 999998779.....5.445556666667..................99998766999....9753..2.22333333.
+seq196         GUCAGCCU......uAAUCCAAGGCUAA..................CUGAUACAc........aa--UUU-UUAGCU-
+#=GR seq196 PP *****987......*5666788999999..................****98769........64..333.334444.
+seq197         AUGGCUUC......uCACUCAUUAGAUC..................GCCACGUUgg.......au--G-CCUUCUA--
+#=GR seq197 PP *****988......*5666778888889..................****987697.......43..3.2333333..
+seq198         CGGUCAC-a.....u-AC-CGUUCUU-C..................GACCUUCGug......ccc-GGGUUA-AGAG-
+#=GR seq198 PP 9999975.4.....4.43.3434444.6..................9999877699......985.333333.3333.
+seq199         -GUCCUUAgc...gu-CAUUGGGUGUCG..................GGACUGUCu........ca-A-GUUAGACACA
+#=GR seq199 PP .****98899...95.444556777777..................****9876*........74.3.3445566666
+seq200         -GGAUUUA......aAC-CAACAGGGGA..................AUCCUGUGau......ugc---GCCUGC----
+#=GR seq200 PP .9999877......744.4556777777..................9999877698......643...222222....
+seq201         AUCACUCA......a-G-GGG-CAUUAA..................GUGACUCAug.......uu--AGUCAAUGU--
+#=GR seq201 PP *****864......4.3.334.555557..................****9876*9.......64..333333333..
+seq202         -AAGUUAGuu...cgGACGGUGUCUAAA..................ACUUCGC-uc......aau----AGAC-----
+#=GR seq202 PP .777776689...984555555555555..................7777655.57......532....2222.....
+seq203         CCGCCGUC......gUC-GGACUCCGAG..................GGCGAGCUu........au--GAACGGAC---
+#=GR seq203 PP *****986......744.4567777778..................****98769........64..32222222...
+seq204         AAGCAGG-c.....g-UGUCG-CGAGCU..................UGCUGACAuug....aaca----CGGGCUCC-
+#=GR seq204 PP 8888875.4.....5.44444.555556..................88888766***....8642....23334444.
+seq205         GAAUAAAGu.....c-CCCGCAUCCCUU..................UAUUAAGGaggu..agaua--A-A-UGGGAC-
+#=GR seq205 PP 999998779.....5.555667777778..................999988769999..98642..2.2.223333.
+seq206         -UGCCUUGc.....c-CGGCCGACGCAA..................GGCACCUGccgc...auug------UGCGUC-
+#=GR seq206 PP .88888779.....6.444555666667..................88888765**97...6432......223333.
+seq207         -AUGCCUAc.....g-AACUUACCAACG..................GCAUCUU-cgu.....gug-----GAUUGGG-
+#=GR seq207 PP .77776668.....5.556666777766..................7777654.697.....643.....2222222.
+seq208         CAUAACCCc....ga-AUACCUUAGGCA..................UUAUCGCGug......aug--GUACA-CCUA-
+#=GR seq208 PP 999998769....85.444556666667..................9999876699......753..33333.3333.
+seq209         UCUGUAU-u.....c-AU-GG-CCGACG..................ACAGUCCGu........ca-UGGUC-GU----
+#=GR seq209 PP **99975.4.....4.43.33.555556..................999998768........53.22222.22....
+seq210         GAACGCAU......cCAAU-GAUAUAUC..................CGUUAGGCg........uc--CGUCU-AUA--
+#=GR seq210 PP *****976......85554.56777778..................****97658........63..33322.333..
+seq211         GUGACCUU......cGAUGUAUCUCCAA..................GUCAUAUGc........ug--CGCUG-GAGU-
+#=GR seq211 PP *****987......*5666778999889..................****98769........64..33333.3333.
+seq212         AGUGCUGCu.....aGUCACAUCGUAGG..................GCACCCUUu........ca--AUG-GUACGU-
+#=GR seq212 PP *****987*.....95566677888888..................****98769........64..333.334444.
+seq213         GAUGAUG-g.....u-AAU-UCGUGGUU..................UCAUAGAGcug.....aca---AACACCAU--
+#=GR seq213 PP 8888865.5.....5.333.45666666..................88887665887.....532...22222333..
+seq214         UGCGCUA-u.....u-AU-U-GGCAGAU..................GCGCUAGUu........ga--CGUC-CUGCC-
+#=GR seq214 PP *****85.5.....4.43.3.3666657..................****98779........74..3333.23333.
+seq215         GUCCUACUa....cg-GUGACACGGAAG..................AGGAAAACacg....ucag--AGUAGUCCGC-
+#=GR seq215 PP 988887768....85.344556666667..................88888765888....8964..3334444444.
+seq216         --CACACG......aGC-AAAACCGGCC..................GUGUACGAc........cu--CA-GAUCCGGG
+#=GR seq216 PP ..888765......744.4556777777..................988987658........53..33.33444444
+seq217         UUGGCGAAa.....a-UACUCGAACGAA..................GCCACCUCcua.....aau----ACCCGUUC-
+#=GR seq217 PP *****988*.....6.445566777778..................****9876**8.....643....22333333.
+seq218         ACCUCCUC......uGCG-UCUGAUCAA..................GAGGACUCgu.......uc---UUAUGAUCU-
+#=GR seq218 PP *****987......8555.567888889..................****9876*8.......53...334444444.
+seq219         -CUAUGCUuc..cgaUUGGGCCUGUAAC..................AUAGCAU-ggu....uacg----GGACAGG--
+#=GR seq219 PP .777766579..8873444444555545..................7777665.5*9....7542....2222333..
+seq220         -GCCUUUUu....gu-UAUUUAUUUCUG..................AGGCAAUGua......agc---UGCAGAAG--
+#=GR seq220 PP .****987*....95.556677888888..................****9877*9......754...33333333..
+seq221         UAUCCGA-u....ug-GGGUAUGUGCAA..................GGAUAUGGgc.......au--A-GCACA----
+#=GR seq221 PP 6666665.5....96.444455666656..................6666554466.......43..2.22222....
+seq222         AGGGGAA-uguagug---A---------uuuaca......cuacccCCCUAA--au......auu----UGUGUA---
+#=GR seq222 PP 6666654.5877542...2.........223334......444433444444..44......542....222222...
+seq223         AAAGUCAC......u-UUUG-AUGUGUA..................ACUUGCCAg........cc--CACC-CACAC-
+#=GR seq223 PP *****865......5.4444.5666668..................****98769........74..3232.33333.
+seq224         ACCGUGGC......aCUAAC-GUGUCGU..................ACGGGCAUcc.......uc-AGCUC-GACA--
+#=GR seq224 PP *****977......844444.4555557..................****9887*9.......74.33222.2333..
+seq225         GUUCACG-c.....u-C-CUG-GGUCUC..................UGAAUUGUgc.......ac---CUGGGACCG-
+#=GR seq225 PP 9999964.5.....4.3.333.555556..................9999876697.......53...333444444.
+seq226         --AAACGGa....ac-AA-GAACAUUCG..................UUUUUGAGgu......agg---GUGCCUGUUG
+#=GR seq226 PP ..6665558....74.22.222333322..................2222222236......642...2333444444
+seq227         -CAAAUUAu.....c-UCAGCAUUGACA..................UUUGCGG-acg.....aua-----AACAAUG-
+#=GR seq227 PP .77777778.....5.555666666666..................7777665.697.....643.....2233333.
+seq228         UGUAGUCCc.....u-CCCAAGAAUAGA..................CUACCCUCgc......aca---CCGAUAUUG-
+#=GR seq228 PP *****9879.....5.556667887778..................****9876**......853...334445555.
+seq229         UGCAACAG......gUAG-UACGGAUGG..................UUGCCCCAgcu....uacg---GAAACAUCG-
+#=GR seq229 PP *****876......8555.456777778..................****9876***....*753...334445555.
+seq230         UGCGCCUU......aGAAC-UUAGAGUG..................GCGCCCGGagu.....uag----CACCUCUC-
+#=GR seq230 PP *****876......85554.45666668..................****9876**8.....642....22333333.
+seq231         -AGUCCCAa.....u-CAAGUAACACCG..................GACUCAAAcgc.....ucg---UUGUGUA---
+#=GR seq231 PP .88887779.....6.445566777767..................88887765*98.....532...2222233...
+seq232         UAAGGU-Cau...aa--GUCACGGGAUU..................CCUUAACUgca.....auu-----CAUCCCG-
+#=GR seq232 PP 555555.469...63..34444444444..................55555555786.....533.....3333333.
+seq233         -UCAGCUGuu...guGGGCCUUUUCCGG..................CUGAAAA-cg.......ca---UC-AGAAA--
+#=GR seq233 PP .666655579...873444444444444..................6666554.67.......43...22.23333..
+seq234         AGGACGUU......u-UCA-UCUAAUAA..................GUCCGUAGca.......cu--G-GAUUAUUG-
+#=GR seq234 PP *****875......5.444.45666667..................****9876*8.......64..2.23344444.
+seq235         GAUCUGAA......cUU-UAAAGGCUGC..................AGAUAAUGug.......gu--UUCUAGCCA--
+#=GR seq235 PP *****987......844.4567888888..................****9877*9.......64..223333333..
+seq236         UCCACCCAc.....uGGGUGCUUGUAUC..................GUGGCUCGcc......ucc--A--GGUACAA-
+#=GR seq236 PP *****988*.....95566677888888..................****9876*8......742..2..2333333.
+seq237         AUUUAGC-ca...ac--CUGCCGCUAGC..................UAAAUCACga.......gc---CUGC-UAGG-
+#=GR seq237 PP 6666655.59...63..34444555555..................6666555477.......53...3332.3333.
+seq238         AUUUCGGAc.....aCCCUGAAGACAAA..................GAAACCAUcuac...guuc---UUUGUGUCC-
+#=GR seq238 PP 999999879.....95566778888888..................999998769999...9853...233344444.
+seq239         -UGUUGCGa.....c-GGACACAUGUGA..................AACAGGCAuaagcgacuuu-----CACAUC--
+#=GR seq239 PP .***99879.....5.455567777778..................9999987699999875432.....222222..
+seq240         -GGCUAACg.....g-UGAACGACGCUA..................AGCCGAUGgcca...agcu------AGCGUC-
+#=GR seq240 PP .****987*.....5.555666777778..................****9877**97...5432......222222.
+seq241         CCGUAGGUu.....c-AAUGUAACUAAU..................UACGAAUGca.......aa--A-A-AUAGUA-
+#=GR seq241 PP *****987*.....5.566778999999..................****987697.......53..2.2.233333.
+seq242         UGAUGCAAu....uu-AAUGCCCUUACU..................CAUCCGUGg........uu--U-UGGUAAGG-
+#=GR seq242 PP *****987*....95.556678888889..................****98769........64..3.33344444.
+seq243         AAUGAUGUg....ag-UAUCUCGACCUU..................UCAUCGAAau......cgc-UCU--UGGUCA-
+#=GR seq243 PP 999998769....95.455566777777..................9999876699......763.222..233333.
+seq244         UUGACCCAg....uu-UGGAAGCGUAUG..................GUCAGUUAg........cg--CU-GGUACGC-
+#=GR seq244 PP *****987*....95.556677888888..................****97669........53..33.3445555.
+seq245         -AGACAUUg.....a-ACC-GCGA----uaauugucaauacagauaGUCUUUAU..........cU------------
+#=GR seq245 PP .66665546.....4.333.3344....44555666666666666666665433..........42............
+seq246         AAAGCCAUa....ua-CGGACUUUUACG..................GCUUACGCag......aac---CACUUAAAG-
+#=GR seq246 PP *****9879....95.555667777778..................****9876**......853...333444444.
+seq247         CCUGUAUCuu...gc-AGACCCUACGAA..................ACAGACAUaa.......ua--AUU-UUCGUA-
+#=GR seq247 PP *****98799...85.455566777777..................****9877*8.......64..323.333333.
+seq248         CGUAUCCU......uAA-CUCCCUGGAC..................AUACCUGGug.......uc---GUGGCCAGU-
+#=GR seq248 PP *****876......745.4567888889..................****9876*8.......53...334445555.
+seq249         UUUGAAACg.....c-CGUGGUAGUGAC..................UCAACUCAu........ac--AUUG-CACUA-
+#=GR seq249 PP *****987*.....5.566778888889..................****98769........64..3333.33333.
+seq250         GGUAGGGG......uAUCGAGUGUCUAC..................CUACUGA-aua....gugu---CCCAGACA--
+#=GR seq250 PP 66666655......63344445555555..................6666554.6**....9753...22333333..
+seq251         GAGACUAA......aGAAU-GUUAUGCA..................GUCUAGUGcg......gaa---UUUGCAUAU-
+#=GR seq251 PP *****987......95555.56777778..................****9876**......853...333444444.
+seq252         CCAUCAGA......aGU-G-GGUUUUGC..................GAUGUUACu........ag-GA-UCCAAAAC-
+#=GR seq252 PP *****865......644.3.44666667..................****9876*........84.33.33445555.
+seq253         -AUUUAUA......g-AUAU-CUGGCAC..................AAAUAAUGgg.......aa---GCCAU-----
+#=GR seq253 PP .****876......6.4444.4555557..................****987696.......43...22222.....
+seq254         CCUUUGAC......a-CCG-UUAACACU..................AAAGUAUAgg.......ac--ACUUUGUUG--
+#=GR seq254 PP *****865......6.333.45666667..................****9876*9.......63..333333333..
+seq255         GCAGCGC-c....cgGUGUUUCGAGUA-..................GCUGCCUUga......ccg---AUC-UCGG--
+#=GR seq255 PP 5555554.6....*8555555555554...................5555555578......643...222.2222..
+seq256         GAGGUCUUa....ag-GAAGCAAGAGGA..................ACCUGUACgu.......ga-C-CUUACUCUC-
+#=GR seq256 PP 999998768....85.333445555556..................7777765477.......63.2.233344444.
+seq257         --CCCUC-gcgacgg-----C-------guguag.....agguugcGGGGAGUAa.........c---------ACGG
+#=GR seq257 PP ..44433.5753322.....2.......223333.....3333333333332223.........3.........2222
+seq258         UAGACUCC......u-UGG-AAAUUAUG..................GUCUGGCGcg.......ag--UG-GAAUAAA-
+#=GR seq258 PP *****865......5.444.56777778..................****9877*8.......53..33.3344444.
+seq259         CGCAGAAA......c-UA-UG-CCCUCU..................CUGCCCUAa........gg--AACA-GGGA--
+#=GR seq259 PP *****865......5.33.33.444446..................****98768........64..3222.2333..
+seq260         ACUACGC-c.....g-CG--GACUCAAU..................GUAGCGGCgcc.....uug--G-GC-UUGAU-
+#=GR seq260 PP *****85.4.....4.33..34666667..................****9876**9.....642..2.22.23333.
+seq261         CAAACAAA......c-UA-U-CAGUGAC..................GUUUAUGCua......agc----AAGCACUA-
+#=GR seq261 PP *****764......5.33.3.3555557..................****9776*8......642....33334444.
+seq262         -GGGCGUGcu..ugu-UGGCGGUGAUCC..................GCCCUCU-aauc...cuga----AG-GUCAC-
+#=GR seq262 PP .777776679..874.333344444445..................7777765.5**9...7543....22.22222.
+seq263         -ACUG-CGa.....cCA-AAUGUUUU-C..................CAGUUAUUg........cu-CCGGAAGAAACC
+#=GR seq263 PP .4444.457.....633.33334444.4..................444444334........43.222333444444
+seq264         -UUGAACAg.....uUAGGCAAGACGGC..................UCAAAAUCgauc...accc-----CGCGUC--
+#=GR seq264 PP .****987*.....95666778888888..................****9876**98...6532.....211222..
+seq265         UGGCAGAU......g-UAG-UAGCGCUG..................UGCCGAUAagc....gcag--AAUC-GCGCU-
+#=GR seq265 PP 99999865......5.433.45777777..................99999876999....9864..2232.33333.
+seq266         -UUAAGCA......a-AG-A-GAUUAUC..................UUAAGCGAaug....ccuc---UAGAUAA---
+#=GR seq266 PP .**99864......4.44.3.3555557..................99999876**9....7543...2222222...
+seq267         UAGCGAGC......gU-CUCAGCAGGUG..................CGCUGGCGc.........a-GGUUC-CCUG--
+#=GR seq267 PP *****865......74.45566777778..................****98768.........4.33333.3333..
+seq268         UCUAUGGU......uUU-UAGCCUGGGG..................AUAGUCCGau......uug--AUUAUCCAGC-
+#=GR seq268 PP *9999875......744.4556777778..................9999987799......974..4444555555.
+seq269         CGCGUGGU......a-GGG-CUAGUUCU..................ACGCACCUa.........aAGGUAAAGGAACU
+#=GR seq269 PP *****865......6.444.45666667..................****9987*.........*66778899*****
+seq270         -AUGCUAA......cGAAC-GUCACUCA..................GCAUGAGUag......uca--CGU--GAU---
+#=GR seq270 PP .****987......95655.56777778..................****987697......642..222..222...
+seq271         AUAAUUGAg.....uGA-UAUGACACAC..................AUUACAAUa........au--GAAGUGUU---
+#=GR seq271 PP *****9879.....644.4556777778..................****98768........54..22222222...
+seq272         -AGCAAUUg.....g-CUACAUAUCGAU..................UGCUUAC-gg......gac----UGAUAU---
+#=GR seq272 PP .88887668.....6.555666777777..................8888765.58......532....223233...
+seq273         -GCACUA-u.....u-CGG-GAGAAUAU..................GUGCGGAUagua..gacga-----GAUUCC--
+#=GR seq273 PP .****86.5.....5.444.56777778..................****9887***9..86432.....222222..
+seq274         -GGAUCCAu.....cAAGACAGACGUUG..................AUCCGCCUuc......cag---GCCG-UCG--
+#=GR seq274 PP .88887768.....95555556666666..................88887766*8......643...2222.222..
+seq275         GAGCAGGUc....uu---AAACCACUAA..................UGCUGCUUugg.....guu---GCAAGUGG--
+#=GR seq275 PP *****9768....54...3344555555..................66666554677.....743...23333333..
+seq276         -UAACAUCac...cuCAGGUUUCU----aa..............cuGUUAACU-uggu...gcac--CGUUAGAU---
+#=GR seq276 PP .777766578...76333333344....44..............444444443.4777...6532..21222222...
+seq277         -CCUCACUac...ggGCGUGAUGAAAAU..................GAGGGACGgag.....cuc-----GGUUCAG-
+#=GR seq277 PP .777766579...985555666666666..................77777665*87.....542.....2222222.
+seq278         AGUUGUG-u.....c-AAA-G-UCGCAU..................CAACGAAUcag....ucgg--G-GAUUGCGG-
+#=GR seq278 PP 9999975.4.....4.333.3.333335..................99998876999....9753..2.23333333.
+seq279         -AGAACCG......g-AGGGCACUGCAA..................UUCUAAUAucuu...gcug------AGCAGA-
+#=GR seq279 PP .****876......7.445677888889..................****9877**97...6432......222222.
+seq280         -CUAGGCGu....cc-UCGGCCCGGUGA..................CUAGAUUGuac....gacc-----UACCGU--
+#=GR seq280 PP .****988*....95.555667777778..................****9876*97....6432.....222222..
+seq281         -UUGAUGCa.....uGAAAAGCCACACA..................UCAAGU-Aag......uag--G-UU-GUGG--
+#=GR seq281 PP .66665557.....95555555555555..................666654.468......642..2.22.2222..
+seq282         UCCGGUG-u.....u-CGA-UGGAGAAU..................CCGGUCAAcg.......ua--CCCAAUUCA--
+#=GR seq282 PP *****86.5.....5.444.45777777..................****9876*8.......63..333333333..
+seq283         -GCGGGUAag...ucGAUGAUAUUGGGC..................CCGCCCA-cgg.....agg----GAACAAUG-
+#=GR seq283 PP .666655569...974444444444444..................6666554.6*8.....643....33344444.
+seq284         AAUUGCGG......c-GGCG-GGACCCG..................CAAUGCCAgug.....gua----AAACGGUC-
+#=GR seq284 PP 99999865......6.3444.4666667..................99999876998.....653....22333333.
+seq285         GUGAAAACca...ug-UGGUUCAGCUAC..................UUCAGCGCgcu.....ugc-AC-GUAGCUU--
+#=GR seq285 PP 9999987698...84.455556666667..................99998766999.....863.22.2233333..
+seq286         GCUAUUGA......aGGA-UAAAGAGGA..................AUAGUCUCaa......cgc---UCUACUCUU-
+#=GR seq286 PP *****876......8444.456777778..................****9876**......753...334444444.
+seq287         -CUAGUUCg.....a-UUAAGGCCAUGA..................CUAGGAGUgacc...ucac---GUGG-CC---
+#=GR seq287 PP .99998779.....6.445556777767..................99998776**98...7532...2222.22...
+seq288         GUAUCAAUu.....u-GGUGCCGUAUUU..................GAUAUAGAu........uc--AGGGAUACU--
+#=GR seq288 PP 888887659.....4.555566777777..................888876657........53..222222333..
+seq289         -UUCACGC......uCCA-CGAUAAUUG..................UGAAGUCCucg....auug---CUAAUUA---
+#=GR seq289 PP .8888765......7444.455666667..................88887665**9....8633...2333333...
+seq290         -UGGCCGGc....cu-AAGGCCCCUGCG..................GCCAAGC-gug.....uga---GUAGGGA---
+#=GR seq290 PP .66666557....94.555556666665..................6666655.6*8.....643...2222222...
+seq291         AGCGGCGUg....gaCAGGCGCGCUUAU..................CCGCCCUA..........gAGCGAAAAAAGCU
+#=GR seq291 PP 999998769....994556677888888..................99999876..........*5566778999999
+seq292         CCCUUGU-ug..gag--CCCCGAGUUAA..................AAGGCAGGgug....auga-A------CUU--
+#=GR seq292 PP 6666655.58..753..33334444444..................66665443532....1242.2......222..
+seq293         -GAAGACCg.....g-CUAACUGUUGAU..................CUUCCUG-ggg.....cug---CCAA-CG---
+#=GR seq293 PP .88887779.....5.555677888887..................8888765.587.....532...2222.22...
+seq294         UAAUGCUC......u-CGCG-AUCCAGA..................CAUUGAUGcg.......gc---UCCGCUGGC-
+#=GR seq294 PP *****865......5.4554.4666667..................****9877*7.......64...333444444.
+seq295         GCGCGGUGg....acGAC-CCGACUACU..................CGCGGCAGuc.......ag--AUCUGGUAGU-
+#=GR seq295 PP *****9889....96444.456777778..................****9877**.......75..3334445555.
+seq296         -AAAAAGCu.....c-AGCCAACUAACG..................UUUUACAAacg....cggc----CACUUAGU-
+#=GR seq296 PP .66666558.....5.666788999999..................****9877***....8653....22333333.
+seq297         AGCACGGAu....cu-CGGCUAGUCUCC..................GUGCGCUAu.........aAGCCUACGAGACA
+#=GR seq297 PP *****988*....95.556678888889..................****9877*.........*56677889*****
+seq298         CGAAGUUC......g-AGG-UUCAGGGU..................CUUCUCAGc........ga--AUCCU-GA---
+#=GR seq298 PP *****875......5.554.45666668..................****98768........53..33322.22...
+seq299         AUCUCGAG......uCC-CUCAAGUGUC..................GAGAGCUCuau.....uuc--ACUCACACU--
+#=GR seq299 PP *****987......844.4566777778..................****9876***.....963..333333333..
+seq300         ACGACCGGa.....g-GAGACUCUUAGC..................GUCGAUAUuc.......uc--CUUCAUAAGU-
+#=GR seq300 PP *****987*.....6.445667888889..................****9876**.......74..4445556666.
+#=GC SS_cons   :<<<<___......._____________~~~~~~~~~~~~~~~~~~>>>>::::...........:::::::::::::
+#=GC RF        xxxxxxxx.......xxxxxxxxxxxxx~~~~~~~~~~~~~~~~~~xxxxxxxx...........xxxxxxxxxxxxx
+//
