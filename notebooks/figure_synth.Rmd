@@ -282,6 +282,10 @@ patch_rscape=
 patch_rscape
 ```
 
+```{r}
+save(gglists, grob_ss1,grob_ss2,grob_ss3,grob_ss4, file="~/GIT/thesis_tc/data/patch_rscape_data.rda" )
+```
+
 
 ```{r}
 patch_rscape=patch_rscape
