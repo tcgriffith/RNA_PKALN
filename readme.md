@@ -16,7 +16,7 @@ Structure of the dir (Use RF00165 for example)
             - `cmalign/RF00165.cmalign.a2m`: cmalign aligned MSA in a2m format
             - `rnamrf/RF00165.rnamrf.a2m`: rnamrf aligned MSA in a2m format
         
-- `data/synthetic` follows similar directory structures.
+- `data/simulated` follows similar directory structures.
 
 Other files:
 
